@@ -208,29 +208,6 @@
             text-overflow: ellipsis;
         }
 
-        .page-item .page-actions {
-            display: flex;
-            gap: 6px;
-            opacity: 0.5;
-            transition: opacity 0.2s;
-        }
-
-        .page-item:hover .page-actions {
-            opacity: 1;
-        }
-
-        .page-action-btn {
-            background: none;
-            border: none;
-            color: var(--text-light);
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-
-        .page-action-btn:hover {
-            color: #ef4444;
-        }
-
         /* Toolbox to add elements */
         .toolbox {
             margin-top: auto;
@@ -256,7 +233,7 @@
             background-repeat: no-repeat;
             position: relative;
             overflow: auto;
-            padding: 30px;
+            padding: 70px 30px 30px; /* Thêm padding-top để chừa khoảng cho thanh Device Selector */
         }
 
         /* Vignette overlay same as index.html */
@@ -272,7 +249,47 @@
             z-index: 0;
         }
 
-        /* Mock Double-Page Book Spread (Tái hiện thiết kế 2 trang của index.html) */
+        /* Device Size Selector Floating Bar */
+        .device-selector-bar {
+            position: absolute;
+            top: 20px;
+            display: flex;
+            background: rgba(18, 22, 18, 0.95);
+            border: 1px solid var(--border-glass);
+            border-radius: 30px;
+            padding: 4px;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            align-items: center;
+        }
+
+        .device-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .device-btn:hover {
+            color: var(--text-light);
+        }
+
+        .device-btn.active {
+            background: var(--accent);
+            color: var(--bg-dark);
+            font-weight: 700;
+            box-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        /* Mock Double-Page Book Spread */
         .mock-book-spread {
             position: relative;
             width: calc(var(--canvas-w) * 2);
@@ -282,6 +299,7 @@
             border-radius: 0 12px 12px 0;
             z-index: 1;
             perspective: 2500px;
+            transition: width 0.3s ease, height 0.3s ease;
         }
 
         /* Page stack lines on the left */
@@ -322,7 +340,7 @@
         .line-3 { left: 12px; }
         .line-4 { left: 16px; }
 
-        /* Left Mock Page (Vẽ 3D gáy sách bên trái) */
+        /* Left Mock Page */
         .mock-page-left {
             width: var(--canvas-w);
             height: var(--canvas-h);
@@ -330,15 +348,7 @@
             overflow: hidden;
             position: relative;
             border-radius: 12px 0 0 12px;
-            transition: all 0.3s ease;
-        }
-
-        .mock-page-left .page-content {
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            transition: width 0.3s ease, height 0.3s ease;
         }
 
         /* Left page shadows mirroring client */
@@ -385,6 +395,7 @@
             background-repeat: no-repeat;
             border-left: 1px solid rgba(255, 255, 255, 0.15);
             z-index: 2;
+            transition: width 0.3s ease, height 0.3s ease;
         }
 
         /* Right page shadows mirroring client */
@@ -502,7 +513,7 @@
             white-space: pre-wrap;
         }
 
-        /* Pricing Table Element Style (Exact copy of index.css) */
+        /* Pricing Table Element Style */
         .pricing-table-element {
             width: 100%;
             height: 100%;
@@ -629,10 +640,10 @@
         .preview-3d-wrapper {
             display: none;
             position: absolute;
-            top: 0;
+            top: 70px; /* Đồng bộ padding của container */
             left: 0;
             width: 100%;
-            height: 100%;
+            height: calc(100% - 70px);
             background: rgba(18,22,18,0.1);
             align-items: center;
             justify-content: center;
@@ -647,6 +658,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: width 0.3s ease, height 0.3s ease;
         }
 
         .flipbook {
@@ -863,7 +875,26 @@
 
         <!-- Khung làm việc Editor/Preview -->
         <main class="editor-container">
-            <!-- 2D Mock Book Spread (Thiết kế giống hệt index.html) -->
+            <!-- Device Size Selector Floating Bar -->
+            <div class="device-selector-bar">
+                <button class="device-btn active" id="btn-device-desktop" title="Kiểm tra màn hình máy tính PC">
+                    <i class="fa-solid fa-desktop"></i> Máy Tính
+                </button>
+                <button class="device-btn" id="btn-device-tablet" title="Kiểm tra kích thước Máy Tính Bảng (Tablet)">
+                    <i class="fa-solid fa-tablet-screen-button"></i> Máy Tính Bảng
+                </button>
+                <button class="device-btn" id="btn-device-mobile" title="Kiểm tra kích thước Điện Thoại (Mobile)">
+                    <i class="fa-solid fa-mobile-screen-button"></i> Điện Thoại
+                </button>
+                <span class="tooltip-container">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span class="tooltip-content">
+                        Chọn kích thước hiển thị để tự động mô phỏng và căn chuẩn tỉ lệ kéo thả trên các dòng thiết bị khác nhau.
+                    </span>
+                </span>
+            </div>
+
+            <!-- 2D Mock Book Spread -->
             <div class="mock-book-spread" id="book-spread-container">
                 <!-- Chồng giấy lề trái -->
                 <div class="book-page-stack" id="designer-page-stack">
@@ -938,7 +969,7 @@
                     </div>
                     <div class="form-group">
                         <label>Màu Chữ (HEX)</label>
-                        <input type="color" class="form-control" id="prop-text-color" value="#1e293b" style="height: 40px; padding: 2px;">
+                        <input type="color" class="form-control" id="prop-text-color" value="#d4af37" style="height: 40px; padding: 2px;">
                     </div>
                     <div class="form-group">
                         <label>Định Dạng</label>
@@ -972,9 +1003,8 @@
 
     <!-- Logic thiết kế và đồng bộ UI -->
     <script>
-        // Mảng cấu hình các trang từ DataManager
         let bookPages = [];
-        let activePageData = []; // Chứa danh sách cấu hình kéo thả các elements tương ứng từng trang
+        let activePageData = []; 
         let selectedPageIndex = 0;
         let selectedElementId = null;
         let pageFlipInstance = null;
@@ -982,7 +1012,7 @@
         // Dữ liệu mẫu khởi tạo ban đầu cho các khối kéo thả
         const defaultPreset = [
             {
-                id: 'page_2', // Khớp trang 2 (Cứu ngải)
+                id: 'page_2', 
                 elements: [
                     {
                         id: 'el_1',
@@ -1015,7 +1045,7 @@
                 ]
             },
             {
-                id: 'page_3', // Khớp trang 3 (Gội đầu)
+                id: 'page_3', 
                 elements: [
                     {
                         id: 'el_3',
@@ -1053,7 +1083,20 @@
             await loadPagesFromDataManager();
             loadConfigFromLocalStorage();
             renderSidebarPages();
-            selectPage(1); // Chọn trang 2 (Cứu ngải) làm mặc định
+            
+            // Phục hồi lại vị trí trang đang chỉnh sửa gần nhất từ LocalStorage
+            const savedPageIndex = localStorage.getItem('muxintang_selected_page_idx');
+            if (savedPageIndex !== null) {
+                const parsedIdx = parseInt(savedPageIndex);
+                if (parsedIdx >= 0 && parsedIdx < bookPages.length) {
+                    selectPage(parsedIdx);
+                } else {
+                    selectPage(1); // Mặc định là trang 2 (Cứu ngải)
+                }
+            } else {
+                selectPage(1);
+            }
+
             initInteractJS();
             registerEventListeners();
         });
@@ -1081,7 +1124,7 @@
         }
 
         // -------------------------------------------------------------
-        // Nạp và lưu cấu hình
+        // Nạp và lưu cấu hình (Tích hợp Auto-Save liên tục bảo vệ dữ liệu)
         // -------------------------------------------------------------
         function loadConfigFromLocalStorage() {
             const dataStr = localStorage.getItem('muxintang_ui_sync');
@@ -1097,12 +1140,16 @@
             }
         }
 
-        function saveConfig() {
+        // Tự động lưu cấu hình cục bộ khi có bất kỳ thay đổi nào (Kéo thả, đổi thuộc tính)
+        function autoSave() {
             localStorage.setItem('muxintang_ui_sync', JSON.stringify(activePageData));
+        }
+
+        function saveConfig() {
+            autoSave(); // Đảm bảo đồng bộ cục bộ trước
             
-            // Tự động cập nhật trực tiếp cho DataManager nếu hoạt động trực tuyến/IndexedDB
+            // Lưu sang DataManager đám mây (Firebase/GitHub) nếu có kết nối
             if (window.DataManager) {
-                // Áp dụng lưu từng trang thiết kế
                 activePageData.forEach(sp => {
                     const page = bookPages.find(p => p.id === sp.id);
                     if (page) {
@@ -1159,7 +1206,9 @@
             selectedElementId = null;
             hideElementProperties();
             
-            // Cập nhật giao diện active sidebar
+            // Lưu lại chỉ số trang hiện tại đang chỉnh sửa để phục hồi khi reload
+            localStorage.setItem('muxintang_selected_page_idx', idx);
+
             document.querySelectorAll('.page-item').forEach((item, index) => {
                 if (index === idx) item.classList.add('active');
                 else item.classList.remove('active');
@@ -1169,23 +1218,19 @@
             document.getElementById('prop-page-name').value = page.name;
             document.getElementById('prop-page-bg').value = page.image || page.bg_image || '';
 
-            // Cập nhật giao diện cuốn sách 2 trang (Mock Book Spread) cực kỳ chính xác:
             const leftPage = document.getElementById('designer-left-page');
             const pageStack = document.getElementById('designer-page-stack');
 
             if (idx === 0) {
-                // Spread đầu tiên (trang bìa trước bên phải, bên trái trong suốt)
                 leftPage.className = 'mock-page-left page-transparent';
                 leftPage.innerHTML = '<div class="page-content"></div>';
-                pageStack.style.opacity = '0'; // Ẩn chồng giấy bên trái
+                pageStack.style.opacity = '0';
             } else {
-                // Các trang tiếp theo: bên trái là trang giấy trắng ngà
                 leftPage.className = 'mock-page-left page-white';
                 leftPage.innerHTML = '<div class="page-content"></div>';
-                pageStack.style.opacity = '0.9'; // Hiện chồng giấy bên trái
+                pageStack.style.opacity = '0.9';
             }
             
-            // Nạp nội dung Canvas kéo thả
             renderCanvasElements();
         }
 
@@ -1203,7 +1248,6 @@
             const page = bookPages[selectedPageIndex];
             if (!page) return;
 
-            // Đặt ảnh nền Canvas
             let imageUrl = page.image || page.bg_image || '';
             if (window.DataManager) {
                 imageUrl = await window.DataManager.getImageUrl(imageUrl);
@@ -1214,7 +1258,6 @@
                 canvas.style.backgroundImage = 'none';
             }
 
-            // Tìm hoặc tạo cấu trúc lưu trữ elements cho trang này
             let pageConfig = activePageData.find(p => p.id === page.id);
             if (!pageConfig) {
                 pageConfig = { id: page.id, elements: [] };
@@ -1239,7 +1282,7 @@
                     if (el.italic) style += ' font-style: italic;';
                     if (el.underline) style += ' text-decoration: underline;';
                     textContent.setAttribute('style', style);
-                    textContent.innerText = el.content || 'Văn bản mới';
+                    textContent.innerText = el.content || 'Vần bản mới';
                     div.appendChild(textContent);
                 } else if (el.type === 'services') {
                     const tableContainer = document.createElement('div');
@@ -1334,6 +1377,7 @@
             }
 
             pageConfig.elements.push(newElement);
+            autoSave(); // Tự động lưu tức thời
             renderCanvasElements();
             selectElement(newId);
         }
@@ -1348,6 +1392,7 @@
             }
             selectedElementId = null;
             hideElementProperties();
+            autoSave(); // Tự động lưu tức thời
             renderCanvasElements();
         }
 
@@ -1387,6 +1432,9 @@
                             target.style.top = `${topPct.toFixed(2)}%`;
 
                             updateElementPositionData(target.id, leftPct, topPct, null, null);
+                        },
+                        end(event) {
+                            autoSave(); // Tự động lưu trạng thái khi kết thúc kéo thả
                         }
                     }
                 })
@@ -1408,6 +1456,9 @@
                             target.style.height = `${heightPct.toFixed(2)}%`;
 
                             updateElementPositionData(target.id, null, null, widthPct, heightPct);
+                        },
+                        end(event) {
+                            autoSave(); // Tự động lưu trạng thái khi kết thúc co giãn
                         }
                     },
                     modifiers: [
@@ -1480,31 +1531,6 @@
                     `;
                     listContainer.appendChild(row);
                 });
-            }
-        }
-
-        window.updateServiceRow = function(idx, key, val) {
-            const page = bookPages[selectedPageIndex];
-            const pageConfig = activePageData.find(p => p.id === page.id);
-            if (pageConfig) {
-                const el = pageConfig.elements.find(item => item.id === selectedElementId);
-                if (el && el.services[idx]) {
-                    el.services[idx][key] = val;
-                    renderCanvasElements();
-                }
-            }
-        }
-
-        window.deleteServiceRow = function(idx) {
-            const page = bookPages[selectedPageIndex];
-            const pageConfig = activePageData.find(p => p.id === page.id);
-            if (pageConfig) {
-                const el = pageConfig.elements.find(item => item.id === selectedElementId);
-                if (el) {
-                    el.services.splice(idx, 1);
-                    renderEditServicesList(el);
-                    renderCanvasElements();
-                }
             }
         }
 
@@ -1624,14 +1650,18 @@
             const previewBook = document.getElementById('preview-book');
             if (!previewBook) return;
 
+            // Đọc kích thước hiện tại từ biến CSS để khởi tạo đúng tỉ lệ cho St.PageFlip
+            const currentW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--canvas-w')) || 380;
+            const currentH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--canvas-h')) || 540;
+
             pageFlipInstance = new St.PageFlip(previewBook, {
-                width: 380,
-                height: 540,
+                width: currentW,
+                height: currentH,
                 size: "fixed",
-                minWidth: 380,
-                maxWidth: 380,
-                minHeight: 540,
-                maxHeight: 540,
+                minWidth: currentW,
+                maxWidth: currentW,
+                minHeight: currentH,
+                maxHeight: currentH,
                 showCover: false,
                 usePortrait: false,
                 flippingTime: 300,
@@ -1649,6 +1679,37 @@
             };
         }
 
+        // Thay đổi kích thước viewport giả lập thiết bị (PC, Tablet, Mobile)
+        function changeDeviceMode(deviceType) {
+            // Xóa active cũ
+            document.querySelectorAll('.device-btn').forEach(btn => btn.classList.remove('active'));
+
+            if (deviceType === 'desktop') {
+                document.getElementById('btn-device-desktop').classList.add('active');
+                document.documentElement.style.setProperty('--canvas-w', '380px');
+                document.documentElement.style.setProperty('--canvas-h', '540px');
+            } else if (deviceType === 'tablet') {
+                document.getElementById('btn-device-tablet').classList.add('active');
+                document.documentElement.style.setProperty('--canvas-w', '300px');
+                document.documentElement.style.setProperty('--canvas-h', '420px');
+            } else if (deviceType === 'mobile') {
+                document.getElementById('btn-device-mobile').classList.add('active');
+                document.documentElement.style.setProperty('--canvas-w', '220px');
+                document.documentElement.style.setProperty('--canvas-h', '310px');
+            }
+
+            // Render lại các phần tử kéo thả cho khít theo tỉ lệ %
+            renderCanvasElements();
+
+            // Nếu đang xem trước 3D, khởi tạo lại Flipbook theo size mới
+            if (pageFlipInstance) {
+                buildFlipbookHTML().then(() => {
+                    try { pageFlipInstance.destroy(); } catch(e) {}
+                    initFlipbook3D();
+                });
+            }
+        }
+
         // -------------------------------------------------------------
         // Lắng nghe sự kiện (Event Listeners)
         // -------------------------------------------------------------
@@ -1656,9 +1717,15 @@
             document.getElementById('btn-mode-design').addEventListener('click', () => toggleMode('design'));
             document.getElementById('btn-mode-preview').addEventListener('click', () => toggleMode('preview'));
 
+            // Đăng ký sự kiện các nút thiết bị
+            document.getElementById('btn-device-desktop').addEventListener('click', () => changeDeviceMode('desktop'));
+            document.getElementById('btn-device-tablet').addEventListener('click', () => changeDeviceMode('tablet'));
+            document.getElementById('btn-device-mobile').addEventListener('click', () => changeDeviceMode('mobile'));
+
             document.getElementById('btn-load-preset').addEventListener('click', () => {
                 if (confirm("Ghi đè thiết kế hiện tại bằng dữ liệu mẫu mặc định?")) {
                     activePageData = JSON.parse(JSON.stringify(defaultPreset));
+                    autoSave(); // Tự động lưu tức thời
                     selectPage(selectedPageIndex);
                 }
             });
@@ -1676,6 +1743,7 @@
                     const el = pageConfig.elements.find(item => item.id === selectedElementId);
                     if (el) {
                         el.content = e.target.value;
+                        autoSave(); // Tự động lưu tức thời
                         renderCanvasElements();
                     }
                 }
@@ -1689,6 +1757,7 @@
                     const el = pageConfig.elements.find(item => item.id === selectedElementId);
                     if (el) {
                         el.fontSize = parseInt(e.target.value) || 12;
+                        autoSave(); // Tự động lưu tức thời
                         renderCanvasElements();
                     }
                 }
@@ -1702,6 +1771,7 @@
                     const el = pageConfig.elements.find(item => item.id === selectedElementId);
                     if (el) {
                         el.color = e.target.value;
+                        autoSave(); // Tự động lưu tức thời
                         renderCanvasElements();
                     }
                 }
@@ -1717,6 +1787,7 @@
                     if (el) {
                         el.bold = !el.bold;
                         toggleStyleBtn('btn-prop-bold', el.bold);
+                        autoSave(); // Tự động lưu tức thời
                         renderCanvasElements();
                     }
                 }
@@ -1731,6 +1802,7 @@
                     if (el) {
                         el.italic = !el.italic;
                         toggleStyleBtn('btn-prop-italic', el.italic);
+                        autoSave(); // Tự động lưu tức thời
                         renderCanvasElements();
                     }
                 }
@@ -1745,6 +1817,7 @@
                     if (el) {
                         el.underline = !el.underline;
                         toggleStyleBtn('btn-prop-underline', el.underline);
+                        autoSave(); // Tự động lưu tức thời
                         renderCanvasElements();
                     }
                 }
@@ -1760,6 +1833,7 @@
                     if (el && el.type === 'services') {
                         el.services.push({ name: 'Tên dịch vụ mới', price: '0 đ' });
                         renderEditServicesList(el);
+                        autoSave(); // Tự động lưu tức thời
                         renderCanvasElements();
                     }
                 }
