@@ -227,13 +227,22 @@ document.addEventListener('DOMContentLoaded', () => {
             activePageData.image = activePageData.bg_image;
         }
         
-        const imgUri = activePageData.type === 'custom' ? activePageData.bg_image : activePageData.image;
+        let imgUri = activePageData.type === 'custom' ? activePageData.bg_image : activePageData.image;
+        let isFallback = false;
+        
+        // Tự động đồng bộ/sử dụng ảnh nền website toàn cục nếu trang tùy chỉnh chưa có ảnh nền riêng
+        if (activePageData.type === 'custom' && !imgUri) {
+            imgUri = globalBgDraft && globalBgDraft !== '__DELETE__' ? globalBgDraft : (globalBgOriginal || 'images/spa_background.png');
+            isFallback = true;
+        }
+        
         if (imgUri) {
             const actualUrl = await DataManager.getImageUrl(imgUri);
             if (actualUrl) {
                 pageImageThumbnail.style.backgroundImage = `url('${actualUrl}')`;
                 pageImageThumbnail.style.display = 'block';
-                btnDeletePageImage.style.display = 'block';
+                // Chỉ hiển thị nút xóa ảnh nền nếu đây không phải là ảnh nền đồng bộ mặc định (ảnh toàn cục)
+                btnDeletePageImage.style.display = isFallback ? 'none' : 'block';
                 return;
             }
         }
@@ -718,7 +727,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!activePageData) return;
         
         // Cần lấy ảnh nền hiển thị
-        const imgUri = activePageData.type === 'custom' ? activePageData.bg_image : activePageData.image;
+        let imgUri = activePageData.type === 'custom' ? activePageData.bg_image : activePageData.image;
+        
+        // Tự động đồng bộ/sử dụng ảnh nền website toàn cục nếu trang tùy biến chưa cấu hình ảnh nền riêng
+        if (activePageData.type === 'custom' && !imgUri) {
+            imgUri = globalBgDraft && globalBgDraft !== '__DELETE__' ? globalBgDraft : (globalBgOriginal || 'images/spa_background.png');
+        }
+        
         if (imgUri) {
             const url = await DataManager.getImageUrl(imgUri);
             if (url) {
@@ -2032,14 +2047,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminZoomCaption = document.getElementById('admin-zoom-caption');
     const adminZoomClose = document.getElementById('admin-zoom-close-btn');
 
-    async function openAdminZoomModal(imgUri, title) {
-        if (!adminZoomModal || !adminZoomImg) return;
+    async function triggerAdminZoom(imgUri, captionText) {
+        if (!imgUri || !adminZoomModal || !adminZoomImg) return;
         try {
             const actualUrl = await DataManager.getImageUrl(imgUri);
             if (actualUrl) {
                 adminZoomImg.src = actualUrl;
-                adminZoomModal.classList.add('active');
-                if (adminZoomCaption) adminZoomCaption.textContent = title || 'Xem chi tiết ảnh';
+                if (adminZoomCaption) adminZoomCaption.textContent = captionText;
+                openModal(adminZoomModal); // Sử dụng hàm dựng sẵn của admin để mở modal mượt mà
             }
         } catch (e) {
             console.error("Lỗi phóng to ảnh trong admin:", e);
@@ -2050,37 +2065,39 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pageImageThumbnail) {
         pageImageThumbnail.onclick = () => {
             if (!activePageData) return;
-            const imgUri = activePageData.type === 'custom' ? activePageData.bg_image : activePageData.image;
+            let imgUri = activePageData.type === 'custom' ? activePageData.bg_image : activePageData.image;
+            // Fallback lấy ảnh nền website toàn cục nếu là trang tùy biến chưa có ảnh riêng
+            if (activePageData.type === 'custom' && !imgUri) {
+                imgUri = globalBgDraft && globalBgDraft !== '__DELETE__' ? globalBgDraft : (globalBgOriginal || 'images/spa_background.png');
+            }
             if (imgUri) {
-                openAdminZoomModal(imgUri, `Ảnh trang: ${activePageData.name || 'Không tên'}`);
+                triggerAdminZoom(imgUri, `Ảnh trang: ${activePageData.name || 'Không tên'}`);
             }
         };
     }
 
     // B. Nhấp vào thumbnail ảnh nền website ở cột trái
     if (globalBgThumbnail) {
-        globalBgThumbnail.onclick = async () => {
-            try {
-                const bgUri = await DataManager.getGlobalBg();
-                if (bgUri) {
-                    openAdminZoomModal(bgUri, "Ảnh nền website toàn cục");
-                }
-            } catch (e) {
-                console.error(e);
-            }
+        globalBgThumbnail.onclick = () => {
+            const imgUri = globalBgDraft && globalBgDraft !== '__DELETE__' ? globalBgDraft : (globalBgOriginal || 'images/spa_background.png');
+            triggerAdminZoom(imgUri, "Hình nền website toàn cục (Global Background)");
         };
     }
 
     // C. Nhấp vào vùng trống của Canvas xem trước ở cột giữa
     if (canvasPreview) {
         canvasPreview.addEventListener('click', (e) => {
-            // Chỉ kích hoạt khi click chính xác vào nền canvas, không trúng các thẻ chữ hoặc nút kéo thả
+            // Chỉ kích hoạt khi click chính xác vào nền canvas trống (không đè lên chữ/dịch vụ)
             if (e.target === canvasPreview && activePageData) {
                 if (canvasPreview.classList.contains('page-transparent')) return;
                 
-                const imgUri = activePageData.type === 'custom' ? activePageData.bg_image : activePageData.image;
+                let imgUri = activePageData.type === 'custom' ? activePageData.bg_image : activePageData.image;
+                // Fallback lấy ảnh nền website toàn cục nếu là trang tùy biến chưa có ảnh riêng
+                if (activePageData.type === 'custom' && !imgUri) {
+                    imgUri = globalBgDraft && globalBgDraft !== '__DELETE__' ? globalBgDraft : (globalBgOriginal || 'images/spa_background.png');
+                }
                 if (imgUri) {
-                    openAdminZoomModal(imgUri, `Ảnh nền trang: ${activePageData.name || 'Không tên'}`);
+                    triggerAdminZoom(imgUri, `Xem trước ảnh nền: ${activePageData.name || 'Không tên'}`);
                 }
             }
         });
@@ -2089,13 +2106,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // D. Sự kiện đóng modal
     if (adminZoomClose) {
         adminZoomClose.onclick = () => {
-            adminZoomModal.classList.remove('active');
+            closeModal(adminZoomModal); // Sử dụng hàm dựng sẵn của admin để đóng modal
         };
     }
     if (adminZoomModal) {
         adminZoomModal.onclick = (e) => {
             if (e.target === adminZoomModal) {
-                adminZoomModal.classList.remove('active');
+                closeModal(adminZoomModal);
             }
         };
     }
