@@ -280,55 +280,111 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Nếu là trang tùy biến (custom), vẽ chữ và dịch vụ
             if (pageData.type === 'custom') {
-                // A. Vẽ các phần tử chữ (text elements)
-                if (pageData.texts && pageData.texts.length > 0) {
-                    pageData.texts.forEach(text => {
-                        const textEl = document.createElement('div');
-                        textEl.className = 'custom-text-element';
+                if (pageData.elements && pageData.elements.length > 0) {
+                    pageData.elements.forEach(el => {
+                        const div = document.createElement('div');
+                        let style = `position: absolute; left: ${el.x}%; top: ${el.y}%; width: ${el.w}%; height: ${el.h}%;`;
                         
-                        let style = `position: absolute; left: ${text.x}%; top: ${text.y}%; font-family: ${text.font || 'Montserrat'}, sans-serif; font-size: ${text.size || 16}px; color: ${text.color || '#333'}; white-space: pre-wrap;`;
-                        if (text.bold) style += ' font-weight: bold;';
-                        if (text.italic) style += ' font-style: italic;';
-                        if (text.underline) style += ' text-decoration: underline;';
-                        textEl.setAttribute('style', style);
-                        textEl.textContent = text.content;
+                        if (el.type === 'text') {
+                            div.className = 'custom-text-element';
+                            let txtStyle = `width: 100%; height: 100%; display: flex; align-items: center; white-space: pre-wrap; font-family: 'Montserrat', sans-serif; font-size: ${el.fontSize}px; color: ${el.color};`;
+                            if (el.bold) txtStyle += ' font-weight: bold;';
+                            if (el.italic) txtStyle += ' font-style: italic;';
+                            if (el.underline) txtStyle += ' text-decoration: underline;';
+                            div.setAttribute('style', style);
+                            
+                            const txt = document.createElement('div');
+                            txt.setAttribute('style', txtStyle);
+                            txt.innerText = el.content;
+                            div.appendChild(txt);
+                        } else if (el.type === 'services') {
+                            div.className = 'custom-services-container';
+                            div.setAttribute('style', style);
+                            
+                            const tbl = document.createElement('div');
+                            tbl.className = 'pricing-table-element';
+                            let tblStyle = `width: 100%; height: 100%; display: flex; flex-direction: column; gap: 12px; padding: 15px; background: rgba(253, 252, 247, 0.92); border: 1px solid rgba(197, 160, 89, 0.4); border-radius: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);`;
+                            tbl.setAttribute('style', tblStyle);
+                            
+                            if (el.services && el.services.length > 0) {
+                                el.services.forEach(serv => {
+                                    const row = document.createElement('div');
+                                    row.className = 'service-row';
+                                    row.setAttribute('style', 'display: flex; align-items: center; justify-content: space-between; width: 100%; font-size: 0.88rem; color: #2b2b2b;');
+                                    row.innerHTML = `
+                                        <span class="service-row-name" style="font-weight: 600; white-space: nowrap; padding-right: 5px;">${serv.name}</span>
+                                        <span class="service-row-line" style="flex-grow: 1; border-bottom: 1.5px dotted rgba(197, 160, 89, 0.6); margin: 0 8px; align-self: flex-end; margin-bottom: 4px;"></span>
+                                        <span class="service-row-price" style="font-weight: 700; color: #a62b2b; white-space: nowrap; padding-left: 5px;">${serv.price}</span>
+                                    `;
+                                    tbl.appendChild(row);
+                                });
+                            }
+                            div.appendChild(tbl);
+                        } else if (el.type === 'button') {
+                            div.className = 'custom-button-element';
+                            div.setAttribute('style', style);
+                            
+                            const btn = document.createElement('button');
+                            let btnStyle = `width: 100%; height: 100%; border: none; font-family: 'Montserrat', sans-serif; font-size: ${el.fontSize}px; color: ${el.color}; background-color: ${el.bgColor || '#d4af37'}; border-radius: ${el.borderRadius || 4}px; cursor: pointer; pointer-events: auto !important; box-shadow: 0 4px 10px rgba(0,0,0,0.15);`;
+                            if (el.bold) btnStyle += ' font-weight: bold;';
+                            if (el.italic) btnStyle += ' font-style: italic;';
+                            if (el.underline) btnStyle += ' text-decoration: underline;';
+                            btn.setAttribute('style', btnStyle);
+                            btn.innerText = el.content || 'Nút Bấm';
+                            
+                            btn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                if (window.executeButtonAction) window.executeButtonAction(el.actionType, el.actionValue);
+                            });
+                            div.appendChild(btn);
+                        } else if (el.type === 'html') {
+                            div.className = 'custom-html-element';
+                            div.setAttribute('style', style + ' pointer-events: auto !important; overflow: auto;');
+                            div.innerHTML = el.htmlContent || '<div>Mã HTML trống</div>';
+                        }
                         
-                        pageContent.appendChild(textEl);
+                        pageContent.appendChild(div);
                     });
-                }
-                
-                // B. Vẽ bảng báo giá dịch vụ (services list)
-                if (pageData.services && pageData.services.length > 0) {
-                    const servicesContainer = document.createElement('div');
-                    servicesContainer.className = 'custom-services-container';
-                    
-                    const sX = pageData.services_x !== undefined ? pageData.services_x : 10;
-                    const sY = pageData.services_y !== undefined ? pageData.services_y : 25;
-                    const sW = pageData.services_w !== undefined ? pageData.services_w : 80;
-                    servicesContainer.setAttribute('style', `position: absolute; left: ${sX}%; top: ${sY}%; width: ${sW}%;`);
-                    
-                    pageData.services.forEach(service => {
-                        const item = document.createElement('div');
-                        item.className = 'service-item';
-                        
-                        const name = document.createElement('span');
-                        name.className = 'service-name';
-                        name.textContent = service.name;
-                        
-                        const line = document.createElement('span');
-                        line.className = 'service-line';
-                        
-                        const price = document.createElement('span');
-                        price.className = 'service-price';
-                        price.textContent = service.price;
-                        
-                        item.appendChild(name);
-                        item.appendChild(line);
-                        item.appendChild(price);
-                        servicesContainer.appendChild(item);
-                    });
-                    
-                    pageContent.appendChild(servicesContainer);
+                } else {
+                    // Fallback tương thích ngược cũ cho texts và services
+                    if (pageData.texts && pageData.texts.length > 0) {
+                        pageData.texts.forEach(text => {
+                            const textEl = document.createElement('div');
+                            textEl.className = 'custom-text-element';
+                            let style = `position: absolute; left: ${text.x}%; top: ${text.y}%; font-family: ${text.font || 'Montserrat'}, sans-serif; font-size: ${text.size || 16}px; color: ${text.color || '#333'}; white-space: pre-wrap;`;
+                            if (text.bold) style += ' font-weight: bold;';
+                            if (text.italic) style += ' font-style: italic;';
+                            if (text.underline) style += ' text-decoration: underline;';
+                            textEl.setAttribute('style', style);
+                            textEl.textContent = text.content;
+                            pageContent.appendChild(textEl);
+                        });
+                    }
+                    if (pageData.services && pageData.services.length > 0) {
+                        const servicesContainer = document.createElement('div');
+                        servicesContainer.className = 'custom-services-container';
+                        const sX = pageData.services_x !== undefined ? pageData.services_x : 10;
+                        const sY = pageData.services_y !== undefined ? pageData.services_y : 25;
+                        const sW = pageData.services_w !== undefined ? pageData.services_w : 80;
+                        servicesContainer.setAttribute('style', `position: absolute; left: ${sX}%; top: ${sY}%; width: ${sW}%;`);
+                        pageData.services.forEach(service => {
+                            const item = document.createElement('div');
+                            item.className = 'service-item';
+                            const name = document.createElement('span');
+                            name.className = 'service-name';
+                            name.textContent = service.name;
+                            const line = document.createElement('span');
+                            line.className = 'service-line';
+                            const price = document.createElement('span');
+                            price.className = 'service-price';
+                            price.textContent = service.price;
+                            item.appendChild(name);
+                            item.appendChild(line);
+                            item.appendChild(price);
+                            servicesContainer.appendChild(item);
+                        });
+                        pageContent.appendChild(servicesContainer);
+                    }
                 }
             }
             
@@ -386,6 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             type: 'custom',
                             order: idx + 2, // đặt sau trang bìa trước (order 1)
                             bg_image: sp.bg_image || 'images/2.jpg',
+                            elements: sp.elements || [], // Lưu trực tiếp mảng elements mới nhất (v3.5)
                             texts: texts,
                             services: services,
                             services_x: services_x,
@@ -413,8 +470,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Lỗi đồng bộ dữ liệu UI Designer:", e);
             }
         }
+        window.bookPages = pages; // Lưu lại biến toàn cục để các nút hành động đọc thứ tự trang
         await renderPagesDynamic(pages);
     });
+
+    // Hàm thực thi hành động của nút bấm (v3.5)
+    window.executeButtonAction = function(type, value) {
+        if (type === 'goto_page') {
+            const pages = window.bookPages || [];
+            // Tìm trang theo ID
+            const idx = pages.findIndex(p => p.id === value);
+            if (idx !== -1) {
+                if (window.pageFlip) window.pageFlip.flip(idx * 2 + 1);
+            } else {
+                const num = parseInt(value);
+                if (!isNaN(num)) {
+                    if (window.pageFlip) window.pageFlip.flip(num * 2 + 1);
+                }
+            }
+        } else if (type === 'open_link') {
+            window.open(value, '_blank');
+        } else if (type === 'call_phone') {
+            window.location.href = `tel:${value}`;
+        } else if (type === 'custom_js') {
+            try {
+                eval(value);
+            } catch (e) {
+                console.error("Lỗi chạy JS hành động:", e);
+            }
+        }
+    };
 
 
     // ==========================================================================
