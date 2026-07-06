@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muxintang UI Designer v3.5 | Trình Kéo Thả Menu Dưỡng Sinh</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CDNs cho Interact.js và St.PageFlip -->
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-glass: rgba(30, 41, 59, 0.7);
+            --primary: #10b981;
+            --primary-glow: rgba(16, 185, 129, 0.4);
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #d4af37;
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --canvas-w: 380px;
+            --canvas-h: 540px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background-image: radial-gradient(circle at top right, rgba(16, 185, 129, 0.15), transparent 40%);
+        }
+
+        /* Header / Navigation Bar */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-glass);
+            z-index: 100;
+        }
+
+        .logo-area h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+        
+        .logo-area span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-left: 5px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-glass);
+            border-radius: 30px;
+            padding: 4px;
+        }
+
+        .mode-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mode-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .action-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            color: var(--text-light);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Workspace Layout */
+        .workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Sidebar: Pages list */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-glass);
+            border-right: 1px solid var(--border-glass);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .page-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .page-item:hover, .page-item.active {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--primary);
+        }
+
+        .page-item .page-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .page-item .page-actions {
+            display: flex;
+            gap: 6px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        .page-item:hover .page-actions {
+            opacity: 1;
+        }
+
+        .page-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .page-action-btn:hover {
+            color: #ef4444;
+        }
+
+        /* Toolbox to add elements */
+        .toolbox {
+            margin-top: auto;
+            border-top: 1px solid var(--border-glass);
+            padding-top: 20px;
+        }
+
+        .toolbox-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        /* Center Canvas Area */
+        .editor-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #020617;
+            position: relative;
+            overflow: auto;
+            padding: 30px;
+        }
+
+        /* 2D Flat Canvas */
+        .canvas-2d-wrapper {
+            position: relative;
+            width: var(--canvas-w);
+            height: var(--canvas-h);
+            background: #ffffff;
+            color: #1e293b;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 0.3s ease;
+        }
+
+        /* Grid lines for precision editing */
+        .canvas-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 5% 5%;
+            z-index: 1;
+        }
+
+        /* Draggable & Resizable Elements */
+        .design-element {
+            position: absolute;
+            border: 1px dashed rgba(16, 185, 129, 0.4);
+            background: rgba(255, 255, 255, 0.85);
+            touch-action: none;
+            user-select: none;
+            z-index: 5;
+            cursor: move;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            padding: 8px;
+            min-width: 50px;
+            min-height: 30px;
+        }
+
+        .design-element:hover {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .design-element.selected {
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 12px var(--primary-glow);
+            z-index: 10;
+        }
+
+        /* Resizable handles styling of interact.js */
+        .design-element::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            cursor: se-resize;
+            border-top-left-radius: 4px;
+            z-index: 11;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .design-element.selected::after {
+            opacity: 1;
+        }
+
+        /* Text Block Content Styles */
+        .text-element-content {
+            width: 100%;
+            height: 100%;
+            word-wrap: break-word;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Price Table Element Style */
+        .pricing-table-element {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .service-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            border-bottom: 1px dotted rgba(0,0,0,0.15);
+            padding-bottom: 2px;
+        }
+
+        .service-row-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .service-row-price {
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* Properties Panel */
+        .properties-panel {
+            width: 320px;
+            background: var(--bg-glass);
+            border-left: 1px solid var(--border-glass);
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-section h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-glass);
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-control {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-glass);
+            border-radius: 6px;
+            color: var(--text-light);
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+
+        .style-tools {
+            display: flex;
+            gap: 8px;
+        }
+
+        .style-toggle-btn {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-glass);
+            color: var(--text-muted);
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .style-toggle-btn.active {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* 3D Preview Container */
+        .preview-3d-wrapper {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #020617;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        /* Book styles mirroring index.html */
+        .book-viewport {
+            position: relative;
+            width: calc(var(--canvas-w) * 2);
+            height: var(--canvas-h);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flipbook {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        .page {
+            width: var(--canvas-w);
+            height: var(--canvas-h);
+            background: #ffffff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .page-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .page-transparent {
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+        .page-white {
+            background: #ffffff !important;
+        }
+
+        /* Crucial Rule implementation: elements on pages must NOT capture clicks in 3D mode */
+        .page-content .custom-rendered-element {
+            pointer-events: none !important; /* Đảm bảo sự kiện vuốt xuyên qua chữ để lật trang */
+        }
+
+        /* Gáy sách và chỉ mục 3D */
+        .book-crease-overlay {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 100%;
+            z-index: 999;
+            pointer-events: none;
+            opacity: 0.85;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.2) 40%, rgba(0, 0, 0, 0.85) 49%, rgba(0, 0, 0, 0.95) 50%, rgba(255, 255, 255, 0.25) 51%, rgba(0, 0, 0, 0.4) 54%, rgba(0, 0, 0, 0) 100%);
+        }
+
+        .book-navigation {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border-glass);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .service-list-edit {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-glass);
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .edit-service-item {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .edit-service-item input {
+            flex: 1;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+        }
+
+        .edit-service-item button {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Tooltip (Nút i) */
+        .tooltip-container {
+            display: inline-block;
+            position: relative;
+            margin-left: 6px;
+            cursor: help;
+        }
+
+        .tooltip-container .fa-circle-info {
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .tooltip-content {
+            display: none;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--primary);
+            padding: 10px 14px;
+            border-radius: 8px;
+            width: 240px;
+            font-size: 0.75rem;
+            color: var(--text-light);
+            line-height: 1.4;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .tooltip-container:hover .tooltip-content {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header điều khiển -->
+    <header>
+        <div class="logo-area">
+            <h1>Muxintang UI Designer <span>v3.5</span></h1>
+        </div>
+
+        <div class="mode-toggle">
+            <button class="mode-btn active" id="btn-mode-design">
+                <i class="fa-solid fa-pen-ruler"></i> Thiết Kế (2D)
+            </button>
+            <button class="mode-btn" id="btn-mode-preview">
+                <i class="fa-solid fa-book-open"></i> Xem Trước (3D)
+            </button>
+        </div>
+
+        <div class="action-group">
+            <button class="btn" id="btn-load-preset">
+                <i class="fa-solid fa-rotate-left"></i> Nạp Dữ Liệu Mẫu
+            </button>
+            <button class="btn btn-primary" id="btn-save-ui">
+                <i class="fa-solid fa-cloud-arrow-up"></i> LƯU GIAO DIỆN
+            </button>
+        </div>
+    </header>
+
+    <!-- Workspace -->
+    <div class="workspace">
+        <!-- Sidebar: Danh sách các trang tùy biến -->
+        <aside class="sidebar">
+            <div class="sidebar-title">
+                Danh Sách Trang
+                <button class="page-action-btn" id="btn-add-page" title="Thêm Trang Mới">
+                    <i class="fa-solid fa-plus-circle" style="color: var(--primary); font-size: 1.2rem;"></i>
+                </button>
+            </div>
+            
+            <ul class="page-list" id="sidebar-page-list">
+                <!-- Sẽ được thêm bằng JS -->
+            </ul>
+
+            <div class="toolbox">
+                <div class="sidebar-title">
+                    Hộp Công Cụ 
+                    <span class="tooltip-container">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span class="tooltip-content">
+                            Kéo thả các phần tử vào canvas để thiết kế. Có thể co giãn kích thước bằng cách kéo góc dưới bên phải của phần tử.
+                        </span>
+                    </span>
+                </div>
+                <div class="toolbox-grid">
+                    <button class="btn" id="btn-add-text">
+                        <i class="fa-solid fa-font"></i> Thêm Khối Văn Bản
+                    </button>
+                    <button class="btn" id="btn-add-table">
+                        <i class="fa-solid fa-table-list"></i> Thêm Bảng Báo Giá
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Khung làm việc Editor/Preview -->
+        <main class="editor-container">
+            <!-- 2D Design Mode Canvas -->
+            <div class="canvas-2d-wrapper" id="canvas-2d">
+                <div class="canvas-grid"></div>
+                <!-- Các phần tử con sẽ được render động tại đây -->
+            </div>
+
+            <!-- 3D Preview Mode Book -->
+            <div class="preview-3d-wrapper" id="preview-3d">
+                <div class="book-viewport" id="preview-viewport">
+                    <div class="book-crease-overlay"></div>
+                    <div class="flipbook" id="preview-book">
+                        <!-- Cấu trúc sách 3D St.PageFlip sẽ render tại đây -->
+                    </div>
+                </div>
+
+                <div class="book-navigation">
+                    <button class="nav-btn" id="preview-prev-btn" title="Trang trước">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button class="nav-btn" id="preview-next-btn" title="Trang sau">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Properties Panel (Bảng Thuộc Tính) -->
+        <aside class="properties-panel" id="properties-panel">
+            <div class="panel-section">
+                <h3>Trang Hiện Tại</h3>
+                <div class="form-group">
+                    <label>Tên Trang</label>
+                    <input type="text" class="form-control" id="prop-page-name">
+                </div>
+                <div class="form-group">
+                    <label>Ảnh Nền Trang (URL)</label>
+                    <input type="text" class="form-control" id="prop-page-bg" placeholder="images/2.jpg hoặc link online">
+                </div>
+            </div>
+
+            <div class="panel-section" id="element-properties" style="display: none;">
+                <h3>Thuộc Tính Phần Tử</h3>
+                
+                <!-- Hiển thị khi chọn Text -->
+                <div id="prop-text-only" style="display: none;">
+                    <div class="form-group">
+                        <label>Nội Dung Chữ</label>
+                        <textarea class="form-control" id="prop-text-content" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Cỡ Chữ (px)</label>
+                        <input type="number" class="form-control" id="prop-text-size" value="16">
+                    </div>
+                    <div class="form-group">
+                        <label>Màu Chữ (HEX)</label>
+                        <input type="color" class="form-control" id="prop-text-color" value="#1e293b" style="height: 40px; padding: 2px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Định Dạng</label>
+                        <div class="style-tools">
+                            <button class="style-toggle-btn" id="btn-prop-bold" title="In đậm">B</button>
+                            <button class="style-toggle-btn" id="btn-prop-italic" title="In nghiêng">I</button>
+                            <button class="style-toggle-btn" id="btn-prop-underline" title="Gạch chân">U</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hiển thị khi chọn Pricing Table -->
+                <div id="prop-table-only" style="display: none;">
+                    <div class="form-group">
+                        <label>Danh Sách Dịch Vụ</label>
+                        <div class="service-list-edit" id="prop-services-list">
+                            <!-- Các dòng dịch vụ sửa đổi bằng JS -->
+                        </div>
+                        <button class="btn" id="btn-add-service-row" style="font-size: 0.75rem; padding: 6px;">
+                            <i class="fa-solid fa-plus"></i> Thêm Dòng Dịch Vụ
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn" id="btn-delete-element" style="background: rgba(239, 68, 68, 0.15); border-color: #ef4444; color: #ef4444; width: 100%; margin-top: 10px; font-weight: 600;">
+                    <i class="fa-solid fa-trash-can"></i> XÓA PHẦN TỬ
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Logic thiết kế và đồng bộ UI -->
+    <script>
+        // Mảng cấu hình các trang tùy biến
+        let activePageData = [];
+        let selectedPageIndex = 0;
+        let selectedElementId = null;
+        let pageFlipInstance = null;
+
+        // Dữ liệu mẫu ban đầu
+        const defaultPreset = [
+            {
+                id: 'page_custom_1',
+                name: 'Trang Cứu Ngải (Tùy Biến)',
+                bg_image: 'images/2.jpg',
+                elements: [
+                    {
+                        id: 'el_1',
+                        type: 'text',
+                        x: 10,
+                        y: 8,
+                        w: 80,
+                        h: 12,
+                        content: 'CỨU NGẢI DƯỠNG SINH\n沐心堂艾灸养生',
+                        fontSize: 22,
+                        color: '#d4af37',
+                        bold: true,
+                        italic: false,
+                        underline: false
+                    },
+                    {
+                        id: 'el_2',
+                        type: 'services',
+                        x: 10,
+                        y: 28,
+                        w: 80,
+                        h: 40,
+                        services: [
+                            { name: 'Cứu ngải vai cổ gáy', price: '199,000 đ' },
+                            { name: 'Cứu ngải thắt lưng', price: '259,000 đ' },
+                            { name: 'Cứu ngải toàn thân', price: '389,000 đ' },
+                            { name: 'Trị liệu ngải cứu thảo dược', price: '299,000 đ' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'page_custom_2',
+                name: 'Trang Gội Đầu (Tùy Biến)',
+                bg_image: 'images/3.jpg',
+                elements: [
+                    {
+                        id: 'el_3',
+                        type: 'text',
+                        x: 10,
+                        y: 10,
+                        w: 80,
+                        h: 10,
+                        content: 'GỘI ĐẦU DƯỠNG SINH',
+                        fontSize: 20,
+                        color: '#10b981',
+                        bold: true,
+                        italic: false,
+                        underline: false
+                    },
+                    {
+                        id: 'el_4',
+                        type: 'services',
+                        x: 10,
+                        y: 25,
+                        w: 80,
+                        h: 40,
+                        services: [
+                            { name: 'Gội đầu thảo dược cơ bản', price: '99,000 đ' },
+                            { name: 'Gội đầu dưỡng sinh chuyên sâu', price: '180,000 đ' },
+                            { name: 'Massage da đầu & Bấm huyệt', price: '120,000 đ' }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // Khởi tạo trang khi tải xong DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            loadConfigFromLocalStorage();
+            renderSidebarPages();
+            selectPage(0);
+            initInteractJS();
+            registerEventListeners();
+        });
+
+        // -------------------------------------------------------------
+        // Nạp và lưu cấu hình
+        // -------------------------------------------------------------
+        function loadConfigFromLocalStorage() {
+            const dataStr = localStorage.getItem('muxintang_ui_sync');
+            if (dataStr) {
+                try {
+                    activePageData = JSON.parse(dataStr);
+                } catch(e) {
+                    console.error("Lỗi parse cấu hình cũ, dùng mẫu mặc định:", e);
+                    activePageData = JSON.parse(JSON.stringify(defaultPreset));
+                }
+            } else {
+                activePageData = JSON.parse(JSON.stringify(defaultPreset));
+            }
+        }
+
+        function saveConfig() {
+            localStorage.setItem('muxintang_ui_sync', JSON.stringify(activePageData));
+            
+            // Đồng bộ trực tiếp sang DataManager nếu nó có sẵn (Offline/Firebase/GitHub)
+            if (window.DataManager) {
+                // Duyệt qua từng trang tùy biến để ghi nhận và cập nhật
+                activePageData.forEach((page, idx) => {
+                    window.DataManager.savePage(page.id, {
+                        name: page.name,
+                        type: 'custom',
+                        order: idx + 2, // Đặt thứ tự sau trang bìa trước
+                        bg_image: page.bg_image,
+                        texts: page.elements.filter(el => el.type === 'text').map(el => ({
+                            x: el.x, y: el.y, size: el.fontSize, color: el.color,
+                            bold: el.bold, italic: el.italic, underline: el.underline, content: el.content
+                        })),
+                        services: page.elements.find(el => el.type === 'services')?.services || []
+                    }).catch(e => console.error("Lỗi đồng bộ DataManager:", e));
+                });
+            }
+
+            alert("Đồng bộ dữ liệu thành công sang 'muxintang_ui_sync' của LocalStorage!");
+        }
+
+        // -------------------------------------------------------------
+        // Quản lý trang (Sidebar)
+        // -------------------------------------------------------------
+        function renderSidebarPages() {
+            const listEl = document.getElementById('sidebar-page-list');
+            listEl.innerHTML = '';
+            
+            activePageData.forEach((page, idx) => {
+                const li = document.createElement('li');
+                li.className = `page-item ${idx === selectedPageIndex ? 'active' : ''}`;
+                li.innerHTML = `
+                    <span class="page-name">${page.name}</span>
+                    <div class="page-actions">
+                        <button class="page-action-btn" onclick="deletePage(${idx}, event)" title="Xóa trang">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                li.addEventListener('click', () => selectPage(idx));
+                listEl.appendChild(li);
+            });
+        }
+
+        function selectPage(idx) {
+            if (idx < 0 || idx >= activePageData.length) return;
+            selectedPageIndex = idx;
+            selectedElementId = null;
+            hideElementProperties();
+            
+            // Cập nhật giao diện sidebar active
+            document.querySelectorAll('.page-item').forEach((item, index) => {
+                if (index === idx) item.classList.add('active');
+                else item.classList.remove('active');
+            });
+
+            // Cập nhật thông số trang hiện tại sang Properties Panel
+            const page = activePageData[idx];
+            document.getElementById('prop-page-name').value = page.name;
+            document.getElementById('prop-page-bg').value = page.bg_image || '';
+            
+            renderCanvasElements();
+        }
+
+        function addPage() {
+            const newId = 'page_custom_' + Date.now();
+            const newPage = {
+                id: newId,
+                name: `Trang Tùy Biến mới`,
+                bg_image: 'images/2.jpg',
+                elements: []
+            };
+            activePageData.push(newPage);
+            renderSidebarPages();
+            selectPage(activePageData.length - 1);
+        }
+
+        window.deletePage = function(idx, event) {
+            event.stopPropagation();
+            if (activePageData.length <= 1) {
+                alert("Bạn phải giữ lại ít nhất 1 trang thiết kế.");
+                return;
+            }
+            if (confirm("Bạn có chắc chắn muốn xóa trang này không?")) {
+                activePageData.splice(idx, 1);
+                selectedPageIndex = Math.max(0, selectedPageIndex - 1);
+                renderSidebarPages();
+                selectPage(selectedPageIndex);
+            }
+        }
+
+        // -------------------------------------------------------------
+        // Render phần tử lên Canvas 2D
+        // -------------------------------------------------------------
+        function renderCanvasElements() {
+            const canvas = document.getElementById('canvas-2d');
+            // Giữ lại canvas-grid
+            const grid = canvas.querySelector('.canvas-grid');
+            canvas.innerHTML = '';
+            canvas.appendChild(grid);
+
+            const page = activePageData[selectedPageIndex];
+            if (!page) return;
+
+            // Áp dụng ảnh nền
+            if (page.bg_image) {
+                canvas.style.backgroundImage = `url('${page.bg_image}')`;
+            } else {
+                canvas.style.backgroundImage = 'none';
+            }
+
+            page.elements.forEach(el => {
+                const div = document.createElement('div');
+                div.className = `design-element ${el.id === selectedElementId ? 'selected' : ''}`;
+                div.id = el.id;
+                
+                // Áp dụng vị trí tọa độ %
+                div.style.left = `${el.x}%`;
+                div.style.top = `${el.y}%`;
+                div.style.width = `${el.w}%`;
+                div.style.height = `${el.h}%`;
+
+                // Render dựa trên loại phần tử
+                if (el.type === 'text') {
+                    const textContent = document.createElement('div');
+                    textContent.className = 'text-element-content';
+                    let style = `font-size: ${el.fontSize}px; color: ${el.color}; font-family: 'Montserrat', sans-serif;`;
+                    if (el.bold) style += ' font-weight: bold;';
+                    if (el.italic) style += ' font-style: italic;';
+                    if (el.underline) style += ' text-decoration: underline;';
+                    textContent.setAttribute('style', style);
+                    textContent.innerText = el.content || 'Nhấn đúp để sửa chữ';
+                    div.appendChild(textContent);
+                } else if (el.type === 'services') {
+                    const tableContainer = document.createElement('div');
+                    tableContainer.className = 'pricing-table-element';
+                    
+                    if (el.services && el.services.length > 0) {
+                        el.services.forEach(serv => {
+                            const row = document.createElement('div');
+                            row.className = 'service-row';
+                            row.innerHTML = `
+                                <span class="service-row-name">${serv.name}</span>
+                                <span class="service-row-price">${serv.price}</span>
+                            `;
+                            tableContainer.appendChild(row);
+                        });
+                    } else {
+                        tableContainer.innerHTML = '<div style="color: #666; font-size: 11px;">Bảng giá trống. Thêm dịch vụ ở cột phải.</div>';
+                    }
+                    div.appendChild(tableContainer);
+                }
+
+                // Đăng ký sự kiện Click chọn phần tử
+                div.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectElement(el.id);
+                });
+
+                canvas.appendChild(div);
+            });
+        }
+
+        // Chọn phần tử thiết kế
+        function selectElement(id) {
+            selectedElementId = id;
+            
+            // Xóa border select cũ
+            document.querySelectorAll('.design-element').forEach(el => {
+                if (el.id === id) el.classList.add('selected');
+                else el.classList.remove('selected');
+            });
+
+            const page = activePageData[selectedPageIndex];
+            const el = page.elements.find(item => item.id === id);
+            
+            if (el) {
+                showElementProperties(el);
+            }
+        }
+
+        // Thêm phần tử mới
+        function addElement(type) {
+            const page = activePageData[selectedPageIndex];
+            if (!page) return;
+
+            const newId = 'el_' + Date.now();
+            let newElement = {};
+
+            if (type === 'text') {
+                newElement = {
+                    id: newId,
+                    type: 'text',
+                    x: 15,
+                    y: 15,
+                    w: 70,
+                    h: 12,
+                    content: 'Nội dung văn bản mới',
+                    fontSize: 16,
+                    color: '#1e293b',
+                    bold: false,
+                    italic: false,
+                    underline: false
+                };
+            } else if (type === 'services') {
+                newElement = {
+                    id: newId,
+                    type: 'services',
+                    x: 10,
+                    y: 30,
+                    w: 80,
+                    h: 40,
+                    services: [
+                        { name: 'Dịch vụ mẫu A', price: '150,000 đ' },
+                        { name: 'Dịch vụ mẫu B', price: '200,000 đ' }
+                    ]
+                };
+            }
+
+            page.elements.push(newElement);
+            renderCanvasElements();
+            selectElement(newId);
+        }
+
+        // Xóa phần tử đang chọn
+        function deleteSelectedElement() {
+            if (!selectedElementId) return;
+            const page = activePageData[selectedPageIndex];
+            page.elements = page.elements.filter(el => el.id !== selectedElementId);
+            selectedElementId = null;
+            hideElementProperties();
+            renderCanvasElements();
+        }
+
+        // -------------------------------------------------------------
+        // Interact.js Drag & Resize (Kéo thả phẳng)
+        // -------------------------------------------------------------
+        function initInteractJS() {
+            interact('.design-element')
+                .draggable({
+                    inertia: false,
+                    modifiers: [
+                        interact.modifiers.restrictRect({
+                            restriction: 'parent',
+                            endOnly: true
+                        })
+                    ],
+                    autoScroll: false,
+                    listeners: {
+                        move(event) {
+                            const target = event.target;
+                            const canvas = document.getElementById('canvas-2d');
+                            const rect = canvas.getBoundingClientRect();
+                            
+                            // Lấy vị trí pixel hiện tại
+                            let leftPx = parseFloat(target.style.left) / 100 * rect.width || 0;
+                            let topPx = parseFloat(target.style.top) / 100 * rect.height || 0;
+
+                            // Cộng thêm sự khác biệt kéo thả
+                            leftPx += event.dx;
+                            topPx += event.dy;
+
+                            // Tính lại phần trăm %
+                            let leftPct = (leftPx / rect.width) * 100;
+                            let topPct = (topPx / rect.height) * 100;
+
+                            // Giới hạn trong khoảng 0% -> 100%
+                            leftPct = Math.max(0, Math.min(100 - parseFloat(target.style.width), leftPct));
+                            topPct = Math.max(0, Math.min(100 - parseFloat(target.style.height), topPct));
+
+                            target.style.left = `${leftPct.toFixed(2)}%`;
+                            target.style.top = `${topPct.toFixed(2)}%`;
+
+                            // Cập nhật cấu hình JavaScript
+                            updateElementPositionData(target.id, leftPct, topPct, null, null);
+                        }
+                    }
+                })
+                .resizable({
+                    edges: { left: false, right: true, bottom: true, top: false },
+                    listeners: {
+                        move(event) {
+                            const target = event.target;
+                            const canvas = document.getElementById('canvas-2d');
+                            const rect = canvas.getBoundingClientRect();
+
+                            // Tính kích thước % mới
+                            let widthPct = (event.rect.width / rect.width) * 100;
+                            let heightPct = (event.rect.height / rect.height) * 100;
+
+                            widthPct = Math.max(5, Math.min(100, widthPct));
+                            heightPct = Math.max(3, Math.min(100, heightPct));
+
+                            target.style.width = `${widthPct.toFixed(2)}%`;
+                            target.style.height = `${heightPct.toFixed(2)}%`;
+
+                            updateElementPositionData(target.id, null, null, widthPct, heightPct);
+                        }
+                    },
+                    modifiers: [
+                        interact.modifiers.restrictSize({
+                            min: { width: 50, height: 30 }
+                        })
+                    ]
+                });
+        }
+
+        function updateElementPositionData(id, x, y, w, h) {
+            const page = activePageData[selectedPageIndex];
+            const el = page.elements.find(item => item.id === id);
+            if (el) {
+                if (x !== null) el.x = parseFloat(x.toFixed(2));
+                if (y !== null) el.y = parseFloat(y.toFixed(2));
+                if (w !== null) el.w = parseFloat(w.toFixed(2));
+                if (h !== null) el.h = parseFloat(h.toFixed(2));
+            }
+        }
+
+        // -------------------------------------------------------------
+        // Bảng thuộc tính phần tử (Properties)
+        // -------------------------------------------------------------
+        function showElementProperties(el) {
+            document.getElementById('element-properties').style.display = 'block';
+            
+            // Xóa tất cả các tab
+            document.getElementById('prop-text-only').style.display = 'none';
+            document.getElementById('prop-table-only').style.display = 'none';
+
+            if (el.type === 'text') {
+                document.getElementById('prop-text-only').style.display = 'block';
+                document.getElementById('prop-text-content').value = el.content || '';
+                document.getElementById('prop-text-size').value = el.fontSize || 16;
+                document.getElementById('prop-text-color').value = el.color || '#1e293b';
+                
+                // Trạng thái Bold/Italic/Underline
+                toggleStyleBtn('btn-prop-bold', el.bold);
+                toggleStyleBtn('btn-prop-italic', el.italic);
+                toggleStyleBtn('btn-prop-underline', el.underline);
+            } else if (el.type === 'services') {
+                document.getElementById('prop-table-only').style.display = 'block';
+                renderEditServicesList(el);
+            }
+        }
+
+        function hideElementProperties() {
+            document.getElementById('element-properties').style.display = 'none';
+        }
+
+        function toggleStyleBtn(btnId, isActive) {
+            const btn = document.getElementById(btnId);
+            if (isActive) btn.classList.add('active');
+            else btn.classList.remove('active');
+        }
+
+        function renderEditServicesList(el) {
+            const listContainer = document.getElementById('prop-services-list');
+            listContainer.innerHTML = '';
+
+            if (el.services && el.services.length > 0) {
+                el.services.forEach((serv, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'edit-service-item';
+                    row.innerHTML = `
+                        <input type="text" class="form-control" value="${serv.name}" onchange="updateServiceRow(${idx}, 'name', this.value)" placeholder="Tên dịch vụ">
+                        <input type="text" class="form-control" value="${serv.price}" onchange="updateServiceRow(${idx}, 'price', this.value)" style="max-width: 90px;" placeholder="Giá">
+                        <button onclick="deleteServiceRow(${idx})"><i class="fa-solid fa-xmark"></i></button>
+                    `;
+                    listContainer.appendChild(row);
+                });
+            }
+        }
+
+        window.updateServiceRow = function(idx, key, val) {
+            const page = activePageData[selectedPageIndex];
+            const el = page.elements.find(item => item.id === selectedElementId);
+            if (el && el.services[idx]) {
+                el.services[idx][key] = val;
+                renderCanvasElements();
+            }
+        }
+
+        window.deleteServiceRow = function(idx) {
+            const page = activePageData[selectedPageIndex];
+            const el = page.elements.find(item => item.id === selectedElementId);
+            if (el) {
+                el.services.splice(idx, 1);
+                renderEditServicesList(el);
+                renderCanvasElements();
+            }
+        }
+
+        // -------------------------------------------------------------
+        // Chuyển đổi qua lại giữa Thiết Kế 2D và Xem Trước 3D
+        // -------------------------------------------------------------
+        function toggleMode(mode) {
+            const canvas2d = document.getElementById('canvas-2d');
+            const preview3d = document.getElementById('preview-3d');
+            const btnDesign = document.getElementById('btn-mode-design');
+            const btnPreview = document.getElementById('btn-mode-preview');
+
+            if (mode === 'design') {
+                btnDesign.classList.add('active');
+                btnPreview.classList.remove('active');
+                preview3d.style.display = 'none';
+                canvas2d.style.display = 'block';
+                
+                // Hủy flipbook để giải phóng RAM
+                if (pageFlipInstance) {
+                    try { pageFlipInstance.destroy(); } catch(e) {}
+                    pageFlipInstance = null;
+                }
+            } else {
+                btnDesign.classList.remove('active');
+                btnPreview.classList.add('active');
+                canvas2d.style.display = 'none';
+                preview3d.style.display = 'flex';
+                
+                // Tạo cấu trúc HTML cho cuốn sách lật
+                buildFlipbookHTML();
+                initFlipbook3D();
+            }
+        }
+
+        function buildFlipbookHTML() {
+            const bookEl = document.getElementById('preview-book');
+            bookEl.innerHTML = '';
+
+            // 1. Tạo trang lót trong suốt bên trái (phục vụ lật bìa đầu)
+            const coverL = document.createElement('div');
+            coverL.className = 'page page-transparent';
+            coverL.setAttribute('data-density', 'hard');
+            coverL.innerHTML = '<div class="page-content"></div>';
+            bookEl.appendChild(coverL);
+
+            // 2. Chèn các trang đã thiết kế của admin
+            activePageData.forEach((page, i) => {
+                // Giữa các trang lẻ (mặt phải) là 1 trang trắng mặt trái
+                if (i > 0) {
+                    const whitePage = document.createElement('div');
+                    whitePage.className = 'page page-white';
+                    whitePage.innerHTML = '<div class="page-content"></div>';
+                    bookEl.appendChild(whitePage);
+                }
+
+                const customPage = document.createElement('div');
+                customPage.className = 'page';
+                if (i === 0 || i === activePageData.length - 1) {
+                    customPage.setAttribute('data-density', 'hard'); // Trang bìa cứng
+                }
+
+                const pageContent = document.createElement('div');
+                pageContent.className = 'page-content';
+                if (page.bg_image) {
+                    pageContent.style.backgroundImage = `url('${page.bg_image}')`;
+                }
+
+                // Render tất cả phần tử của trang
+                page.elements.forEach(el => {
+                    const div = document.createElement('div');
+                    div.className = 'custom-rendered-element';
+                    
+                    let style = `position: absolute; left: ${el.x}%; top: ${el.y}%; width: ${el.w}%; height: ${el.h}%; pointer-events: none !important;`;
+                    div.setAttribute('style', style);
+
+                    if (el.type === 'text') {
+                        const txt = document.createElement('div');
+                        let txtStyle = `font-size: ${el.fontSize}px; color: ${el.color}; font-family: 'Montserrat', sans-serif; height: 100%; display: flex; align-items: center;`;
+                        if (el.bold) txtStyle += ' font-weight: bold;';
+                        if (el.italic) txtStyle += ' font-style: italic;';
+                        if (el.underline) txtStyle += ' text-decoration: underline;';
+                        txt.setAttribute('style', txtStyle);
+                        txt.innerText = el.content;
+                        div.appendChild(txt);
+                    } else if (el.type === 'services') {
+                        const tbl = document.createElement('div');
+                        tbl.className = 'pricing-table-element';
+                        el.services.forEach(serv => {
+                            const row = document.createElement('div');
+                            row.className = 'service-row';
+                            row.innerHTML = `
+                                <span class="service-row-name">${serv.name}</span>
+                                <span class="service-row-price">${serv.price}</span>
+                            `;
+                            tbl.appendChild(row);
+                        });
+                        div.appendChild(tbl);
+                    }
+
+                    pageContent.appendChild(div);
+                });
+
+                customPage.appendChild(pageContent);
+                bookEl.appendChild(customPage);
+            });
+        }
+
+        function initFlipbook3D() {
+            const previewBook = document.getElementById('preview-book');
+            if (!previewBook) return;
+
+            pageFlipInstance = new St.PageFlip(previewBook, {
+                width: 380,
+                height: 540,
+                size: "fixed",
+                minWidth: 380,
+                maxWidth: 380,
+                minHeight: 540,
+                maxHeight: 540,
+                showCover: false,
+                usePortrait: false,
+                flippingTime: 300,
+                swipeDistance: 15,
+                maxShadowOpacity: 0.8
+            });
+
+            pageFlipInstance.loadFromHTML(previewBook.querySelectorAll('.page'));
+
+            // Đăng ký các phím điều khiển preview
+            document.getElementById('preview-prev-btn').onclick = () => {
+                pageFlipInstance.flipPrev();
+            };
+            document.getElementById('preview-next-btn').onclick = () => {
+                pageFlipInstance.flipNext();
+            };
+        }
+
+        // -------------------------------------------------------------
+        // Lắng nghe sự kiện (Event Listeners)
+        // -------------------------------------------------------------
+        function registerEventListeners() {
+            // Mode buttons
+            document.getElementById('btn-mode-design').addEventListener('click', () => toggleMode('design'));
+            document.getElementById('btn-mode-preview').addEventListener('click', () => toggleMode('preview'));
+
+            // Load presets / Save
+            document.getElementById('btn-load-preset').addEventListener('click', () => {
+                if (confirm("Thao tác này sẽ ghi đè thiết kế hiện tại bằng dữ liệu mẫu. Tiếp tục?")) {
+                    activePageData = JSON.parse(JSON.stringify(defaultPreset));
+                    selectedPageIndex = 0;
+                    renderSidebarPages();
+                    selectPage(0);
+                }
+            });
+            document.getElementById('btn-save-ui').addEventListener('click', saveConfig);
+
+            // Add elements
+            document.getElementById('btn-add-text').addEventListener('click', () => addElement('text'));
+            document.getElementById('btn-add-table').addEventListener('click', () => addElement('services'));
+            document.getElementById('btn-add-page').addEventListener('click', addPage);
+
+            // Properties Panel Inputs
+            document.getElementById('prop-page-name').addEventListener('input', (e) => {
+                const page = activePageData[selectedPageIndex];
+                if (page) {
+                    page.name = e.target.value;
+                    renderSidebarPages();
+                }
+            });
+
+            document.getElementById('prop-page-bg').addEventListener('input', (e) => {
+                const page = activePageData[selectedPageIndex];
+                if (page) {
+                    page.bg_image = e.target.value;
+                    renderCanvasElements();
+                }
+            });
+
+            // Text Properties Input
+            document.getElementById('prop-text-content').addEventListener('input', (e) => {
+                if (!selectedElementId) return;
+                const page = activePageData[selectedPageIndex];
+                const el = page.elements.find(item => item.id === selectedElementId);
+                if (el) {
+                    el.content = e.target.value;
+                    renderCanvasElements();
+                }
+            });
+
+            document.getElementById('prop-text-size').addEventListener('input', (e) => {
+                if (!selectedElementId) return;
+                const page = activePageData[selectedPageIndex];
+                const el = page.elements.find(item => item.id === selectedElementId);
+                if (el) {
+                    el.fontSize = parseInt(e.target.value) || 12;
+                    renderCanvasElements();
+                }
+            });
+
+            document.getElementById('prop-text-color').addEventListener('input', (e) => {
+                if (!selectedElementId) return;
+                const page = activePageData[selectedPageIndex];
+                const el = page.elements.find(item => item.id === selectedElementId);
+                if (el) {
+                    el.color = e.target.value;
+                    renderCanvasElements();
+                }
+            });
+
+            // Style Toggles
+            document.getElementById('btn-prop-bold').addEventListener('click', () => {
+                if (!selectedElementId) return;
+                const page = activePageData[selectedPageIndex];
+                const el = page.elements.find(item => item.id === selectedElementId);
+                if (el) {
+                    el.bold = !el.bold;
+                    toggleStyleBtn('btn-prop-bold', el.bold);
+                    renderCanvasElements();
+                }
+            });
+
+            document.getElementById('btn-prop-italic').addEventListener('click', () => {
+                if (!selectedElementId) return;
+                const page = activePageData[selectedPageIndex];
+                const el = page.elements.find(item => item.id === selectedElementId);
+                if (el) {
+                    el.italic = !el.italic;
+                    toggleStyleBtn('btn-prop-italic', el.italic);
+                    renderCanvasElements();
+                }
+            });
+
+            document.getElementById('btn-prop-underline').addEventListener('click', () => {
+                if (!selectedElementId) return;
+                const page = activePageData[selectedPageIndex];
+                const el = page.elements.find(item => item.id === selectedElementId);
+                if (el) {
+                    el.underline = !el.underline;
+                    toggleStyleBtn('btn-prop-underline', el.underline);
+                    renderCanvasElements();
+                }
+            });
+
+            // Service Row Controls
+            document.getElementById('btn-add-service-row').addEventListener('click', () => {
+                if (!selectedElementId) return;
+                const page = activePageData[selectedPageIndex];
+                const el = page.elements.find(item => item.id === selectedElementId);
+                if (el && el.type === 'services') {
+                    el.services.push({ name: 'Tên dịch vụ mới', price: '0 đ' });
+                    renderEditServicesList(el);
+                    renderCanvasElements();
+                }
+            });
+
+            document.getElementById('btn-delete-element').addEventListener('click', deleteSelectedElement);
+
+            // Deselect on Canvas Click
+            document.getElementById('canvas-2d').addEventListener('click', () => {
+                selectedElementId = null;
+                document.querySelectorAll('.design-element').forEach(el => el.classList.remove('selected'));
+                hideElementProperties();
+            });
+        }
+    </script>
+</body>
+</html>

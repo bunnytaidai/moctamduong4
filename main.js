@@ -286,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const textEl = document.createElement('div');
                         textEl.className = 'custom-text-element';
                         
-                        let style = `position: absolute; left: ${text.x}%; top: ${text.y}%; font-family: ${text.font || 'Montserrat'}, sans-serif; font-size: ${text.size || 16}px; color: ${text.color || '#333'};`;
+                        let style = `position: absolute; left: ${text.x}%; top: ${text.y}%; font-family: ${text.font || 'Montserrat'}, sans-serif; font-size: ${text.size || 16}px; color: ${text.color || '#333'}; white-space: pre-wrap;`;
                         if (text.bold) style += ' font-weight: bold;';
                         if (text.italic) style += ' font-style: italic;';
                         if (text.underline) style += ' text-decoration: underline;';
@@ -349,6 +349,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Đăng ký sự kiện thay đổi dữ liệu thời gian thực từ DataManager
     DataManager.onDataChange(async (pages) => {
+        // KIỂM TRA ĐỒNG BỘ TỪ DESIGNER (muxintang_ui_sync)
+        const uiSync = localStorage.getItem('muxintang_ui_sync');
+        if (uiSync) {
+            try {
+                const syncedPages = JSON.parse(uiSync);
+                if (Array.isArray(syncedPages) && syncedPages.length > 0) {
+                    const clientCustomPages = syncedPages.map((sp, idx) => {
+                        const texts = [];
+                        let services = [];
+                        let services_x = 10, services_y = 25, services_w = 80;
+
+                        sp.elements.forEach(el => {
+                            if (el.type === 'text') {
+                                texts.push({
+                                    x: el.x,
+                                    y: el.y,
+                                    size: el.fontSize,
+                                    color: el.color,
+                                    bold: el.bold,
+                                    italic: el.italic,
+                                    underline: el.underline,
+                                    content: el.content
+                                });
+                            } else if (el.type === 'services') {
+                                services = el.services || [];
+                                services_x = el.x;
+                                services_y = el.y;
+                                services_w = el.w;
+                            }
+                        });
+
+                        return {
+                            id: sp.id || `custom_${idx}`,
+                            name: sp.name || `Trang Tùy Biến ${idx + 1}`,
+                            type: 'custom',
+                            order: idx + 2, // đặt sau trang bìa trước (order 1)
+                            bg_image: sp.bg_image || 'images/2.jpg',
+                            texts: texts,
+                            services: services,
+                            services_x: services_x,
+                            services_y: services_y,
+                            services_w: services_w
+                        };
+                    });
+
+                    // Thay thế các trang giữa bằng các trang kéo thả tùy biến
+                    if (pages.length >= 2) {
+                        const coverStart = pages[0];
+                        const coverEnd = pages[pages.length - 1];
+                        
+                        const mergedPages = [coverStart];
+                        clientCustomPages.forEach((cp, cIdx) => {
+                            cp.order = cIdx + 2;
+                            mergedPages.push(cp);
+                        });
+                        coverEnd.order = mergedPages.length + 1;
+                        mergedPages.push(coverEnd);
+                        pages = mergedPages;
+                    }
+                }
+            } catch (e) {
+                console.error("Lỗi đồng bộ dữ liệu UI Designer:", e);
+            }
+        }
         await renderPagesDynamic(pages);
     });
 
