@@ -48,9 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
         pageWidth = Math.floor(pageHeight * ASPECT_RATIO);
 
         // ĐẢM BẢO KHÔNG TRÀN MÀN HÌNH DI ĐỘNG:
-        // Căn lề hai bên cực mảnh (5px), riêng trên di động chừa 90px để hiển thị trang lót trái và nút điều hướng phải
+        // Căn lề hai bên cực mảnh, riêng trên di động chừa 25px (gáy 15px lề trái, 10px lề phải) để tối ưu không gian hiển thị tối đa trang lẻ bên phải (v3.4)
         const isMobile = window.innerWidth <= 600;
-        const maxAllowedWidth = isMobile ? (window.innerWidth - 90) : (window.innerWidth - 10);
+        const maxAllowedWidth = isMobile ? (window.innerWidth - 25) : (window.innerWidth - 10);
         if (pageWidth > maxAllowedWidth) {
             pageWidth = maxAllowedWidth;
             // Tính ngược lại chiều cao tương ứng theo tỷ lệ vàng để không méo hình
@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
             flippingTime: 300,     // Hoạt ảnh lật trang siêu tốc (300ms) cực kỳ nhạy và nhanh
             swipeDistance: 15,     // Giảm khoảng cách vuốt tối thiểu để lật trang nhanh hơn trên mobile
             maxShadowOpacity: 0.85, // Tăng mạnh độ đậm bóng đổ StPageFlip vẽ để tối ưu thị giác 3D (v3.4)
-            showPageCorners: true, // Nhô mép trang khi di chuột qua để gợi ý lật
+            showPageCorners: false, // TẮT hiệu ứng nhô mép góc trang khi rê chuột qua (v3.4)
             disableKeyPress: true
         });
 
@@ -210,12 +210,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         pageFlip.on('changeState', (e) => {
-            // Khi đang lật hoặc kéo, gáy sách hơi mờ đi để tạo cảm giác tự nhiên 3D
+            // Khi đang lật hoặc kéo, gáy sách tạm thời ẩn đi và hạ z-index xuống dưới để trang đang lật đè lên trên gáy sách (v3.4)
             if (creaseOverlay) {
                 if (e.data === 'page_flip' || e.data === 'user_fold') {
-                    creaseOverlay.style.opacity = '0.5';
+                    creaseOverlay.style.opacity = '0';
+                    creaseOverlay.style.zIndex = '1';
                 } else {
-                    creaseOverlay.style.opacity = '0.85';
+                    // Khi lật xong, hiện lại gáy sách đè lên trên để tạo bóng đổ tĩnh chân thực
+                    setTimeout(() => {
+                        creaseOverlay.style.opacity = '0.85';
+                        creaseOverlay.style.zIndex = '999';
+                    }, 100); // Trì hoãn nhẹ 100ms để hoạt ảnh lật trang hoàn tất phẳng phiu
                 }
             }
         });

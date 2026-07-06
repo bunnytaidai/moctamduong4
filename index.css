@@ -133,14 +133,14 @@ html {
 }
 
 /* ==========================================================================
-   KHUNG 4: KHUNG NỘI DUNG CHÍNH (Height = 60%, Trong suốt)
+   KHUNG 4: KHUNG NỘI DUNG CHÍNH (Chiều cao 100% Tràn viền, Trong suốt)
    ========================================================================== */
 .content-frame {
     position: absolute;
-    top: 5%; /* Đẩy sát lên top 5% */
+    top: 0; /* Đẩy sát lên top 0 để tràn viền tuyệt đối (v3.4) */
     left: 0;
     width: 100%;
-    height: 85%; /* Tăng từ 80% lên 85% trên Desktop nhờ việc thu nhỏ header */
+    height: 100%; /* Chiếm trọn 100% chiều cao để trang sách bay đè qua các khung khác (v3.4) */
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -164,12 +164,9 @@ html {
     perspective: 2500px; /* Tạo chiều sâu phối cảnh không gian 3D cực mạnh (v3.4) */
 }
 
-/* Container sách lật - căn giữa tuyệt đối nhờ flexbox viewport */
+/* Container sách lật - mặc định dùng absolute để định vị linh hoạt */
 .flipbook {
-    position: relative !important; /* Dùng relative để flexbox viewport căn giữa chính xác */
-    left: auto !important;
-    right: auto !important;
-    margin: 0 !important;
+    position: absolute;
     height: 90%;
     width: calc(2 * var(--page-width));
     overflow: visible;
@@ -177,6 +174,16 @@ html {
     border-radius: 0 12px 12px 0;
     transition: box-shadow 0.3s ease;
     transform-style: preserve-3d; /* Giữ cấu trúc phối cảnh 3D của các trang con khi lật (v3.4) */
+}
+
+/* Chỉ căn giữa bằng relative flexbox khi ở giao diện Desktop màn hình rộng (v3.4) */
+@media (min-width: 601px) {
+    .flipbook {
+        position: relative !important;
+        left: auto !important;
+        right: auto !important;
+        margin: 0 !important;
+    }
 }
 
 /* Từng trang đơn trong sách lật */
@@ -277,7 +284,7 @@ html {
             rgba(0, 0, 0, 0.02) 80%,
             rgba(0, 0, 0, 0) 100%);
     opacity: 0.85;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.12s ease; /* Tốc độ mờ gáy sách phản hồi tức thì (v3.4) */
 }
 
 /* Hiệu ứng chồng nhiều lớp viền giấy (Page Stack) ở lề trái từ 30px đến 50px */
@@ -857,20 +864,21 @@ html {
         height: 20%;
     }
 
-    /* ĐỊNH VỊ CHO DI ĐỘNG: Gáy sách ở 40px, trang trái chừa lộ ra 35px, trang phải cố định căn chỉnh */
+    /* ĐỊNH VỊ CHO DI ĐỘNG: Gáy sách cách lề trái 15px để chừa bóng gáy mượt và phóng to trang phải nội dung chính (v3.4) */
     .flipbook {
-        left: calc(40px - var(--page-width)) !important;
+        position: absolute !important;
+        left: calc(15px - var(--page-width)) !important;
         right: auto !important;
     }
 
     .book-crease-overlay {
-        left: 40px !important; /* Gáy sách nằm ở 40px từ lề trái */
+        left: 15px !important; /* Gáy sách nằm ở 15px từ lề trái */
         right: auto !important;
         transform: translateX(-50%) !important;
     }
 
     .book-page-stack {
-        left: 20px !important; /* Chồng viền giấy nằm dưới trang lót bên trái (rộng 20px) */
+        left: -5px !important; /* Đẩy sát lề trái màn hình để làm điểm tỳ trang giấy lật */
         right: auto !important;
         width: 20px !important;
     }
