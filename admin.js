@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnDeleteGlobalBg = document.getElementById('btn-delete-global-bg');
     const globalBgThumbnail = document.getElementById('global-bg-thumbnail');
 
-    // Controls Xem trước nâng cấp (v3.1)
+    // Controls Xem trước nâng cấp (v3.2)
     const previewResolution = document.getElementById('preview-resolution');
     const btnPreviewModeEdit = document.getElementById('btn-preview-mode-edit');
     const btnPreviewModeFlip = document.getElementById('btn-preview-mode-flip');
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         allPages = pages;
         renderPageList();
         
-        // Đồng bộ Cài đặt chung (v3.1)
+        // Đồng bộ Cài đặt chung (v3.2)
         try {
             const title = await DataManager.getSiteTitle();
             siteTitleOriginal = title || '';
@@ -1583,7 +1583,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------------------------------------------
-    // 13. CẤU HÌNH CHUNG & XEM TRƯỚC LẬT TRANG 3D ST.PAGEFLIP (v3.1)
+    // 13. CẤU HÌNH CHUNG & XEM TRƯỚC LẬT TRANG 3D ST.PAGEFLIP (v3.2)
     // -------------------------------------------------------------
     // A. Đồng bộ cấu hình chung lúc khởi tạo
     async function initGlobalSettingsUI() {

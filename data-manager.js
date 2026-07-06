@@ -27,9 +27,11 @@ try {
 let db = null;
 let storage = null;
 const dataChangeCallbacks = [];
+let lastTriggeredPages = null; // Lưu trữ cấu hình thực đơn đã nạp gần nhất để đồng bộ ngay lập tức
 
 // Hàm kích hoạt các callback phản hồi khi dữ liệu thay đổi
 function triggerCallbacks(pagesList) {
+    lastTriggeredPages = pagesList; // Lưu lại bộ dữ liệu mới nhất
     dataChangeCallbacks.forEach(cb => {
         try {
             cb(pagesList);
@@ -796,7 +798,17 @@ const DataManager = {
     },
 
     onDataChange(callback) {
-        if (typeof callback === 'function') dataChangeCallbacks.push(callback);
+        if (typeof callback === 'function') {
+            dataChangeCallbacks.push(callback);
+            // Nếu hệ thống đã nạp sẵn dữ liệu từ trước, gọi ngay lập tức cho callback này
+            if (lastTriggeredPages) {
+                try {
+                    callback(lastTriggeredPages);
+                } catch (e) {
+                    console.error("Lỗi thực thi callback khởi tạo ngay lập tức:", e);
+                }
+            }
+        }
     },
 
     offDataChange(callback) {
