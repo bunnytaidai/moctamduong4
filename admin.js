@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnDeleteGlobalBg = document.getElementById('btn-delete-global-bg');
     const globalBgThumbnail = document.getElementById('global-bg-thumbnail');
 
-    // Controls Xem trước nâng cấp (v3.3)
+    // Controls Xem trước nâng cấp (v3.5)
     const previewResolution = document.getElementById('preview-resolution');
     const btnPreviewModeEdit = document.getElementById('btn-preview-mode-edit');
     const btnPreviewModeFlip = document.getElementById('btn-preview-mode-flip');
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         allPages = pages;
         renderPageList();
         
-        // Đồng bộ Cài đặt chung (v3.3)
+        // Đồng bộ Cài đặt chung (v3.5)
         try {
             const title = await DataManager.getSiteTitle();
             siteTitleOriginal = title || '';
@@ -219,6 +219,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function updatePageImageUI() {
         if (!activePageData) return;
+        
+        // Tự động đồng bộ ảnh nền giữa custom (bg_image) và image (image) để giữ hình ảnh khi chuyển đổi loại nội dung
+        if (activePageData.type === 'custom' && !activePageData.bg_image && activePageData.image) {
+            activePageData.bg_image = activePageData.image;
+        } else if (activePageData.type === 'image' && !activePageData.image && activePageData.bg_image) {
+            activePageData.image = activePageData.bg_image;
+        }
+        
         const imgUri = activePageData.type === 'custom' ? activePageData.bg_image : activePageData.image;
         if (imgUri) {
             const actualUrl = await DataManager.getImageUrl(imgUri);
@@ -1583,7 +1591,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------------------------------------------
-    // 13. CẤU HÌNH CHUNG & XEM TRƯỚC LẬT TRANG 3D ST.PAGEFLIP (v3.3)
+    // 13. CẤU HÌNH CHUNG & XEM TRƯỚC LẬT TRANG 3D ST.PAGEFLIP (v3.5)
     // -------------------------------------------------------------
     // A. Đồng bộ cấu hình chung lúc khởi tạo
     async function initGlobalSettingsUI() {

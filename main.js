@@ -297,6 +297,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
+            // Lưu trữ đường dẫn ảnh vào DOM để xử lý tập trung bằng Event Delegation (v3.5)
+            if (i > 0 && imgUri) {
+                contentPage.setAttribute('data-img-uri', imgUri);
+                contentPage.setAttribute('data-page-name', pageData.name || '');
+            }
+            
             contentPage.appendChild(pageContent);
             tempContainer.appendChild(contentPage);
         }
@@ -361,7 +367,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==========================================================================
+    // Cơ chế Event Delegation (Ủy quyền sự kiện) xử lý click zoom ảnh thông minh (v3.5)
+    if (bookEl) {
+        bookEl.addEventListener('click', (e) => {
+            const pageEl = e.target.closest('.page');
+            if (!pageEl) return;
+
+            const imgUri = pageEl.getAttribute('data-img-uri');
+            const pageName = pageEl.getAttribute('data-page-name');
+
+            if (imgUri && pageFlip && pageFlip.getState() === 'read') {
+                const rect = pageEl.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const margin = rect.width * 0.15; // Chừa biên 15% lật trang
+                
+                if (clickX >= margin && clickX <= rect.width - margin) {
+                    if (typeof window.openZoomModal === 'function') {
+                        window.openZoomModal(imgUri, pageName);
+                    }
+                }
+            }
+        });
+    }
+
+    // ==========================================================================================
     // 6. RESPONSIVE WINDOW RESIZE
     // ==========================================================================
     let resizeTimeout;
@@ -397,5 +426,41 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('gesturestart', (event) => {
         event.preventDefault();
     });
+
+    // ==========================================================================
+    // 8. LOGIC POPUP PHÓNG TO HÌNH ẢNH THỰC ĐƠN (v3.5)
+    // ==========================================================================
+    const zoomModal = document.getElementById('image-zoom-modal');
+    const zoomImg = document.getElementById('zoom-modal-img');
+    const zoomCaption = document.getElementById('zoom-caption');
+    const zoomClose = document.getElementById('zoom-close-btn');
+
+    window.openZoomModal = async function(imgUri, title) {
+        if (!zoomModal || !zoomImg) return;
+        try {
+            const actualUrl = await DataManager.getImageUrl(imgUri);
+            if (actualUrl) {
+                zoomImg.src = actualUrl;
+                zoomModal.style.display = 'flex';
+                if (zoomCaption) zoomCaption.textContent = title || 'Thực đơn Muxintang';
+            }
+        } catch (e) {
+            console.error("Lỗi phóng to hình ảnh:", e);
+        }
+    };
+
+    if (zoomClose) {
+        zoomClose.onclick = () => {
+            zoomModal.style.display = 'none';
+        };
+    }
+
+    if (zoomModal) {
+        zoomModal.onclick = (e) => {
+            if (e.target === zoomModal) {
+                zoomModal.style.display = 'none';
+            }
+        };
+    }
 
 });
