@@ -1,5 +1,5 @@
 /**
- * data-manager.js (v2.4)
+ * data-manager.js (v2.5)
  * Quản lý dữ liệu thời gian thực cho Menu Online (Firebase, GitHub API & Offline Local Fallback)
  * Hỗ trợ 3 chế độ lưu trữ 100% MIỄN PHÍ:
  *   1. Chế độ FIREBASE (Khuyên dùng cho Realtime): Sử dụng Realtime Database & Storage.

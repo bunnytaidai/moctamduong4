@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnDeleteGlobalBg = document.getElementById('btn-delete-global-bg');
     const globalBgThumbnail = document.getElementById('global-bg-thumbnail');
 
-    // Controls Xem trước nâng cấp (v3.6)
+    // Controls Xem trước nâng cấp (v3.7)
     const previewResolution = document.getElementById('preview-resolution');
     const btnPreviewModeEdit = document.getElementById('btn-preview-mode-edit');
     const btnPreviewModeFlip = document.getElementById('btn-preview-mode-flip');
@@ -144,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let allPages = [];            // Danh sách tất cả các trang
     let activePageId = null;      // ID của trang đang được sửa
     let activePageData = null;    // Bản sao dữ liệu của trang đang sửa
+    let isInitialLoad = true;     // Cờ hiệu đánh dấu lần đầu tiên tải trang để khôi phục trạng thái (v3.7)
     
     let siteTitleOriginal = '';   // Tiêu đề trang web gốc từ DB
     let siteTitleDraft = '';      // Tiêu đề trang web nháp đang sửa
@@ -170,7 +171,35 @@ document.addEventListener('DOMContentLoaded', () => {
         allPages = pages;
         renderPageList();
         
-        // Đồng bộ Cài đặt chung (v3.6)
+        // --- KHÔI PHỤC TRẠNG THÁI CẤU HÌNH KHI F5 TRANG (v3.7) ---
+        if (isInitialLoad && allPages.length > 0) {
+            isInitialLoad = false;
+            
+            const savedPageId = localStorage.getItem('muxintang_admin_active_page_id');
+            const savedDeviceMode = localStorage.getItem('muxintang_admin_active_device');
+            const savedPreviewMode = localStorage.getItem('muxintang_admin_preview_mode');
+            
+            // 1. Mở lại trang đang làm việc dở
+            if (savedPageId && allPages.some(p => p.id === savedPageId)) {
+                selectPage(savedPageId);
+            }
+            
+            // 2. Chuyển lại đúng thiết bị xem trước
+            if (savedDeviceMode) {
+                switchDevice(savedDeviceMode);
+            }
+            
+            // 3. Chuyển lại đúng tab xem trước (Sửa / Lật 3D)
+            if (savedPreviewMode) {
+                if (savedPreviewMode === 'flip') {
+                    if (btnPreviewModeFlip) btnPreviewModeFlip.click();
+                } else {
+                    if (btnPreviewModeEdit) btnPreviewModeEdit.click();
+                }
+            }
+        }
+        
+        // Đồng bộ Cài đặt chung (v3.7)
         try {
             const title = await DataManager.getSiteTitle();
             siteTitleOriginal = title || '';
@@ -624,6 +653,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         activePageId = pageId;
+        localStorage.setItem('muxintang_admin_active_page_id', pageId); // Lưu ID trang đang chọn
         const page = allPages.find(p => p.id === pageId);
         if (!page) return;
         
@@ -1262,21 +1292,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 cropper.destroy();
             }
             
-            // Khởi động Cropper.js với tỉ lệ vàng flipbook (0.7037)
+            // Khởi động Cropper.js với tỉ lệ vàng flipbook (0.7037) và cho phép thu phóng tự do lấy toàn bộ ảnh (v3.7)
             setTimeout(() => {
+                const cropperZoomSlider = document.getElementById('cropper-zoom-slider');
+                if (cropperZoomSlider) cropperZoomSlider.value = 1; // Reset slider về 1
+
                 cropper = new Cropper(cropperTargetImg, {
                     aspectRatio: MENU_ASPECT_RATIO,
-                    viewMode: 1, // Hạn chế vùng cắt luôn nằm trong ảnh
+                    viewMode: 0, // Đặt bằng 0 để ảnh có thể thu nhỏ tự do nhỏ hơn khung cắt, không ép che phủ
                     dragMode: 'move',
-                    autoCropArea: 0.9, // Cắt tự động 90% diện tích
+                    autoCropArea: 1.0, // Cắt tự động 100% diện tích
                     restore: false,
                     guides: true,
                     center: true,
                     highlight: false,
                     cropBoxMovable: true,
                     cropBoxResizable: true,
-                    toggleDragModeOnDblclick: false
+                    toggleDragModeOnDblclick: false,
+                    zoomable: true,
+                    zoomOnTouch: true,
+                    zoomOnWheel: true,
+                    zoom: function(e) {
+                        // Đồng bộ giá trị slider khi pinch-to-zoom trên di động hoặc cuộn chuột
+                        if (cropperZoomSlider) {
+                            cropperZoomSlider.value = e.detail.ratio;
+                        }
+                    }
                 });
+
+                // Cấu hình sự kiện cho slider và nút reset
+                if (cropperZoomSlider) {
+                    cropperZoomSlider.oninput = (e) => {
+                        if (cropper) cropper.zoomTo(parseFloat(e.target.value));
+                    };
+                }
+
+                const btnResetZoom = document.getElementById('btn-reset-zoom');
+                if (btnResetZoom) {
+                    btnResetZoom.onclick = () => {
+                        if (cropper) {
+                            const containerData = cropper.getContainerData();
+                            const imageData = cropper.getImageData();
+                            // Tính toán tỷ lệ tối thiểu để ảnh nằm trọn vẹn trong khung cắt
+                            const minRatio = Math.min(
+                                containerData.width / imageData.naturalWidth,
+                                containerData.height / imageData.naturalHeight
+                            );
+                            cropper.zoomTo(minRatio);
+                            if (cropperZoomSlider) cropperZoomSlider.value = minRatio;
+                        }
+                    };
+                }
             }, 100);
         };
         reader.readAsDataURL(file);
@@ -1290,6 +1356,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cropper.getCroppedCanvas({
             width: 500, // Định kích thước xuất tối đa để vừa đẹp, không quá nặng
             height: Math.round(500 / MENU_ASPECT_RATIO),
+            fillColor: '#fdfcf7', // Tô màu nền giấy ngà sang trọng cho các khoảng trống nếu thu nhỏ ảnh lấy toàn bộ (v3.7)
             imageSmoothingQuality: 'high'
         }).toBlob(async (blob) => {
             if (!blob) return;
@@ -1606,7 +1673,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------------------------------------------
-    // 13. CẤU HÌNH CHUNG & XEM TRƯỚC LẬT TRANG 3D ST.PAGEFLIP (v3.6)
+    // 13. CẤU HÌNH CHUNG & XEM TRƯỚC LẬT TRANG 3D ST.PAGEFLIP (v3.7)
     // -------------------------------------------------------------
     // A. Đồng bộ cấu hình chung lúc khởi tạo
     async function initGlobalSettingsUI() {
@@ -1755,6 +1822,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function switchDevice(mode) {
             currentMode = mode;
+            localStorage.setItem('muxintang_admin_active_device', mode); // Ghi nhớ thiết bị
             btnDeviceDesktop.classList.toggle('active', mode === 'desktop');
             btnDeviceTablet.classList.toggle('active', mode === 'tablet');
             btnDeviceMobile.classList.toggle('active', mode === 'mobile');
@@ -1794,6 +1862,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnPreviewModeEdit.onclick = () => {
             if (previewMode === 'edit') return;
             previewMode = 'edit';
+            localStorage.setItem('muxintang_admin_preview_mode', 'edit'); // Ghi nhớ chế độ sửa
             btnPreviewModeEdit.classList.add('active');
             btnPreviewModeFlip.classList.remove('active');
             
@@ -1816,6 +1885,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentHeight = canvasPreview.offsetHeight || 540;
             
             previewMode = 'flip';
+            localStorage.setItem('muxintang_admin_preview_mode', 'flip'); // Ghi nhớ chế độ lật
             btnPreviewModeFlip.classList.add('active');
             btnPreviewModeEdit.classList.remove('active');
             
@@ -1826,6 +1896,19 @@ document.addEventListener('DOMContentLoaded', () => {
             initFlipbookPreview(currentWidth, currentHeight);
             addSystemLog('Đã kích hoạt chế độ xem trước lật sách 3D trực quan.', 'info');
         };
+
+        // Tự động khôi phục chế độ xem và thiết bị đã lưu sau khi load (v3.7)
+        setTimeout(() => {
+            const savedDevice = localStorage.getItem('muxintang_admin_active_device') || 'desktop';
+            switchDevice(savedDevice);
+            
+            const savedPreviewMode = localStorage.getItem('muxintang_admin_preview_mode') || 'edit';
+            if (savedPreviewMode === 'flip') {
+                btnPreviewModeFlip.click();
+            } else {
+                btnPreviewModeEdit.click();
+            }
+        }, 150);
         
         // Điều hướng nút lật trang thu nhỏ
         if (btnFlipPrev && btnFlipNext) {
@@ -1854,16 +1937,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // E. Hàm khởi tạo trình lật trang xem trước
-    function initFlipbookPreview(forcedW, forcedH) {
-        if (!flipPreviewBook) return;
-        
+    // E. Hàm khởi tạo trình lật trang xem trước (v3.7)
+    async function initFlipbookPreview(forcedW, forcedH) {
         if (flipPreviewBookInstance) {
-            flipPreviewBookInstance.destroy();
+            try {
+                flipPreviewBookInstance.destroy();
+            } catch (e) {
+                console.error("Lỗi khi dọn dẹp bộ nhớ lật sách:", e);
+            }
             flipPreviewBookInstance = null;
         }
         
-        flipPreviewBook.innerHTML = '';
+        const viewport = document.getElementById('flip-preview-book-viewport');
+        if (!viewport) return;
+        
+        let bookEl = document.getElementById('flip-preview-book');
+        if (!bookEl) {
+            bookEl = document.createElement('div');
+            bookEl.id = 'flip-preview-book';
+            bookEl.className = 'flipbook';
+            bookEl.style.background = 'transparent';
+            viewport.appendChild(bookEl);
+        } else {
+            bookEl.innerHTML = '';
+        }
         
         // Lấy danh sách các trang hiện có (sử dụng bản nháp nếu đang active)
         const pagesToRender = allPages.map(page => {
@@ -1877,6 +1974,26 @@ document.addEventListener('DOMContentLoaded', () => {
             flipPreviewBook.innerHTML = '<div style="color: var(--text-muted); font-size: 0.8rem; padding: 20px;">Không có trang nào để hiển thị</div>';
             return;
         }
+
+        // Tải trước tất cả các đường dẫn hình ảnh của các trang một cách đồng thời để tránh lỗi clone DOM không đồng bộ của thư viện
+        const imagePromises = pagesToRender.map(async (pageData) => {
+            let imgUri = pageData.type === 'custom' ? pageData.bg_image : pageData.image;
+            // Fallback lấy ảnh nền website toàn cục nếu là trang tùy biến chưa có ảnh nền riêng
+            if (pageData.type === 'custom' && !imgUri) {
+                imgUri = globalBgDraft && globalBgDraft !== '__DELETE__' ? globalBgDraft : (globalBgOriginal || 'images/spa_background.png');
+            }
+            if (imgUri) {
+                try {
+                    return await DataManager.getImageUrl(imgUri);
+                } catch(e) {
+                    console.error(e);
+                    return '';
+                }
+            }
+            return '';
+        });
+
+        const resolvedUrls = await Promise.all(imagePromises);
         
         const tempFragment = document.createDocumentFragment();
         
@@ -1896,6 +2013,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Render các trang nội dung
         for (let i = 0; i < pagesToRender.length; i++) {
             const pageData = pagesToRender[i];
+            const url = resolvedUrls[i];
             
             // Trang lót trắng từ trang chẵn
             if (i > 0) {
@@ -1921,11 +2039,8 @@ document.addEventListener('DOMContentLoaded', () => {
             pageContent.style.width = '100%';
             pageContent.style.height = '100%';
             
-            const imgUri = pageData.type === 'custom' ? pageData.bg_image : pageData.image;
-            if (imgUri) {
-                DataManager.getImageUrl(imgUri).then(url => {
-                    if (url) pageContent.style.backgroundImage = `url('${url}')`;
-                }).catch(e => console.error(e));
+            if (url) {
+                pageContent.style.backgroundImage = `url('${url}')`;
             }
             
             if (pageData.type === 'custom') {
@@ -1983,13 +2098,13 @@ document.addEventListener('DOMContentLoaded', () => {
             tempFragment.appendChild(contentPage);
         }
         
-        flipPreviewBook.appendChild(tempFragment);
+        bookEl.appendChild(tempFragment);
         
         flipPreviewBookViewport.style.width = `${bookW * 2 + 30}px`;
         flipPreviewBookViewport.style.height = `${bookH + 30}px`;
         
         try {
-            flipPreviewBookInstance = new St.PageFlip(flipPreviewBook, {
+            flipPreviewBookInstance = new St.PageFlip(bookEl, {
                 width: bookW,
                 height: bookH,
                 size: "fixed",
@@ -2006,7 +2121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 disableKeyPress: true
             });
             
-            flipPreviewBookInstance.loadFromHTML(flipPreviewBook.querySelectorAll('.page'));
+            flipPreviewBookInstance.loadFromHTML(bookEl.querySelectorAll('.page'));
             updateFlipPageIndicator();
             
             flipPreviewBookInstance.on('flip', (e) => {
@@ -2027,7 +2142,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         flipPageIndicator.textContent = `${currentSpread} / ${totalSpreads}`;
         
-        const pages = flipPreviewBook.querySelectorAll('.page');
+        const bookEl = document.getElementById('flip-preview-book');
+        if (!bookEl) return;
+        
+        const pages = bookEl.querySelectorAll('.page');
         if (pages.length > 0) {
             if (pages[0]) pages[0].style.pointerEvents = 'none';
             const lastPageIdx = totalPages - 1;
@@ -2040,7 +2158,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================================
-    // 14. LOGIC PHÓNG TO ẢNH XEM CHI TIẾT CHO ADMIN (v3.6)
+    // 14. LOGIC PHÓNG TO ẢNH XEM CHI TIẾT CHO ADMIN (v3.7)
     // ==========================================================================
     const adminZoomModal = document.getElementById('admin-image-zoom-modal');
     const adminZoomImg = document.getElementById('admin-zoom-modal-img');
