@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnDeleteGlobalBg = document.getElementById('btn-delete-global-bg');
     const globalBgThumbnail = document.getElementById('global-bg-thumbnail');
 
-    // Controls Xem trước nâng cấp (v3.5)
+    // Controls Xem trước nâng cấp (v3.6)
     const previewResolution = document.getElementById('preview-resolution');
     const btnPreviewModeEdit = document.getElementById('btn-preview-mode-edit');
     const btnPreviewModeFlip = document.getElementById('btn-preview-mode-flip');
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         allPages = pages;
         renderPageList();
         
-        // Đồng bộ Cài đặt chung (v3.5)
+        // Đồng bộ Cài đặt chung (v3.6)
         try {
             const title = await DataManager.getSiteTitle();
             siteTitleOriginal = title || '';
@@ -1591,7 +1591,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------------------------------------------
-    // 13. CẤU HÌNH CHUNG & XEM TRƯỚC LẬT TRANG 3D ST.PAGEFLIP (v3.5)
+    // 13. CẤU HÌNH CHUNG & XEM TRƯỚC LẬT TRANG 3D ST.PAGEFLIP (v3.6)
     // -------------------------------------------------------------
     // A. Đồng bộ cấu hình chung lúc khởi tạo
     async function initGlobalSettingsUI() {
@@ -2022,5 +2022,81 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (pages[lastPageIdx]) pages[lastPageIdx].style.pointerEvents = 'auto';
             }
         }
+    }
+
+    // ==========================================================================
+    // 14. LOGIC PHÓNG TO ẢNH XEM CHI TIẾT CHO ADMIN (v3.6)
+    // ==========================================================================
+    const adminZoomModal = document.getElementById('admin-image-zoom-modal');
+    const adminZoomImg = document.getElementById('admin-zoom-modal-img');
+    const adminZoomCaption = document.getElementById('admin-zoom-caption');
+    const adminZoomClose = document.getElementById('admin-zoom-close-btn');
+
+    async function openAdminZoomModal(imgUri, title) {
+        if (!adminZoomModal || !adminZoomImg) return;
+        try {
+            const actualUrl = await DataManager.getImageUrl(imgUri);
+            if (actualUrl) {
+                adminZoomImg.src = actualUrl;
+                adminZoomModal.classList.add('active');
+                if (adminZoomCaption) adminZoomCaption.textContent = title || 'Xem chi tiết ảnh';
+            }
+        } catch (e) {
+            console.error("Lỗi phóng to ảnh trong admin:", e);
+        }
+    }
+
+    // A. Nhấp vào thumbnail trang ở cột phải
+    if (pageImageThumbnail) {
+        pageImageThumbnail.onclick = () => {
+            if (!activePageData) return;
+            const imgUri = activePageData.type === 'custom' ? activePageData.bg_image : activePageData.image;
+            if (imgUri) {
+                openAdminZoomModal(imgUri, `Ảnh trang: ${activePageData.name || 'Không tên'}`);
+            }
+        };
+    }
+
+    // B. Nhấp vào thumbnail ảnh nền website ở cột trái
+    if (globalBgThumbnail) {
+        globalBgThumbnail.onclick = async () => {
+            try {
+                const bgUri = await DataManager.getGlobalBg();
+                if (bgUri) {
+                    openAdminZoomModal(bgUri, "Ảnh nền website toàn cục");
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        };
+    }
+
+    // C. Nhấp vào vùng trống của Canvas xem trước ở cột giữa
+    if (canvasPreview) {
+        canvasPreview.addEventListener('click', (e) => {
+            // Chỉ kích hoạt khi click chính xác vào nền canvas, không trúng các thẻ chữ hoặc nút kéo thả
+            if (e.target === canvasPreview && activePageData) {
+                if (canvasPreview.classList.contains('page-transparent')) return;
+                
+                const imgUri = activePageData.type === 'custom' ? activePageData.bg_image : activePageData.image;
+                if (imgUri) {
+                    openAdminZoomModal(imgUri, `Ảnh nền trang: ${activePageData.name || 'Không tên'}`);
+                }
+            }
+        });
+    }
+
+    // D. Sự kiện đóng modal
+    if (adminZoomClose) {
+        adminZoomClose.onclick = () => {
+            adminZoomModal.classList.remove('active');
+        };
+    }
+    if (adminZoomModal) {
+        adminZoomModal.onclick = (e) => {
+            if (e.target === adminZoomModal) {
+                adminZoomModal.classList.remove('active');
+            }
+        };
     }
 });

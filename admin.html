@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng Điều Khiển Quản Trị v3.5 - Muxintang Wellness Spa</title>
+    <title>Bảng Điều Khiển Quản Trị v3.6 - Muxintang Wellness Spa</title>
     
     <!-- Premium Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -964,6 +964,27 @@
         .log-item.success {
             color: #4aff4a;
         }
+
+        /* Hiệu ứng zoom hover ảnh trong trang admin (v3.6) */
+        #page-image-thumbnail, #global-bg-thumbnail {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: zoom-in !important;
+        }
+        #page-image-thumbnail:hover, #global-bg-thumbnail:hover {
+            transform: scale(1.08) !important;
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4) !important;
+            z-index: 5;
+        }
+
+        /* Phóng to ảnh nền bên trong canvas preview để không làm lệch tọa độ kéo thả */
+        #canvas-preview {
+            transition: background-size 0.3s ease-out;
+            background-size: 100% 100% !important;
+            cursor: zoom-in;
+        }
+        #canvas-preview:not(.page-transparent):hover {
+            background-size: 105% 105% !important; /* Chỉ zoom ảnh nền */
+        }
     </style>
 </head>
 <body>
@@ -971,7 +992,7 @@
     <!-- Header quản trị -->
     <header class="admin-header">
         <div class="logo-section">
-            <h1><i class="fa-solid fa-compass-drafting"></i> 沐心堂 Muxintang <span>BẢNG ĐIỀU KHIỂN ADMIN v3.5</span></h1>
+            <h1><i class="fa-solid fa-compass-drafting"></i> 沐心堂 Muxintang <span>BẢNG ĐIỀU KHIỂN ADMIN v3.6</span></h1>
         </div>
         <div class="header-controls">
             <!-- Xem trang khách -->
@@ -1017,7 +1038,7 @@
             <!-- Cài đặt chung của website -->
             <div class="pane-section" style="padding: 10px; margin-top: 5px; border-radius: 8px;">
                 <div class="pane-section-title" style="font-size: 0.76rem; padding-bottom: 5px; margin-bottom: 8px;">
-                    <span><i class="fa-solid fa-gears"></i> Cài đặt chung (v3.5)</span>
+                    <span><i class="fa-solid fa-gears"></i> Cài đặt chung (v3.6)</span>
                 </div>
                 <div class="form-group" style="margin-bottom: 8px;">
                     <label for="input-site-title" style="font-size: 0.68rem; color: var(--text-muted); font-weight: 500;">Tiêu đề trang web (Title)</label>
@@ -1379,6 +1400,15 @@
     <div class="toast" id="toast-notification">
         <i class="fa-solid fa-circle-check"></i>
         <span id="toast-message">Đã lưu và cập nhật menu online!</span>
+    </div>
+
+    <!-- Popup phóng to ảnh xem chi tiết cho Admin (v3.6) -->
+    <div id="admin-image-zoom-modal" class="modal" style="z-index: 12000; background: rgba(10, 15, 10, 0.95);">
+        <div class="modal-content" style="width: auto; max-width: 90%; background: transparent; border: none; box-shadow: none; align-items: center; position: relative;">
+            <span class="close-modal-btn" id="admin-zoom-close-btn" style="position: absolute; top: -35px; right: 0; color: #fff; font-size: 2.2rem;">&times;</span>
+            <img id="admin-zoom-modal-img" src="" alt="Hình ảnh phóng to" style="max-width: 100%; max-height: 80vh; border: 2px solid var(--gold-color); border-radius: 8px; box-shadow: 0 0 35px rgba(212, 175, 55, 0.4);">
+            <div id="admin-zoom-caption" style="color: var(--gold-color); margin-top: 12px; font-weight: 600; font-size: 1.05rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); text-align: center;">Xem chi tiết ảnh</div>
+        </div>
     </div>
 
     <!-- Core Admin Logic -->
