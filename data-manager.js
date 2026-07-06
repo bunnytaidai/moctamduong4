@@ -80,6 +80,13 @@ function initStorageConnection() {
                     localStorage.setItem('muxintang_site_title', title || '');
                     DataManager.getPages().then(pages => triggerCallbacks(pages)).catch(() => {});
                 });
+
+                // Lắng nghe thay đổi layout tổng thể từ Firebase (v3.5)
+                db.ref('global_layout').on('value', (snapshot) => {
+                    const layout = snapshot.val();
+                    localStorage.setItem('muxintang_global_layout', JSON.stringify(layout || {}));
+                    DataManager.getPages().then(pages => triggerCallbacks(pages)).catch(() => {});
+                });
                 return;
             }
         } catch (e) {
@@ -220,8 +227,8 @@ async function loadStaticMenuData() {
             let globalBg = Array.isArray(parsedData) ? '' : (parsedData.global_bg || '');
             localStorage.setItem('muxintang_global_bg', globalBg);
             
-            let siteTitle = Array.isArray(parsedData) ? '' : (parsedData.site_title || '');
-            localStorage.setItem('muxintang_site_title', siteTitle);
+            let globalLayout = parsedData.global_layout || {};
+            localStorage.setItem('muxintang_global_layout', JSON.stringify(globalLayout));
             
             pagesList.sort((a, b) => a.order - b.order);
             
@@ -230,7 +237,8 @@ async function loadStaticMenuData() {
             localStorage.setItem('muxintang_menu_pages', JSON.stringify({
                 site_title: siteTitle,
                 global_bg: globalBg,
-                pages: pagesList
+                pages: pagesList,
+                global_layout: globalLayout
             }));
             
             triggerCallbacks(pagesList);
@@ -269,6 +277,11 @@ async function loadLocalData() {
         let localTitle = parsedLocal && !Array.isArray(parsedLocal) ? parsedLocal.site_title : '';
         if (cachedTitle) localStorage.setItem('muxintang_site_title', cachedTitle);
         else if (localTitle) localStorage.setItem('muxintang_site_title', localTitle);
+
+        let cachedLayout = parsedCached && !Array.isArray(parsedCached) ? parsedCached.global_layout : null;
+        let localLayout = parsedLocal && !Array.isArray(parsedLocal) ? parsedLocal.global_layout : null;
+        if (cachedLayout) localStorage.setItem('muxintang_global_layout', JSON.stringify(cachedLayout));
+        else if (localLayout) localStorage.setItem('muxintang_global_layout', JSON.stringify(localLayout));
         
         pages = finalCachedPages || finalLocalPages;
     } catch (e) {
@@ -333,6 +346,9 @@ async function loadGithubData(isSilentPoll = false) {
         
         let siteTitle = Array.isArray(parsedData) ? '' : (parsedData.site_title || '');
         localStorage.setItem('muxintang_site_title', siteTitle);
+
+        let globalLayout = parsedData.global_layout || {};
+        localStorage.setItem('muxintang_global_layout', JSON.stringify(globalLayout));
         
         pagesList.sort((a, b) => a.order - b.order);
         
@@ -377,10 +393,13 @@ async function saveGithubData(pagesData) {
     // Bước B: Chuyển dữ liệu sang Base64
     const globalBg = localStorage.getItem('muxintang_global_bg') || '';
     const siteTitle = localStorage.getItem('muxintang_site_title') || '';
+    const globalLayoutStr = localStorage.getItem('muxintang_global_layout') || '{}';
+    const globalLayout = JSON.parse(globalLayoutStr);
     const fullData = {
         site_title: siteTitle,
         global_bg: globalBg,
-        pages: pagesData
+        pages: pagesData,
+        global_layout: globalLayout
     };
     const jsonStr = JSON.stringify(fullData, null, 2);
     const base64Content = btoa(unescape(encodeURIComponent(jsonStr)));
@@ -795,10 +814,45 @@ const DataManager = {
         } else {
             const pages = await this.getPages();
             const siteTitle = localStorage.getItem('muxintang_site_title') || '';
+            const globalLayoutStr = localStorage.getItem('muxintang_global_layout') || '{}';
+            const globalLayout = JSON.parse(globalLayoutStr);
             const fullData = {
                 site_title: siteTitle,
                 global_bg: imageUri,
-                pages: pages
+                pages: pages,
+                global_layout: globalLayout
+            };
+            localStorage.setItem('muxintang_menu_pages', JSON.stringify(fullData));
+            triggerCallbacks(pages);
+        }
+    },
+
+    async getGlobalLayout() {
+        if (activeStorageMode === 'firebase' && db) {
+            const snapshot = await db.ref('global_layout').once('value');
+            return snapshot.val() || {};
+        }
+        const localData = localStorage.getItem('muxintang_global_layout');
+        return localData ? JSON.parse(localData) : {};
+    },
+
+    async saveGlobalLayout(layoutData) {
+        localStorage.setItem('muxintang_global_layout', JSON.stringify(layoutData));
+        
+        if (activeStorageMode === 'firebase' && db) {
+            await db.ref('global_layout').set(layoutData);
+        } else if (activeStorageMode === 'github') {
+            const pages = await this.getPages();
+            await saveGithubData(pages);
+        } else {
+            const pages = await this.getPages();
+            const siteTitle = localStorage.getItem('muxintang_site_title') || '';
+            const globalBg = localStorage.getItem('muxintang_global_bg') || '';
+            const fullData = {
+                site_title: siteTitle,
+                global_bg: globalBg,
+                pages: pages,
+                global_layout: layoutData
             };
             localStorage.setItem('muxintang_menu_pages', JSON.stringify(fullData));
             triggerCallbacks(pages);

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Muxintang UI Designer v3.5 | Trình Kéo Thả Menu Dưỡng Sinh</title>
+    <title>Muxintang UI Designer v3.6 | Trình Quản Trị Hệ Thống Tối Thượng</title>
     
     <!-- Google Fonts & FontAwesome -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,7 +88,7 @@
             border: none;
             background: transparent;
             color: var(--text-muted);
-            padding: 8px 18px;
+            padding: 8px 14px;
             font-size: 0.8rem;
             font-weight: 600;
             border-radius: 20px;
@@ -433,8 +433,7 @@
             width: 100%;
             height: 100%;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
             overflow: hidden;
             background-image: url('images/spa_background.png');
             background-size: cover;
@@ -1030,6 +1029,77 @@
             z-index: 98;
             white-space: nowrap;
         }
+
+        /* BỘ GIẢ LẬP ĐỊNH VỊ KHUNG TRÊN TỔNG THỂ (Global Inspect Mode styles) (v3.6) */
+        .inspect-hover-outline {
+            position: absolute;
+            border: 1.5px dashed var(--accent);
+            background: rgba(212, 175, 55, 0.08);
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+        }
+
+        .inspect-hover-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background: var(--accent);
+            color: var(--bg-dark);
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: 4px;
+            white-space: nowrap;
+            margin-bottom: 4px;
+        }
+
+        .inspect-selected-outline {
+            position: absolute;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 15px var(--gold-glow);
+            pointer-events: none;
+            z-index: 9998;
+            display: none;
+        }
+
+        /* Move handle floating at top-right of selected bounding box */
+        .inspect-move-handle {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            width: 26px;
+            height: 26px;
+            background: var(--accent);
+            color: var(--bg-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            pointer-events: auto; /* Allow dragging via this handle! */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            z-index: 10000;
+        }
+
+        /* Golden resize handle at bottom-right of selected bounding box */
+        .inspect-resize-handle {
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            width: 20px;
+            height: 20px;
+            background: var(--accent);
+            color: var(--bg-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: se-resize;
+            pointer-events: auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            z-index: 10000;
+        }
     </style>
 </head>
 <body>
@@ -1037,12 +1107,15 @@
     <!-- Header điều khiển -->
     <header>
         <div class="logo-area">
-            <h1>Muxintang UI Designer <span>v3.5</span></h1>
+            <h1>Muxintang UI Designer <span>v3.6</span></h1>
         </div>
 
         <div class="mode-toggle">
             <button class="mode-btn active" id="btn-mode-design">
                 <i class="fa-solid fa-pen-ruler"></i> Thiết Kế (2D)
+            </button>
+            <button class="mode-btn" id="btn-mode-global">
+                <i class="fa-solid fa-globe"></i> Tổng Thể (Global)
             </button>
             <button class="mode-btn" id="btn-mode-preview">
                 <i class="fa-solid fa-book-open"></i> Xem Trước (3D)
@@ -1061,21 +1134,50 @@
 
     <!-- Workspace -->
     <div class="workspace">
-        <!-- Sidebar: Danh sách các trang tùy biến -->
+        <!-- Sidebar: Danh sách các trang tùy biến hoặc danh sách DOM Tree (v3.6) -->
         <aside class="sidebar">
-            <div class="sidebar-title">
-                Sắp Xếp Thứ Tự Trang
-                <span class="tooltip-container">
-                    <i class="fa-solid fa-circle-info"></i>
-                    <span class="tooltip-content">
-                        Nhấp giữ và kéo các trang lên/xuống để sắp xếp lại thứ tự hiển thị trong cuốn sách.
+            <!-- Mục trang đơn (Thiết kế) -->
+            <div id="sidebar-design-section">
+                <div class="sidebar-title">
+                    Sắp Xếp Thứ Tự Trang
+                    <span class="tooltip-container">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span class="tooltip-content">
+                            Nhấp giữ và kéo các trang lên/xuống để sắp xếp lại thứ tự hiển thị trong cuốn sách.
+                        </span>
                     </span>
-                </span>
+                </div>
+                
+                <ul class="page-list" id="sidebar-page-list">
+                    <!-- Sẽ được thêm bằng JS từ DataManager -->
+                </ul>
             </div>
-            
-            <ul class="page-list" id="sidebar-page-list">
-                <!-- Sẽ được thêm bằng JS từ DataManager -->
-            </ul>
+
+            <!-- Mục tổng thể (Global) (v3.6) -->
+            <div id="sidebar-global-section" style="display: none;">
+                <div class="sidebar-title">
+                    Công Cụ Tổng Thể
+                    <span class="tooltip-container">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span class="tooltip-content">
+                            Kích hoạt tính năng chọn bất kỳ phần tử nào trên toàn bộ trang web (Header, Sách, Footer) và sắp xếp thứ tự hiển thị của chúng.
+                        </span>
+                    </span>
+                </div>
+                <button class="btn" id="btn-global-inspect" style="width: 100%; margin-bottom: 10px; background: rgba(255,255,255,0.05); font-weight: bold; border-color: var(--accent);">
+                    <i class="fa-solid fa-crosshairs"></i> Chọn Phần Tử (Inspector)
+                </button>
+                <button class="btn btn-primary" id="btn-global-add-button" style="width: 100%; margin-bottom: 15px;">
+                    <i class="fa-solid fa-plus"></i> Tạo Nút Bấm Hành Động
+                </button>
+                
+                <div class="sidebar-title" style="margin-top: 15px;">
+                    Danh Sách Phần Tử DOM
+                </div>
+                <ul class="page-list" id="global-dom-tree" style="max-height: 280px; overflow-y: auto;">
+                    <!-- Render danh sách phần tử DOM kiểu DevTools -->
+                </ul>
+            </div>
 
             <div class="toolbox">
                 <div class="sidebar-title">
@@ -1138,56 +1240,100 @@
                     <i class="fa-solid fa-arrows-rotate"></i>
                 </div>
 
-                <!-- Màn hình bên trong -->
-                <div class="device-screen" id="simulator-screen">
+                <!-- Màn hình bên trong (Bao gồm Simulated Header/Footer cho chế độ Global) (v3.6) -->
+                <div class="device-screen" id="simulator-screen" style="display: flex; flex-direction: column; overflow: hidden; justify-content: space-between;">
                     
-                    <!-- 2D Mock Book Spread -->
-                    <div class="mock-book-spread" id="book-spread-container">
-                        <!-- Golden Resize Handle chỉ dùng ở PC mode -->
-                        <div class="book-resize-handle" id="book-resize-handle" title="Giữ chuột và kéo góc này để Phóng to / Thu nhỏ toàn bộ cuốn sách">
-                            <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
-                        </div>
-
-                        <!-- Chồng giấy lề trái -->
-                        <div class="book-page-stack" id="designer-page-stack">
-                            <div class="stack-line line-1"></div>
-                            <div class="stack-line line-2"></div>
-                            <div class="stack-line line-3"></div>
-                            <div class="stack-line line-4"></div>
-                        </div>
-
-                        <!-- Trang bên trái (Trong suốt / Trắng) -->
-                        <div class="mock-page-left" id="designer-left-page">
-                            <div class="page-content"></div>
-                        </div>
-
-                        <!-- Gáy sách 3D -->
-                        <div class="book-crease-overlay" id="designer-crease"></div>
-
-                        <!-- Trang bên phải (CHÍNH LÀ CANVAS 2D ĐỂ THIẾT KẾ KÉO THẢ) -->
-                        <div class="canvas-2d-wrapper" id="canvas-2d">
-                            <div class="canvas-grid"></div>
-                            <!-- Các phần tử con sẽ được render động tại đây -->
-                            <div class="canvas-tip">Trang Thiết Kế 2D (Kéo thả/Co giãn chữ tại đây)</div>
-                        </div>
+                    <!-- Simulated Top Header (Chỉ hiện khi ở chế độ Global / Preview) (v3.6) -->
+                    <div class="top-header" id="simulated-header" style="display: none; height: 45px; border-bottom: 1px solid rgba(212,175,55,0.2); align-items: center; justify-content: center; width: 100%; color: #d4af37; font-family: 'Noto Serif SC', serif; font-size: 0.88rem; font-weight: bold; background: rgba(18,22,18,0.7); text-shadow: 0 0 5px var(--gold-glow); z-index: 10; user-select: none;">
+                        沐心堂艾灸养生会馆 (Muxintang Spa)
                     </div>
 
-                    <!-- 3D Preview Mode Book -->
-                    <div class="preview-3d-wrapper" id="preview-3d">
-                        <div class="book-viewport" id="preview-viewport">
-                            <div class="book-crease-overlay"></div>
-                            <div class="flipbook" id="preview-book">
-                                <!-- Cấu trúc sách 3D St.PageFlip sẽ render tại đây -->
+                    <!-- Area chứa sách lật ở giữa -->
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: center; position: relative; width: 100%;">
+                        <!-- 2D Mock Book Spread -->
+                        <div class="mock-book-spread" id="book-spread-container">
+                            <!-- Golden Resize Handle chỉ dùng ở PC mode -->
+                            <div class="book-resize-handle" id="book-resize-handle" title="Giữ chuột và kéo góc này để Phóng to / Thu nhỏ toàn bộ cuốn sách">
+                                <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                            </div>
+
+                            <!-- Chồng giấy lề trái -->
+                            <div class="book-page-stack" id="designer-page-stack">
+                                <div class="stack-line line-1"></div>
+                                <div class="stack-line line-2"></div>
+                                <div class="stack-line line-3"></div>
+                                <div class="stack-line line-4"></div>
+                            </div>
+
+                            <!-- Trang bên trái (Trong suốt / Trắng) -->
+                            <div class="mock-page-left" id="designer-left-page">
+                                <div class="page-content"></div>
+                            </div>
+
+                            <!-- Gáy sách 3D -->
+                            <div class="book-crease-overlay" id="designer-crease"></div>
+
+                            <!-- Trang bên phải (CHÍNH LÀ CANVAS 2D ĐỂ THIẾT KẾ KÉO THẢ) -->
+                            <div class="canvas-2d-wrapper" id="canvas-2d">
+                                <div class="canvas-grid"></div>
+                                <!-- Các phần tử con sẽ được render động tại đây -->
+                                <div class="canvas-tip">Trang Thiết Kế 2D (Kéo thả/Co giãn chữ tại đây)</div>
                             </div>
                         </div>
 
-                        <div class="book-navigation">
-                            <button class="nav-btn" id="preview-prev-btn" title="Trang trước">
-                                <i class="fa-solid fa-chevron-left"></i>
-                            </button>
-                            <button class="nav-btn" id="preview-next-btn" title="Trang sau">
-                                <i class="fa-solid fa-chevron-right"></i>
-                            </button>
+                        <!-- 3D Preview Mode Book -->
+                        <div class="preview-3d-wrapper" id="preview-3d">
+                            <div class="book-viewport" id="preview-viewport">
+                                <div class="book-crease-overlay"></div>
+                                <div class="flipbook" id="preview-book">
+                                    <!-- Cấu trúc sách 3D St.PageFlip sẽ render tại đây -->
+                                </div>
+                            </div>
+
+                            <div class="book-navigation">
+                                <button class="nav-btn" id="preview-prev-btn" title="Trang trước">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <button class="nav-btn" id="preview-next-btn" title="Trang sau">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Simulated Bottom Footer Bar (Chỉ hiện khi ở chế độ Global / Preview) (v3.6) -->
+                    <div class="bottom-footer" id="simulated-footer" style="display: none; height: 60px; border-top: 1px solid rgba(212,175,55,0.2); align-items: center; justify-content: center; width: 100%; background: rgba(18,22,18,0.85); z-index: 10; padding: 5px 0;">
+                        <div class="contact-bar" style="display: flex; gap: 12px; justify-content: center; align-items: center; width: 100%; max-width: 600px;">
+                            <a href="#" class="contact-btn hotline-btn" id="sim-btn-hotline" style="display: flex; align-items: center; gap: 6px; color: #fff; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); padding: 6px 12px; border-radius: 20px; text-decoration: none; font-size: 0.65rem; font-weight: bold; box-shadow: 0 0 8px rgba(239,68,68,0.3); border:none;">
+                                <div class="icon-circle" style="width:20px; height:20px; border-radius:50%; background:#fff; color:#ef4444; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-phone"></i></div>
+                                <div>HOTLINE<br><span style="font-size: 9px; font-weight: normal;">0968 868 712</span></div>
+                            </a>
+                            <a href="#" class="contact-btn zalo-btn" id="sim-btn-zalo" style="display: flex; align-items: center; gap: 6px; color: #fff; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 6px 12px; border-radius: 20px; text-decoration: none; font-size: 0.65rem; font-weight: bold; box-shadow: 0 0 8px rgba(59,130,246,0.3); border:none;">
+                                <div class="icon-circle" style="width:20px; height:20px; border-radius:50%; background:#fff; color:#3b82f6; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:8px;">Zalo</div>
+                                <div>TƯ VẤN<br><span style="font-size: 9px; font-weight: normal;">Nhắn Zalo</span></div>
+                            </a>
+                            <a href="#" class="contact-btn wechat-btn" id="sim-btn-wechat" style="display: flex; align-items: center; gap: 6px; color: #fff; background: linear-gradient(135deg, #10b981 0%, #047857 100%); padding: 6px 12px; border-radius: 20px; text-decoration: none; font-size: 0.65rem; font-weight: bold; box-shadow: 0 0 8px rgba(16,185,129,0.3); border:none;">
+                                <div class="icon-circle" style="width:20px; height:20px; border-radius:50%; background:#fff; color:#10b981; display:flex; align-items:center; justify-content:center;"><i class="fa-brands fa-weixin"></i></div>
+                                <div>WECHAT<br><span style="font-size: 9px; font-weight: normal;">NGALADY0708</span></div>
+                            </a>
+                            <a href="#" class="contact-btn maps-btn" id="sim-btn-maps" style="display: flex; align-items: center; gap: 6px; color: #fff; background: linear-gradient(135deg, #d4af37 0%, #b5922f 100%); padding: 6px 12px; border-radius: 20px; text-decoration: none; font-size: 0.65rem; font-weight: bold; box-shadow: 0 0 8px rgba(212,175,55,0.3); border:none;">
+                                <div class="icon-circle" style="width:20px; height:20px; border-radius:50%; background:#fff; color:#d4af37; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-location-dot"></i></div>
+                                <div>BẢN ĐỒ<br><span style="font-size: 9px; font-weight: normal;">Chỉ Đường</span></div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Global Inspect overlays (Hover & Selection) (v3.6) -->
+                    <div id="global-hover-outline" class="inspect-hover-outline">
+                        <span class="inspect-hover-tooltip" id="global-hover-tooltip">div#btn-zalo | 120x38</span>
+                    </div>
+
+                    <div id="global-selected-outline" class="inspect-selected-outline">
+                        <div id="global-move-handle" class="inspect-move-handle" title="Kéo nút này để di chuyển vị trí phần tử">
+                            <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                        </div>
+                        <div id="global-resize-handle" class="inspect-resize-handle" title="Kéo góc này để co giãn giữ nguyên tỷ lệ gốc">
+                            <i class="fa-solid fa-up-right-and-down-left-from-center" style="font-size: 8px;"></i>
                         </div>
                     </div>
 
@@ -1209,6 +1355,7 @@
                 </div>
             </div>
 
+            <!-- Thuộc tính phần tử 2D Thiết Kế -->
             <div class="panel-section" id="element-properties" style="display: none;">
                 <h3>Thuộc Tính Phần Tử</h3>
                 
@@ -1249,7 +1396,7 @@
                     </div>
                 </div>
 
-                <!-- Hiển thị khi chọn Button (MỚI v3.5) -->
+                <!-- Hiển thị khi chọn Button -->
                 <div id="prop-button-only" style="display: none;">
                     <div class="form-group">
                         <label>Nhãn Nút Bấm</label>
@@ -1293,7 +1440,7 @@
                     </div>
                 </div>
 
-                <!-- Hiển thị khi chọn HTML Block (MỚI v3.5) -->
+                <!-- Hiển thị khi chọn HTML Block -->
                 <div id="prop-html-only" style="display: none;">
                     <div class="form-group">
                         <label>Mã HTML Tùy Biến
@@ -1312,6 +1459,53 @@
                     <i class="fa-solid fa-trash-can"></i> XÓA PHẦN TỬ
                 </button>
             </div>
+
+            <!-- BẢNG ĐIỀU KHIỂN CODE TRỰC TIẾP PHẦN TỬ TỔNG THỂ (v3.6) -->
+            <div class="panel-section" id="global-element-properties" style="display: none;">
+                <h3>Mã Nguồn Phần Tử (Global)</h3>
+                
+                <div id="global-button-extra" style="display: none; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; margin-bottom: 12px;">
+                    <div class="form-group">
+                        <label>Chọn Icon hiển thị (FontAwesome)</label>
+                        <select class="form-control" id="global-btn-icon">
+                            <option value="">Không có Icon</option>
+                            <option value="fa-solid fa-phone">Điện thoại (Hotline)</option>
+                            <option value="fa-solid fa-comment-dots">Nhắn tin (Zalo)</option>
+                            <option value="fa-brands fa-weixin">WeChat</option>
+                            <option value="fa-solid fa-location-dot">Bản đồ (Chỉ đường)</option>
+                            <option value="fa-solid fa-calendar-days">Lịch hẹn</option>
+                            <option value="fa-solid fa-envelope">Thư từ (Mail)</option>
+                            <option value="fa-solid fa-link">Đường dẫn (Link)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Hoặc Đường Dẫn Icon Tải Lên (Hình ảnh)</label>
+                        <input type="text" class="form-control" id="global-btn-custom-icon" placeholder="Dán link ảnh icon vào đây...">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Mã HTML (innerHTML)</label>
+                    <textarea class="form-control" id="global-code-html" rows="6" style="font-family: monospace; font-size: 0.76rem; line-height: 1.3; background: #000; color: #10b981; border: 1px solid var(--border-glass);"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Mã CSS (style.cssText)</label>
+                    <textarea class="form-control" id="global-code-css" rows="6" style="font-family: monospace; font-size: 0.76rem; line-height: 1.3; background: #000; color: #d4af37; border: 1px solid var(--border-glass);"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Hành Động JS (onclick)</label>
+                    <textarea class="form-control" id="global-code-js" rows="4" style="font-family: monospace; font-size: 0.76rem; line-height: 1.3; background: #000; color: #3b82f6; border: 1px solid var(--border-glass);"></textarea>
+                </div>
+
+                <button class="btn btn-primary" id="btn-global-save-code" style="width: 100%; margin-top: 10px;">
+                    <i class="fa-solid fa-code-commit"></i> CẬP NHẬT MÃ NGUỒN
+                </button>
+                <button class="btn" id="btn-global-delete-element" style="background: rgba(239, 68, 68, 0.15); border-color: #ef4444; color: #ef4444; width: 100%; margin-top: 10px; font-weight: 600;">
+                    <i class="fa-solid fa-trash-can"></i> XÓA PHẦN TỬ
+                </button>
+            </div>
         </aside>
     </div>
 
@@ -1323,6 +1517,11 @@
         let selectedElementId = null;
         let pageFlipInstance = null;
         let activeDevice = 'desktop'; // 'desktop' | 'tablet' | 'mobile'
+
+        // Chế độ Inspect của Sửa tổng thể (v3.6)
+        let isGlobalInspectActive = false;
+        let selectedDOMElement = null;
+        let globalLayoutData = { selectors: {} };
 
         // Khởi động dữ liệu mẫu gốc dự phòng
         const defaultPreset = [
@@ -1387,6 +1586,9 @@
 
             initInteractJS();
             registerEventListeners();
+
+            // Tải cấu hình tổng thể (v3.6)
+            await loadGlobalLayoutData();
         });
 
         // Tải danh sách trang thật của dự án từ DataManager
@@ -1424,7 +1626,6 @@
                     activePageData = [];
                 }
             } else {
-                // BỎ HOÀN TOÀN GỢI Ý MẶC ĐỊNH THEO YÊU CẦU: Khởi chạy trống hoàn toàn để người dùng tự cấu hình từ đầu!
                 activePageData = []; 
             }
         }
@@ -1435,6 +1636,7 @@
 
         function saveConfig() {
             autoSave(); 
+            saveGlobalLayoutData();
             
             if (window.DataManager) {
                 activePageData.forEach(sp => {
@@ -1456,7 +1658,7 @@
                             order: page.order,
                             image: page.image,
                             bg_image: page.image,
-                            elements: sp.elements || [], // Đẩy luôn mảng elements mới nhất hỗ trợ các nút hành động & HTML (v3.5)
+                            elements: sp.elements || [], 
                             texts: texts,
                             services: services,
                             services_x: services_x,
@@ -1467,7 +1669,7 @@
                 });
             }
 
-            alert("Đồng bộ cấu hình thiết kế thành công vào bộ nhớ trình duyệt!");
+            alert("Đồng bộ cấu hình thiết kế và giao diện tổng thể thành công!");
         }
 
         // -------------------------------------------------------------
@@ -1563,7 +1765,6 @@
             document.getElementById('prop-page-name').value = page.name;
             document.getElementById('prop-page-bg').value = page.image || page.bg_image || '';
 
-            // SỬA LỖI ĐỨNG TRANG 3D: Khi đang ở chế độ xem trước 3D, lật trực tiếp thay vì huỷ/rebuild
             const isPreviewMode = document.getElementById('btn-mode-preview').classList.contains('active');
             if (isPreviewMode && pageFlipInstance) {
                 pageFlipInstance.flip(idx * 2 + 1);
@@ -1642,7 +1843,6 @@
                     }
                     div.appendChild(tableContainer);
                 } else if (el.type === 'button') {
-                    // Render Nút Bấm Hành Động (v3.5)
                     const btn = document.createElement('button');
                     let btnStyle = `width: 100%; height: 100%; border: none; font-family: 'Montserrat', sans-serif; font-size: ${el.fontSize}px; color: ${el.color}; background-color: ${el.bgColor || '#d4af37'}; border-radius: ${el.borderRadius || 4}px; pointer-events: none;`;
                     if (el.bold) btnStyle += ' font-weight: bold;';
@@ -1651,7 +1851,6 @@
                     btn.innerText = el.content || 'Nút Bấm';
                     div.appendChild(btn);
                 } else if (el.type === 'html') {
-                    // Render Mã HTML Tùy Biến (v3.5)
                     const htmlDiv = document.createElement('div');
                     htmlDiv.setAttribute('style', 'width: 100%; height: 100%; overflow: auto; pointer-events: none;');
                     htmlDiv.innerHTML = el.htmlContent || '<div style="font-size:11px;color:#999;padding:5px;">&lt;Mã HTML Trống&gt;</div>';
@@ -1728,7 +1927,6 @@
                     ]
                 };
             } else if (type === 'button') {
-                // Khởi tạo Nút Bấm Hành Động (v3.5)
                 newElement = {
                     id: newId,
                     type: 'button',
@@ -1747,7 +1945,6 @@
                     italic: false
                 };
             } else if (type === 'html') {
-                // Khởi tạo Khối HTML Tùy Biến (v3.5)
                 newElement = {
                     id: newId,
                     type: 'html',
@@ -1869,6 +2066,73 @@
                         }
                     }
                 });
+
+            // -------------------------------------------------------------
+            // BỘ KÉO THẢ & CO GIÃN THEO TỶ LỆ TRONG CHẾ ĐỘ TỔNG THỂ (v3.6)
+            // -------------------------------------------------------------
+            interact('#global-move-handle')
+                .draggable({
+                    listeners: {
+                        move(event) {
+                            if (!selectedDOMElement) return;
+
+                            let curX = parseFloat(selectedDOMElement.getAttribute('data-x')) || 0;
+                            let curY = parseFloat(selectedDOMElement.getAttribute('data-y')) || 0;
+
+                            curX += event.dx;
+                            curY += event.dy;
+
+                            selectedDOMElement.setAttribute('data-x', curX);
+                            selectedDOMElement.setAttribute('data-y', curY);
+                            selectedDOMElement.style.transform = `translate(${curX}px, ${curY}px)`;
+
+                            // Di chuyển khung selected outline theo
+                            const outline = document.getElementById('global-selected-outline');
+                            outline.style.left = `${parseFloat(outline.style.left) + event.dx}px`;
+                            outline.style.top = `${parseFloat(outline.style.top) + event.dy}px`;
+
+                            // Đồng bộ CSS hiển thị
+                            document.getElementById('global-code-css').value = selectedDOMElement.style.cssText;
+                        },
+                        end(event) {
+                            saveGlobalLayoutData();
+                        }
+                    }
+                });
+
+            interact('#global-resize-handle')
+                .draggable({
+                    listeners: {
+                        move(event) {
+                            if (!selectedDOMElement) return;
+
+                            const rect = selectedDOMElement.getBoundingClientRect();
+                            const screenRect = document.getElementById('simulator-screen').getBoundingClientRect();
+                            
+                            // Giữ nguyên tỷ lệ gốc của phần tử
+                            const initialWidth = parseFloat(selectedDOMElement.getAttribute('data-initial-w')) || rect.width;
+                            const initialHeight = parseFloat(selectedDOMElement.getAttribute('data-initial-h')) || rect.height;
+                            const aspectRatio = initialWidth / initialHeight;
+
+                            let newWidth = rect.width + event.dx;
+                            if (newWidth < 30) newWidth = 30;
+                            let newHeight = newWidth / aspectRatio;
+
+                            selectedDOMElement.style.width = `${newWidth}px`;
+                            selectedDOMElement.style.height = `${newHeight}px`;
+
+                            // Cập nhật kích thước khung selection outline
+                            const outline = document.getElementById('global-selected-outline');
+                            outline.style.width = `${newWidth}px`;
+                            outline.style.height = `${newHeight}px`;
+
+                            document.getElementById('global-code-css').value = selectedDOMElement.style.cssText;
+                        },
+                        end(event) {
+                            saveGlobalLayoutData();
+                        }
+                    }
+                });
         }
 
         function updateElementPositionData(id, x, y, w, h) {
@@ -1882,23 +2146,6 @@
                     if (w !== null) el.w = parseFloat(w.toFixed(2));
                     if (h !== null) el.h = parseFloat(h.toFixed(2));
                 }
-            }
-        }
-
-        // Helper lấy phần tử đang chọn
-        function getSelectedElement() {
-            if (!selectedElementId) return null;
-            const page = bookPages[selectedPageIndex];
-            const pageConfig = activePageData.find(p => p.id === page.id);
-            return pageConfig ? pageConfig.elements.find(item => item.id === selectedElementId) : null;
-        }
-
-        function updateSelectedElementProp(propName, value) {
-            const el = getSelectedElement();
-            if (el) {
-                el[propName] = value;
-                autoSave();
-                renderCanvasElements();
             }
         }
 
@@ -1925,7 +2172,6 @@
                 document.getElementById('prop-table-only').style.display = 'block';
                 renderEditServicesList(el);
             } else if (el.type === 'button') {
-                // Hiện panel nút bấm (v3.5)
                 document.getElementById('prop-button-only').style.display = 'block';
                 document.getElementById('prop-button-content').value = el.content || '';
                 document.getElementById('prop-button-action-type').value = el.actionType || 'goto_page';
@@ -1938,7 +2184,6 @@
                 toggleStyleBtn('btn-prop-btn-bold', el.bold);
                 toggleStyleBtn('btn-prop-btn-italic', el.italic);
             } else if (el.type === 'html') {
-                // Hiện panel HTML (v3.5)
                 document.getElementById('prop-html-only').style.display = 'block';
                 document.getElementById('prop-html-content').value = el.htmlContent || '';
             }
@@ -2000,30 +2245,79 @@
         }
 
         // -------------------------------------------------------------
-        // Chuyển đổi qua lại giữa Thiết Kế 2D và Xem Trước 3D
+        // Chuyển đổi các chế độ làm việc (Thiết kế / Tổng thể / Xem trước)
         // -------------------------------------------------------------
         function toggleMode(mode) {
             const bookSpread = document.getElementById('book-spread-container');
             const preview3d = document.getElementById('preview-3d');
             const btnDesign = document.getElementById('btn-mode-design');
+            const btnGlobal = document.getElementById('btn-mode-global');
             const btnPreview = document.getElementById('btn-mode-preview');
+
+            const header = document.getElementById('simulated-header');
+            const footer = document.getElementById('simulated-footer');
+            const sidebarDesign = document.getElementById('sidebar-design-section');
+            const sidebarGlobal = document.getElementById('sidebar-global-section');
+
+            // Reset chế độ chọn phần tử tổng thể nếu đang chạy
+            if (isGlobalInspectActive) toggleGlobalInspect();
+            hideGlobalOverlays();
+            document.getElementById('global-element-properties').style.display = 'none';
 
             if (mode === 'design') {
                 btnDesign.classList.add('active');
+                btnGlobal.classList.remove('active');
                 btnPreview.classList.remove('active');
+
                 preview3d.style.display = 'none';
                 bookSpread.style.display = 'flex';
+
+                header.style.display = 'none';
+                footer.style.display = 'none';
+                sidebarDesign.style.display = 'block';
+                sidebarGlobal.style.display = 'none';
+                document.querySelector('.toolbox').style.display = 'block';
                 
                 if (pageFlipInstance) {
                     try { pageFlipInstance.destroy(); } catch(e) {}
                     pageFlipInstance = null;
                 }
                 resizeSimulator();
+            } else if (mode === 'global') {
+                btnDesign.classList.remove('active');
+                btnGlobal.classList.add('active');
+                btnPreview.classList.remove('active');
+
+                preview3d.style.display = 'none';
+                bookSpread.style.display = 'flex';
+
+                header.style.display = 'flex';
+                footer.style.display = 'flex';
+                sidebarDesign.style.display = 'none';
+                sidebarGlobal.style.display = 'block';
+                document.querySelector('.toolbox').style.display = 'none'; // Ẩn toolbox 2D
+
+                if (pageFlipInstance) {
+                    try { pageFlipInstance.destroy(); } catch(e) {}
+                    pageFlipInstance = null;
+                }
+                resizeSimulator();
+                loadGlobalLayoutData().then(() => {
+                    renderGlobalDOMTree();
+                });
             } else {
                 btnDesign.classList.remove('active');
+                btnGlobal.classList.remove('active');
                 btnPreview.classList.add('active');
+
                 bookSpread.style.display = 'none';
                 preview3d.style.display = 'flex';
+
+                header.style.display = 'flex';
+                footer.style.display = 'flex';
+                sidebarDesign.style.display = 'none';
+                sidebarGlobal.style.display = 'none';
+                document.querySelector('.toolbox').style.display = 'none';
                 
                 buildFlipbookHTML().then(() => {
                     initFlipbook3D();
@@ -2103,7 +2397,6 @@
                             });
                             div.appendChild(tbl);
                         } else if (el.type === 'button') {
-                            // Vẽ nút bấm hành động ở xem trước 3D (v3.5)
                             const btn = document.createElement('button');
                             let btnStyle = `width: 100%; height: 100%; border: none; font-family: 'Montserrat', sans-serif; font-size: ${el.fontSize}px; color: ${el.color}; background-color: ${el.bgColor || '#d4af37'}; border-radius: ${el.borderRadius || 4}px; cursor: pointer; pointer-events: auto !important; box-shadow: 0 4px 10px rgba(0,0,0,0.15);`;
                             if (el.bold) btnStyle += ' font-weight: bold;';
@@ -2117,7 +2410,6 @@
                             });
                             div.appendChild(btn);
                         } else if (el.type === 'html') {
-                            // Vẽ khối HTML ở xem trước 3D (v3.5)
                             const htmlDiv = document.createElement('div');
                             htmlDiv.setAttribute('style', 'width: 100%; height: 100%; overflow: auto; pointer-events: auto !important;');
                             htmlDiv.innerHTML = el.htmlContent || '<div>Mã HTML trống</div>';
@@ -2157,7 +2449,6 @@
 
             pageFlipInstance.loadFromHTML(previewBook.querySelectorAll('.page'));
 
-            // ĐỒNG BỘ HOÁ LẬT TRANG (Flip event sync): Khi lật sách trong 3D, đồng bộ trang đang chọn bên sidebar tự động!
             pageFlipInstance.on('flip', (e) => {
                 const pageIndex = e.data;
                 const bookPageIdx = Math.floor(pageIndex / 2);
@@ -2178,7 +2469,6 @@
                 }
             });
 
-            // Nhảy tới trang đang chọn ban đầu
             pageFlipInstance.flip(selectedPageIndex * 2 + 1);
 
             document.getElementById('preview-prev-btn').onclick = () => {
@@ -2189,7 +2479,7 @@
             };
         }
 
-        // Thực thi hành động của Nút Bấm Hành Động (v3.5)
+        // Thực thi hành động của Nút Bấm Hành Động
         function executeButtonAction(type, value) {
             if (type === 'goto_page') {
                 const idx = bookPages.findIndex(p => p.id === value);
@@ -2236,7 +2526,7 @@
             } else if (deviceType === 'mobile') {
                 document.getElementById('btn-device-mobile').classList.add('active');
                 frame.classList.add('mode-mobile');
-                preview3d.classList.add('simulated-mobile'); // Ép lật 3D dịch chuyển chuẩn di động
+                preview3d.classList.add('simulated-mobile'); 
             }
 
             resizeSimulator();
@@ -2246,18 +2536,24 @@
             const screen = document.getElementById('simulator-screen');
             if (!screen) return;
 
+            // Kích thước của simulated-screen trừ đi chiều cao header và footer nếu chúng đang hiển thị
+            const isGlobalOrPreview = document.getElementById('btn-mode-global').classList.contains('active') || document.getElementById('btn-mode-preview').classList.contains('active');
+            
             const screenW = screen.clientWidth;
-            const screenH = screen.clientHeight;
+            let screenH = screen.clientHeight;
+            if (isGlobalOrPreview) {
+                screenH -= 105; // trừ đi 45px header + 60px footer
+            }
 
             let singlePageW, singlePageH;
 
             // Tính toán kích thước thật theo tỉ lệ màn hình thiết bị giả lập
             if (activeDevice === 'desktop') {
-                singlePageH = Math.floor(screenH * 0.85);
-                if (singlePageH > 560) singlePageH = 560;
+                singlePageH = Math.floor(screenH * 0.82);
+                if (singlePageH > 520) singlePageH = 520;
                 singlePageW = Math.floor(singlePageH * 0.73);
             } else if (activeDevice === 'tablet') {
-                singlePageH = Math.floor(screenH * 0.85); 
+                singlePageH = Math.floor(screenH * 0.82); 
                 singlePageW = Math.floor(singlePageH * 0.73); 
             } else if (activeDevice === 'mobile') {
                 singlePageW = screenW - 25; 
@@ -2307,10 +2603,365 @@
         });
 
         // -------------------------------------------------------------
+        // CHẾ ĐỘ CHỌN PHẦN TỬ & PHÂN LAYER TỔNG THỂ (v3.6)
+        // -------------------------------------------------------------
+        function toggleGlobalInspect() {
+            isGlobalInspectActive = !isGlobalInspectActive;
+            const btn = document.getElementById('btn-global-inspect');
+            if (isGlobalInspectActive) {
+                btn.classList.add('active');
+                btn.style.background = 'var(--accent)';
+                btn.style.color = 'var(--bg-dark)';
+                btn.style.boxShadow = '0 0 10px var(--gold-glow)';
+                
+                enableGlobalHoverListeners();
+            } else {
+                btn.classList.remove('active');
+                btn.style.background = '';
+                btn.style.color = '';
+                btn.style.boxShadow = '';
+                
+                disableGlobalHoverListeners();
+                hideGlobalOverlays();
+            }
+        }
+
+        function enableGlobalHoverListeners() {
+            const screen = document.getElementById('simulator-screen');
+            screen.addEventListener('mouseover', onGlobalMouseOver);
+            screen.addEventListener('click', onGlobalClick);
+        }
+
+        function disableGlobalHoverListeners() {
+            const screen = document.getElementById('simulator-screen');
+            screen.removeEventListener('mouseover', onGlobalMouseOver);
+            screen.removeEventListener('click', onGlobalClick);
+        }
+
+        function onGlobalMouseOver(e) {
+            if (!isGlobalInspectActive) return;
+            const target = e.target.closest('#simulated-header, .contact-bar .contact-btn, #simulated-footer, #book-spread-container, #canvas-2d .design-element');
+            if (!target) return;
+            
+            showHoverOutline(target);
+        }
+
+        function showHoverOutline(target) {
+            const outline = document.getElementById('global-hover-outline');
+            const tooltip = document.getElementById('global-hover-tooltip');
+            
+            const targetRect = target.getBoundingClientRect();
+            const screenRect = document.getElementById('simulator-screen').getBoundingClientRect();
+            
+            outline.style.left = `${targetRect.left - screenRect.left}px`;
+            outline.style.top = `${targetRect.top - screenRect.top}px`;
+            outline.style.width = `${targetRect.width}px`;
+            outline.style.height = `${targetRect.height}px`;
+            outline.style.display = 'block';
+            
+            let idLabel = target.id ? '#' + target.id : '.' + target.className.split(' ')[0];
+            tooltip.innerText = `${target.tagName.toLowerCase()}${idLabel} | ${Math.round(targetRect.width)}x${Math.round(targetRect.height)}`;
+        }
+
+        function onGlobalClick(e) {
+            if (!isGlobalInspectActive) return;
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const target = e.target.closest('#simulated-header, .contact-bar .contact-btn, #simulated-footer, #book-spread-container, #canvas-2d .design-element');
+            if (!target) return;
+            
+            selectDOMElement(target);
+        }
+
+        function hideGlobalOverlays() {
+            document.getElementById('global-hover-outline').style.display = 'none';
+            document.getElementById('global-selected-outline').style.display = 'none';
+        }
+
+        function selectDOMElement(target) {
+            selectedDOMElement = target;
+            
+            // Vẽ selection outline
+            const outline = document.getElementById('global-selected-outline');
+            const targetRect = target.getBoundingClientRect();
+            const screenRect = document.getElementById('simulator-screen').getBoundingClientRect();
+            
+            outline.style.left = `${targetRect.left - screenRect.left}px`;
+            outline.style.top = `${targetRect.top - screenRect.top}px`;
+            outline.style.width = `${targetRect.width}px`;
+            outline.style.height = `${targetRect.height}px`;
+            outline.style.display = 'block';
+
+            // Lưu lại tỷ lệ và kích thước ban đầu để co giãn chuẩn (giữ nguyên tỷ lệ gốc)
+            if (!target.getAttribute('data-initial-w')) {
+                target.setAttribute('data-initial-w', targetRect.width);
+                target.setAttribute('data-initial-h', targetRect.height);
+            }
+
+            // Hiển thị properties panel cho Global Element
+            document.getElementById('global-element-properties').style.display = 'block';
+            
+            // Đổ dữ liệu mã nguồn ra các ô code
+            document.getElementById('global-code-html').value = target.innerHTML;
+            document.getElementById('global-code-css').value = target.style.cssText;
+            document.getElementById('global-code-js').value = target.getAttribute('onclick') || '';
+
+            // Nếu chọn nút bấm liên hệ, hiện thêm cài đặt icon
+            if (target.classList.contains('contact-btn')) {
+                document.getElementById('global-button-extra').style.display = 'block';
+                const icon = target.querySelector('.icon-circle i');
+                if (icon) {
+                    document.getElementById('global-btn-icon').value = Array.from(icon.classList).find(c => c.startsWith('fa-')) || '';
+                } else {
+                    document.getElementById('global-btn-icon').value = '';
+                }
+            } else {
+                document.getElementById('global-button-extra').style.display = 'none';
+            }
+
+            renderGlobalDOMTree();
+        }
+
+        // Tạo bộ chọn CSS duy nhất cho phần tử
+        function getUniqueSelector(el) {
+            if (el.id) {
+                // Ánh xạ ngược lại ID thật bên ngoài index.html
+                let id = el.id;
+                if (id.startsWith('sim-')) id = id.substring(4);
+                if (id === 'simulated-header') return '#frame-2';
+                if (id === 'simulated-footer') return '#frame-3';
+                return '#' + id;
+            }
+            let path = [];
+            while (el && el.nodeType === Node.ELEMENT_NODE) {
+                let selector = el.nodeName.toLowerCase();
+                if (el.id) {
+                    let id = el.id;
+                    if (id.startsWith('sim-')) id = id.substring(4);
+                    if (id === 'simulated-header') selector += '#frame-2';
+                    else if (id === 'simulated-footer') selector += '#frame-3';
+                    else selector += '#' + id;
+                    path.unshift(selector);
+                    break;
+                } else {
+                    let sib = el, nth = 1;
+                    while (sib = sib.previousElementSibling) {
+                        if (sib.nodeName.toLowerCase() === selector) nth++;
+                    }
+                    if (nth > 1) {
+                        selector += `:nth-of-type(${nth})`;
+                    }
+                }
+                path.unshift(selector);
+                el = el.parentNode;
+            }
+            return path.join(' > ');
+        }
+
+        // Đọc dữ liệu layout tổng thể
+        async function loadGlobalLayoutData() {
+            try {
+                if (window.DataManager) {
+                    globalLayoutData = await window.DataManager.getGlobalLayout();
+                    if (globalLayoutData && globalLayoutData.selectors) {
+                        applyGlobalLayoutToSimulator(globalLayoutData);
+                    }
+                }
+            } catch(e) {
+                console.error("Lỗi khi load global layout:", e);
+            }
+        }
+
+        function applyGlobalLayoutToSimulator(layout) {
+            if (!layout || !layout.selectors) return;
+            
+            for (const selector in layout.selectors) {
+                const config = layout.selectors[selector];
+                
+                // Chuyển selector của client sang selector của simulator
+                let simSelector = selector;
+                if (selector === '#btn-hotline') simSelector = '#sim-btn-hotline';
+                else if (selector === '#btn-zalo') simSelector = '#sim-btn-zalo';
+                else if (selector === '#btn-wechat') simSelector = '#sim-btn-wechat';
+                else if (selector === '#btn-maps') simSelector = '#sim-btn-maps';
+                else if (selector === '#frame-2') simSelector = '#simulated-header';
+                else if (selector === '#frame-3') simSelector = '#simulated-footer';
+
+                let el = document.querySelector(simSelector);
+                
+                // Nếu chưa có và có parent, tự động tạo động
+                if (!el && config.parent) {
+                    let parentSelector = config.parent;
+                    if (parentSelector === '#frame-3') parentSelector = '#simulated-footer .contact-bar';
+                    const parentEl = document.querySelector(parentSelector);
+                    if (parentEl) {
+                        el = document.createElement(config.tagName || 'div');
+                        if (simSelector.startsWith('#')) {
+                            el.id = simSelector.substring(1);
+                        } else {
+                            el.className = simSelector.substring(1);
+                        }
+                        parentEl.appendChild(el);
+                    }
+                }
+
+                if (el) {
+                    if (config.html !== undefined) el.innerHTML = config.html;
+                    if (config.css !== undefined) el.style.cssText = config.css;
+                    if (config.js !== undefined) {
+                        el.setAttribute('onclick', config.js);
+                    }
+                    if (config.iconClass) {
+                        const iconCircle = el.querySelector('.icon-circle');
+                        if (iconCircle) {
+                            iconCircle.innerHTML = `<i class="${config.iconClass}"></i>`;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Lưu dữ liệu layout tổng thể
+        function saveGlobalLayoutData() {
+            let layout = { selectors: {} };
+            
+            // 1. Lưu Header
+            const header = document.getElementById('simulated-header');
+            if (header) {
+                layout.selectors['#frame-2'] = {
+                    html: header.innerHTML,
+                    css: header.style.cssText,
+                    js: header.getAttribute('onclick') || '',
+                    tagName: 'header'
+                };
+            }
+            
+            // 2. Lưu các nút bấm trong Footer
+            const footerBtns = document.querySelectorAll('#simulated-footer .contact-btn');
+            footerBtns.forEach(btn => {
+                let clientSelector = '#' + btn.id.replace('sim-', '');
+                const icon = btn.querySelector('.icon-circle i');
+                
+                layout.selectors[clientSelector] = {
+                    html: btn.innerHTML,
+                    css: btn.style.cssText,
+                    js: btn.getAttribute('onclick') || '',
+                    tagName: btn.tagName.toLowerCase(),
+                    parent: '#frame-3',
+                    iconClass: icon ? Array.from(icon.classList).find(c => c.startsWith('fa-')) : null
+                };
+            });
+
+            globalLayoutData = layout;
+            localStorage.setItem('muxintang_global_layout', JSON.stringify(layout));
+            
+            if (window.DataManager) {
+                window.DataManager.saveGlobalLayout(layout).catch(e => console.error("Lỗi lưu global layout:", e));
+            }
+        }
+
+        // Thêm nút hành động tùy biến toàn cục
+        function addGlobalButton() {
+            const footer = document.querySelector('#simulated-footer .contact-bar');
+            if (!footer) return;
+
+            const id = `sim-btn-custom_${Date.now()}`;
+            const btn = document.createElement('a');
+            btn.href = '#';
+            btn.className = 'contact-btn maps-btn'; 
+            btn.id = id;
+            btn.setAttribute('style', `display: flex; align-items: center; gap: 8px; color: #fff; background: linear-gradient(135deg, #d4af37 0%, #b5922f 100%); padding: 8px 16px; border-radius: 30px; text-decoration: none; font-size: 0.72rem; box-shadow: 0 0 10px rgba(212,175,55,0.4);`);
+            
+            btn.innerHTML = `
+                <div class="icon-circle" style="width:24px; height:24px; border-radius:50%; background:#fff; color:#d4af37; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-link"></i></div>
+                <div class="btn-info" style="display: flex; flex-direction: column;">
+                    <span class="btn-label" style="font-size: 9px; font-weight: bold;">MỚI</span>
+                    <span class="btn-val" style="font-size: 10px;">Nút Bấm</span>
+                </div>
+            `;
+
+            footer.appendChild(btn);
+            saveGlobalLayoutData();
+            renderGlobalDOMTree();
+            selectDOMElement(btn);
+        }
+
+        // Render cây thư mục phần tử DOM
+        function renderGlobalDOMTree() {
+            const treeEl = document.getElementById('global-dom-tree');
+            treeEl.innerHTML = '';
+
+            const editableElements = [];
+            
+            // Add Header
+            const header = document.getElementById('simulated-header');
+            if (header) editableElements.push(header);
+            
+            // Add Footer buttons
+            const footerBtns = document.querySelectorAll('#simulated-footer .contact-btn');
+            footerBtns.forEach(btn => editableElements.push(btn));
+
+            // Render ra danh sách chọn
+            editableElements.forEach(el => {
+                const li = document.createElement('li');
+                const uniqueId = el.id || getUniqueSelector(el);
+                li.className = `page-item ${el === selectedDOMElement ? 'active' : ''}`;
+                li.style.cursor = 'pointer';
+                
+                let label = el.id || el.tagName.toLowerCase();
+                if (el.id === 'simulated-header') label = 'Thanh Tiêu Đề (Header)';
+                else if (el.id === 'sim-btn-hotline') label = 'Nút Hotline';
+                else if (el.id === 'sim-btn-zalo') label = 'Nút Zalo';
+                else if (el.id === 'sim-btn-wechat') label = 'Nút WeChat';
+                else if (el.id === 'sim-btn-maps') label = 'Nút Bản Đồ';
+                else if (el.id.startsWith('sim-btn-custom_')) label = 'Nút Tùy Biến Mới';
+
+                li.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-layer-group" style="color: var(--accent);"></i>
+                            <span class="page-name" style="font-size: 0.72rem;">${label}</span>
+                        </div>
+                        <div style="display: flex; gap: 4px;">
+                            <button class="tree-move-btn" onclick="event.stopPropagation(); moveDOMElementOrder('${uniqueId}', 'up')" style="background:none; border:none; color:var(--text-muted); cursor:pointer;" title="Lên trên (Tăng z-index)"><i class="fa-solid fa-chevron-up"></i></button>
+                            <button class="tree-move-btn" onclick="event.stopPropagation(); moveDOMElementOrder('${uniqueId}', 'down')" style="background:none; border:none; color:var(--text-muted); cursor:pointer;" title="Xuống dưới (Giảm z-index)"><i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                    </div>
+                `;
+
+                li.addEventListener('click', () => {
+                    selectDOMElement(el);
+                });
+
+                treeEl.appendChild(li);
+            });
+        }
+
+        // Tăng/giảm Z-Index của phần tử (Trên che dưới)
+        window.moveDOMElementOrder = function(idOrSelector, direction) {
+            let el = document.getElementById(idOrSelector) || document.querySelector(idOrSelector);
+            if (!el) return;
+            
+            let curZ = parseInt(el.style.zIndex) || 1;
+            if (direction === 'up') {
+                curZ += 5;
+            } else {
+                curZ = Math.max(0, curZ - 5);
+            }
+            el.style.zIndex = curZ;
+            
+            saveGlobalLayoutData();
+            renderGlobalDOMTree();
+            selectDOMElement(el);
+        };
+
+        // -------------------------------------------------------------
         // Lắng nghe sự kiện (Event Listeners)
         // -------------------------------------------------------------
         function registerEventListeners() {
             document.getElementById('btn-mode-design').addEventListener('click', () => toggleMode('design'));
+            document.getElementById('btn-mode-global').addEventListener('click', () => toggleMode('global'));
             document.getElementById('btn-mode-preview').addEventListener('click', () => toggleMode('preview'));
 
             document.getElementById('btn-device-desktop').addEventListener('click', () => changeDeviceMode('desktop'));
@@ -2382,7 +3033,7 @@
                 }
             });
 
-            // Button properties inputs (v3.5)
+            // Button properties inputs
             document.getElementById('prop-button-content').addEventListener('input', (e) => {
                 updateSelectedElementProp('content', e.target.value);
             });
@@ -2425,7 +3076,7 @@
                 }
             });
 
-            // HTML Block input listener (v3.5)
+            // HTML Block input listener
             document.getElementById('prop-html-content').addEventListener('input', (e) => {
                 updateSelectedElementProp('htmlContent', e.target.value);
             });
@@ -2437,6 +3088,61 @@
                 selectedElementId = null;
                 document.querySelectorAll('.design-element').forEach(el => el.classList.remove('selected'));
                 hideElementProperties();
+            });
+
+            // -------------------------------------------------------------
+            // LẮNG NGHE SỰ KIỆN CHẾ ĐỘ TỔNG THỂ (v3.6)
+            // -------------------------------------------------------------
+            document.getElementById('btn-global-inspect').addEventListener('click', toggleGlobalInspect);
+            document.getElementById('btn-global-add-button').addEventListener('click', addGlobalButton);
+
+            document.getElementById('btn-global-save-code').addEventListener('click', () => {
+                if (selectedDOMElement) {
+                    selectedDOMElement.innerHTML = document.getElementById('global-code-html').value;
+                    selectedDOMElement.style.cssText = document.getElementById('global-code-css').value;
+                    
+                    const jsCode = document.getElementById('global-code-js').value;
+                    if (jsCode) {
+                        selectedDOMElement.setAttribute('onclick', jsCode);
+                        selectedDOMElement.onclick = function() {
+                            try { eval(jsCode); } catch(err) { console.error("Lỗi:", err); }
+                        };
+                    } else {
+                        selectedDOMElement.removeAttribute('onclick');
+                        selectedDOMElement.onclick = null;
+                    }
+                    
+                    // Đồng bộ Icon nếu là contact-btn
+                    if (selectedDOMElement.classList.contains('contact-btn')) {
+                        const iconSelect = document.getElementById('global-btn-icon').value;
+                        const customIcon = document.getElementById('global-btn-custom-icon').value;
+                        const iconCircle = selectedDOMElement.querySelector('.icon-circle');
+                        if (iconCircle) {
+                            if (customIcon) {
+                                iconCircle.innerHTML = `<img src="${customIcon}" style="width:100%; height:100%; object-fit:contain;">`;
+                            } else if (iconSelect) {
+                                iconCircle.innerHTML = `<i class="${iconSelect}"></i>`;
+                            }
+                        }
+                    }
+
+                    saveGlobalLayoutData();
+                    alert("Cập nhật mã nguồn phần tử thành công!");
+                    selectDOMElement(selectedDOMElement); // Vẽ lại outline sau khi cập nhật
+                }
+            });
+
+            document.getElementById('btn-global-delete-element').addEventListener('click', () => {
+                if (selectedDOMElement) {
+                    if (selectedDOMElement.id && (selectedDOMElement.id.startsWith('sim-btn-custom_') || confirm("Bạn có chắc chắn muốn xóa phần tử mặc định này?"))) {
+                        selectedDOMElement.remove();
+                        selectedDOMElement = null;
+                        document.getElementById('global-selected-outline').style.display = 'none';
+                        document.getElementById('global-element-properties').style.display = 'none';
+                        saveGlobalLayoutData();
+                        renderGlobalDOMTree();
+                    }
+                }
             });
         }
     </script>

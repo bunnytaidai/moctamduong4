@@ -472,6 +472,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         window.bookPages = pages; // Lưu lại biến toàn cục để các nút hành động đọc thứ tự trang
         await renderPagesDynamic(pages);
+        
+        // Tải và áp dụng cấu hình giao diện tổng thể toàn trang (v3.5)
+        try {
+            const layout = await DataManager.getGlobalLayout();
+            if (layout && layout.selectors) {
+                applyGlobalLayout(layout);
+            }
+        } catch (e) {
+            console.error("Lỗi khi tải giao diện tổng thể:", e);
+        }
     });
 
     // Hàm thực thi hành động của nút bấm (v3.5)
@@ -500,6 +510,60 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
+
+    // Hàm áp dụng cấu hình giao diện tổng thể toàn bộ trang (v3.5)
+    function applyGlobalLayout(layout) {
+        if (!layout || !layout.selectors) return;
+        
+        for (const selector in layout.selectors) {
+            const config = layout.selectors[selector];
+            let el = document.querySelector(selector);
+            
+            // Nếu không tìm thấy và có khai báo parent thì tự động tạo động phần tử mới
+            if (!el && config.parent) {
+                const parentEl = document.querySelector(config.parent);
+                if (parentEl) {
+                    el = document.createElement(config.tagName || 'div');
+                    if (selector.startsWith('#')) {
+                        el.id = selector.substring(1);
+                    } else if (selector.startsWith('.')) {
+                        el.className = selector.substring(1);
+                    }
+                    parentEl.appendChild(el);
+                }
+            }
+            
+            if (el) {
+                // Áp dụng mã HTML
+                if (config.html !== undefined) {
+                    el.innerHTML = config.html;
+                }
+                // Áp dụng mã CSS
+                if (config.css !== undefined) {
+                    el.style.cssText = config.css;
+                }
+                // Áp dụng sự kiện click JS
+                if (config.js !== undefined && config.js !== '') {
+                    el.setAttribute('onclick', config.js);
+                    el.onclick = function(e) {
+                        try {
+                            eval(config.js);
+                        } catch (err) {
+                            console.error("Lỗi chạy JS tùy biến:", err);
+                        }
+                    };
+                }
+                // Hỗ trợ hiển thị icon
+                if (config.iconClass) {
+                    const iconCircle = el.querySelector('.icon-circle');
+                    if (iconCircle) {
+                        iconCircle.innerHTML = `<i class="${config.iconClass}"></i>`;
+                    }
+                }
+            }
+        }
+    }
+
 
 
     // ==========================================================================
