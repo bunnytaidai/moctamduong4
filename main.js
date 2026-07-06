@@ -410,61 +410,46 @@ document.addEventListener('DOMContentLoaded', () => {
         if (uiSync) {
             try {
                 const syncedPages = JSON.parse(uiSync);
-                if (Array.isArray(syncedPages) && syncedPages.length > 0) {
-                    const clientCustomPages = syncedPages.map((sp, idx) => {
-                        const texts = [];
-                        let services = [];
-                        let services_x = 10, services_y = 25, services_w = 80;
+                if (Array.isArray(syncedPages)) {
+                    pages.forEach(page => {
+                        const sp = syncedPages.find(p => p.id === page.id);
+                        if (sp) {
+                            page.type = 'custom';
+                            page.bg_image = sp.bg_image || page.image || 'images/2.jpg';
+                            page.elements = sp.elements || [];
+                            
+                            // Đồng bộ texts và services để tương thích ngược hoàn hảo
+                            const texts = [];
+                            let services = [];
+                            let services_x = 10, services_y = 25, services_w = 80;
 
-                        sp.elements.forEach(el => {
-                            if (el.type === 'text') {
-                                texts.push({
-                                    x: el.x,
-                                    y: el.y,
-                                    size: el.fontSize,
-                                    color: el.color,
-                                    bold: el.bold,
-                                    italic: el.italic,
-                                    underline: el.underline,
-                                    content: el.content
-                                });
-                            } else if (el.type === 'services') {
-                                services = el.services || [];
-                                services_x = el.x;
-                                services_y = el.y;
-                                services_w = el.w;
-                            }
-                        });
+                            page.elements.forEach(el => {
+                                if (el.type === 'text') {
+                                    texts.push({
+                                        x: el.x,
+                                        y: el.y,
+                                        size: el.fontSize,
+                                        color: el.color,
+                                        bold: el.bold,
+                                        italic: el.italic,
+                                        underline: el.underline,
+                                        content: el.content
+                                    });
+                                } else if (el.type === 'services') {
+                                    services = el.services || [];
+                                    services_x = el.x;
+                                    services_y = el.y;
+                                    services_w = el.w;
+                                }
+                            });
 
-                        return {
-                            id: sp.id || `custom_${idx}`,
-                            name: sp.name || `Trang Tùy Biến ${idx + 1}`,
-                            type: 'custom',
-                            order: idx + 2, // đặt sau trang bìa trước (order 1)
-                            bg_image: sp.bg_image || 'images/2.jpg',
-                            elements: sp.elements || [], // Lưu trực tiếp mảng elements mới nhất (v3.5)
-                            texts: texts,
-                            services: services,
-                            services_x: services_x,
-                            services_y: services_y,
-                            services_w: services_w
-                        };
+                            page.texts = texts;
+                            page.services = services;
+                            page.services_x = services_x;
+                            page.services_y = services_y;
+                            page.services_w = services_w;
+                        }
                     });
-
-                    // Thay thế các trang giữa bằng các trang kéo thả tùy biến
-                    if (pages.length >= 2) {
-                        const coverStart = pages[0];
-                        const coverEnd = pages[pages.length - 1];
-                        
-                        const mergedPages = [coverStart];
-                        clientCustomPages.forEach((cp, cIdx) => {
-                            cp.order = cIdx + 2;
-                            mergedPages.push(cp);
-                        });
-                        coverEnd.order = mergedPages.length + 1;
-                        mergedPages.push(coverEnd);
-                        pages = mergedPages;
-                    }
                 }
             } catch (e) {
                 console.error("Lỗi đồng bộ dữ liệu UI Designer:", e);
