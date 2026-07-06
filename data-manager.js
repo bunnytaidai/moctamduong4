@@ -147,6 +147,17 @@ async function getLocalImage(id) {
     });
 }
 
+async function deleteLocalImage(id) {
+    const localDb = await getLocalDB();
+    return new Promise((resolve, reject) => {
+        const transaction = localDb.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.delete(id);
+        request.onsuccess = () => resolve();
+        request.onerror = (e) => reject(e.target.error);
+    });
+}
+
 // -------------------------------------------------------------
 // 3. DỮ LIỆU MẪU MẶC ĐỊNH BAN ĐẦU
 // -------------------------------------------------------------
@@ -478,10 +489,21 @@ const DataManager = {
     },
 
     async deletePage(pageId) {
+        // Lấy thông tin trang trước để dọn dẹp file rác
+        let pages = await this.getPages();
+        const pageToDelete = pages.find(p => p.id === pageId);
+        if (pageToDelete) {
+            if (pageToDelete.image) {
+                await this.deleteImage(pageToDelete.image);
+            }
+            if (pageToDelete.bg_image) {
+                await this.deleteImage(pageToDelete.bg_image);
+            }
+        }
+
         if (activeStorageMode === 'firebase' && db) {
             await db.ref(`menu_pages/${pageId}`).remove();
         } else {
-            let pages = await this.getPages();
             pages = pages.filter(p => p.id !== pageId);
             pages.forEach((p, idx) => { p.order = idx + 1; });
             
@@ -602,6 +624,86 @@ const DataManager = {
             reader.onerror = reject;
             reader.readAsDataURL(fileOrBlob);
         });
+    },
+
+    // Hàm xóa ảnh để giải phóng tài nguyên rác (v3.2)
+    async deleteImage(imageUrl) {
+        if (!imageUrl) return;
+
+        // Bỏ qua không xóa các ảnh mặc định của hệ thống
+        const systemDefaults = ['images/dau.jpg', 'images/2.jpg', 'images/3.jpg', 'images/4.jpg', 'images/5.jpg', 'images/6.jpg', 'images/cuoi.jpg', 'images/spa_background.png'];
+        if (systemDefaults.includes(imageUrl)) {
+            console.log("Giữ lại ảnh mặc định của hệ thống:", imageUrl);
+            return;
+        }
+
+        // 1. Nếu là IndexedDB local
+        if (imageUrl.startsWith('localdb://')) {
+            const imageKey = imageUrl.replace('localdb://', '');
+            try {
+                await deleteLocalImage(imageKey);
+                console.log(`Đã xóa ảnh IndexedDB: ${imageKey}`);
+            } catch (e) {
+                console.error("Lỗi khi xóa ảnh IndexedDB:", e);
+            }
+            return;
+        }
+
+        // 2. Nếu là Firebase Storage
+        if (activeStorageMode === 'firebase' && storage) {
+            if (imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
+                try {
+                    await storage.refFromURL(imageUrl).delete();
+                    console.log("Đã xóa ảnh trên Firebase Storage:", imageUrl);
+                } catch (e) {
+                    console.error("Lỗi khi xóa ảnh Firebase:", e);
+                }
+            }
+            return;
+        }
+
+        // 3. Nếu là GitHub Cloud
+        if (activeStorageMode === 'github' && githubConfig) {
+            const { username, repo, token, branch = 'main' } = githubConfig;
+            // Trích xuất tên tệp từ URL raw của GitHub
+            const regex = new RegExp(`raw\\.githubusercontent\\.com/${username}/${repo}/${branch}/images/(.+)`, 'i');
+            const match = imageUrl.match(regex);
+            if (match && match[1]) {
+                const filename = match[1];
+                const url = `https://api.github.com/repos/${username}/${repo}/contents/images/${filename}`;
+                try {
+                    // Bước A: Lấy SHA của tệp
+                    const checkRes = await fetch(`${url}?ref=${branch}`, {
+                        headers: { 'Authorization': `token ${token}` }
+                    });
+                    if (checkRes.status === 200) {
+                        const fileInfo = await checkRes.json();
+                        const sha = fileInfo.sha;
+
+                        // Bước B: Gọi API DELETE
+                        const deleteRes = await fetch(url, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `token ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                message: `Xóa hình ảnh rác ${filename} via Admin Dashboard [v3.2]`,
+                                sha: sha,
+                                branch: branch
+                            })
+                        });
+                        if (deleteRes.ok) {
+                            console.log(`Đã xóa ảnh rác trên GitHub: ${filename}`);
+                        } else {
+                            console.warn("Lỗi API GitHub khi xóa file:", await deleteRes.json());
+                        }
+                    }
+                } catch (e) {
+                    console.error("Lỗi kết nối API GitHub khi xóa file rác:", e);
+                }
+            }
+        }
     },
 
     async getSiteTitle() {

@@ -145,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let siteTitleDraft = '';      // Tiêu đề trang web nháp đang sửa
     let globalBgOriginal = '';    // Ảnh nền web gốc từ DB
     let globalBgDraft = '';       // Ảnh nền web nháp đang sửa
+    let pendingImageDeletions = []; // Danh sách URL ảnh cũ chờ xóa khi Lưu thành công (v3.2)
     let previewMode = 'edit';     // Chế độ xem trước: 'edit' (sửa) hoặc 'flip' (lật trang 3D)
     let flipPreviewBookInstance = null; // Đối tượng St.PageFlip xem trước
     
@@ -199,16 +200,17 @@ document.addEventListener('DOMContentLoaded', () => {
         addSystemLog(`Đồng bộ dữ liệu thành công! Tìm thấy ${pages.length} trang thực đơn.`, 'success');
     });
 
-    function updateGlobalBgUI(bgUrl) {
-        if (bgUrl) {
-            globalBgThumbnail.style.backgroundImage = `url('${bgUrl}')`;
+    async function updateGlobalBgUI(bgUrl) {
+        const actualUrl = bgUrl ? await DataManager.getImageUrl(bgUrl) : 'images/spa_background.png';
+        if (actualUrl) {
+            globalBgThumbnail.style.backgroundImage = `url('${actualUrl}')`;
             globalBgThumbnail.style.display = 'block';
-            btnDeleteGlobalBg.style.display = 'block';
-        } else {
-            globalBgThumbnail.style.backgroundImage = 'none';
-            globalBgThumbnail.style.display = 'none';
-            btnDeleteGlobalBg.style.display = 'none';
+            btnDeleteGlobalBg.style.display = bgUrl ? 'block' : 'none';
+            return;
         }
+        globalBgThumbnail.style.backgroundImage = 'none';
+        globalBgThumbnail.style.display = 'none';
+        btnDeleteGlobalBg.style.display = 'none';
     }
 
     // Kiểm tra xem trang hiện tại có thay đổi gì so với dữ liệu gốc không
@@ -1243,6 +1245,14 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 // Upload ảnh thông qua DataManager
                 const url = await DataManager.uploadImage(activePageId, blob, isBg);
+                
+                // Đưa ảnh cũ bị thay thế vào danh sách chờ xóa để giải phóng file rác khi bấm Lưu (v3.2)
+                const oldUrl = isBg ? activePageData.bg_image : activePageData.image;
+                if (oldUrl && oldUrl !== url) {
+                    pendingImageDeletions.push(oldUrl);
+                    addSystemLog('Đã đưa ảnh cũ bị thay thế vào danh sách chờ dọn dẹp.', 'info');
+                }
+                
                 if (isBg) {
                     activePageData.bg_image = url;
                 } else {
@@ -1326,8 +1336,30 @@ document.addEventListener('DOMContentLoaded', () => {
             
             showToast('Đã lưu và cập nhật menu online thành công!');
             
-            // Dọn dẹp trạng thái
+            // Dọn dẹp trạng thái và cập nhật trực tiếp GUI không reload trang
+            
+            // Thực hiện xóa các tệp ảnh cũ đang chờ xóa để giải phóng file rác (v3.2)
+            if (pendingImageDeletions.length > 0) {
+                for (const urlToDelete of pendingImageDeletions) {
+                    await DataManager.deleteImage(urlToDelete);
+                }
+                addSystemLog(`Đã tự động dọn dẹp sạch sẽ ${pendingImageDeletions.length} tệp ảnh rác cũ khỏi bộ lưu trữ.`, 'success');
+                pendingImageDeletions = [];
+            }
+            
+            const freshPages = await DataManager.getPages();
+            allPages = freshPages;
+            
+            if (activePageId) {
+                const updatedPage = allPages.find(p => p.id === activePageId);
+                if (updatedPage) {
+                    activePageData = JSON.parse(JSON.stringify(updatedPage));
+                }
+            }
+            
             renderPageList();
+            renderCanvasPreview();
+            initGlobalSettingsUI();
             checkChanges();
         } catch (e) {
             console.error("Lỗi khi lưu dữ liệu:", e);
@@ -1365,6 +1397,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     : `radial-gradient(circle at 50% 50%, rgba(20, 30, 20, 0.6) 0%, var(--bg-dark) 100%), url('images/spa_background.png')`;
             }
             
+            pendingImageDeletions = []; // Reset danh sách chờ xóa mà không xóa ảnh nào (v3.2)
             checkChanges();
             showToast('Đã hủy bỏ toàn bộ các thay đổi nháp!', 'info');
             addSystemLog('Đã hủy toàn bộ các chỉnh sửa nháp.', 'info');
@@ -1531,7 +1564,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!globalBgDraft) {
                 updateGlobalBgUI(globalBgOriginal);
                 if (globalBgOriginal) {
-                    document.body.style.backgroundImage = `radial-gradient(circle at 50% 50%, rgba(20, 30, 20, 0.6) 0%, var(--bg-dark) 100%), url('${globalBgOriginal}')`;
+                    const actualUrl = await DataManager.getImageUrl(globalBgOriginal);
+                    document.body.style.backgroundImage = `radial-gradient(circle at 50% 50%, rgba(20, 30, 20, 0.6) 0%, var(--bg-dark) 100%), url('${actualUrl}')`;
                 } else {
                     document.body.style.backgroundImage = `radial-gradient(circle at 50% 50%, rgba(20, 30, 20, 0.6) 0%, var(--bg-dark) 100%), url('images/spa_background.png')`;
                 }
@@ -1604,6 +1638,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     canvas.toBlob(async (blob) => {
                         try {
                             const url = await DataManager.uploadImage('global_bg_image_draft', blob, true);
+                            
+                            // Đưa ảnh nền cũ vào danh sách chờ xóa để dọn dẹp file rác khi bấm Lưu (v3.2)
+                            if (globalBgOriginal && globalBgOriginal !== url) {
+                                pendingImageDeletions.push(globalBgOriginal);
+                                addSystemLog('Đã đưa ảnh nền website cũ vào danh sách chờ dọn dẹp.', 'info');
+                            }
+                            
                             globalBgDraft = url;
                             
                             addSystemLog('Tải ảnh nền nháp thành công! Nhấp "Lưu thay đổi" để áp dụng.', 'success');
