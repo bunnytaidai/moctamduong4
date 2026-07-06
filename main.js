@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let pageWidth = 380;
     let pageHeight = 540;
     let pageFlip = null;
+    let bookClone = null; // Bản sao lưu cấu trúc DOM của sách phục vụ khôi phục tự động (v3.4)
 
     // ==========================================================================
     // 2. TÍNH TOÁN KÍCH THƯỚC ĐÁP ỨNG (RESPONSIVE)
@@ -114,11 +115,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (creaseOverlay) {
-            if (currentSpread === 1) {
-                // Dịch gáy sách lệch sang để chỉ tạo bóng đổ cho trang phải
+            // Tự động kiểm tra xem trang bên trái của đôi trang hiện tại có phải là trang trong suốt hay không (v3.4)
+            const pages = bookEl ? bookEl.querySelectorAll('.page') : [];
+            const leftPageIdx = (currentSpread - 1) * 2;
+            const isLeftPageTransparent = pages[leftPageIdx] && pages[leftPageIdx].classList.contains('page-transparent');
+
+            if (isLeftPageTransparent) {
+                // Dịch gáy sách lệch sang để chỉ tạo bóng đổ cho trang phải vì bên trái trong suốt
                 creaseOverlay.style.background = 'linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 48%, rgba(0,0,0,0.85) 49.5%, rgba(255,255,255,0.25) 50.5%, rgba(0,0,0,0.3) 53%, rgba(0,0,0,0.1) 70%, rgba(0,0,0,0) 100%)';
             } else {
-                // Trả về gáy 3D đối xứng 2 bên mềm mại
+                // Trả về gáy 3D đối xứng 2 bên mềm mại cân đối chính giữa trục gáy
                 creaseOverlay.style.background = 'linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.04) 20%, rgba(0, 0, 0, 0.2) 40%, rgba(0, 0, 0, 0.55) 46%, rgba(0, 0, 0, 0.85) 49%, rgba(0, 0, 0, 0.95) 50%, rgba(255, 255, 255, 0.25) 51%, rgba(0, 0, 0, 0.4) 54%, rgba(0, 0, 0, 0.15) 65%, rgba(0, 0, 0, 0.02) 80%, rgba(0, 0, 0, 0) 100%)';
             }
         }
@@ -143,13 +149,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. KHỞI TẠO THƯ VIỆN ST.PAGEFLIP TỪ DỮ LIỆU ĐỘNG (REALTIME UPDATE)
     // ==========================================================================
     function initPageFlip() {
-        if (!bookEl) return;
+        const viewport = document.getElementById('book-viewport');
+        if (!viewport) return;
+
+        // Lưu lại chỉ số trang hiện tại trước khi hủy thực thể cũ để khôi phục khi resize
+        const savedIdx = pageFlip ? pageFlip.getCurrentPageIndex() : 0;
 
         if (pageFlip) {
-            pageFlip.destroy();
+            try {
+                pageFlip.destroy();
+            } catch(e) {
+                console.error("Lỗi khi hủy PageFlip cũ:", e);
+            }
+            pageFlip = null;
         }
 
-        pageFlip = new St.PageFlip(bookEl, {
+        // Tự động khôi phục và phục dựng lại thẻ DOM #book sạch từ bản sao lưu động mới nhất
+        let currentBookEl = document.getElementById('book');
+        if (bookClone) {
+            if (currentBookEl) {
+                currentBookEl.remove();
+            }
+            currentBookEl = bookClone.cloneNode(true);
+            viewport.appendChild(currentBookEl);
+        }
+
+        if (!currentBookEl) return;
+
+        pageFlip = new St.PageFlip(currentBookEl, {
             width: pageWidth,
             height: pageHeight,
             size: "fixed",
@@ -163,16 +190,19 @@ document.addEventListener('DOMContentLoaded', () => {
             
             flippingTime: 300,     // Hoạt ảnh lật trang siêu tốc (300ms) cực kỳ nhạy và nhanh
             swipeDistance: 15,     // Giảm khoảng cách vuốt tối thiểu để lật trang nhanh hơn trên mobile
-            maxShadowOpacity: 0.5, // Độ đậm của bóng bóng đổ StPageFlip vẽ
+            maxShadowOpacity: 0.85, // Tăng mạnh độ đậm bóng đổ StPageFlip vẽ để tối ưu thị giác 3D (v3.4)
             showPageCorners: true, // Nhô mép trang khi di chuột qua để gợi ý lật
             disableKeyPress: true
         });
 
-        // Nạp nội dung từ các div .page đã được render động trong DOM
-        pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+        // Nạp nội dung từ các div .page đã được render động trong DOM mới
+        pageFlip.loadFromHTML(currentBookEl.querySelectorAll('.page'));
 
-        // Cập nhật trạng thái ban đầu
-        updateSpineAndUI(0);
+        // Cập nhật trạng thái ban đầu và khôi phục trang trước khi resize
+        if (savedIdx > 0 && savedIdx < pageFlip.getPageCount()) {
+            pageFlip.flip(savedIdx);
+        }
+        updateSpineAndUI(savedIdx);
 
         // Đăng ký các sự kiện lật trang
         pageFlip.on('flip', (e) => {
@@ -304,6 +334,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // 4. Xóa các trang cũ trong DOM và chèn các trang động mới vào
         bookEl.innerHTML = '';
         bookEl.appendChild(tempContainer);
+        
+        // Lưu lại bản sao cấu trúc động mới nhất phục vụ tự phục hồi khi resize/lỗi (v3.4)
+        bookClone = bookEl.cloneNode(true);
         
         // 5. Khởi tạo lại PageFlip để vẽ cuốn sách mới
         initPageFlip();

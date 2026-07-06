@@ -149,31 +149,34 @@ html {
     pointer-events: none; /* Cho phép sự kiện click đi xuyên qua vùng trống của khung nội dung */
 }
 
-/* Viewport cuốn sách: Cắt phần thừa lề trái ở 30px */
+/* Viewport cuốn sách: Căn giữa tự động và tạo chiều sâu 3D phối cảnh */
 .book-viewport {
     position: absolute;
     top: 0;
     bottom: 0;
-    left: 0; /* Cho phép mở rộng toàn màn hình để dễ dàng căn lề phải */
+    left: 0;
     right: 0;
     overflow: hidden;
-    /* Cắt các trang/nội dung bị tràn ra ngoài màn hình */
     display: flex;
-    align-items: center;
+    justify-content: center; /* Căn giữa cuốn sách theo chiều ngang (v3.4) */
+    align-items: center;     /* Căn giữa cuốn sách theo chiều dọc */
     pointer-events: auto; /* Kích hoạt lại tương tác click/vuốt trên vùng sách */
+    perspective: 2500px; /* Tạo chiều sâu phối cảnh không gian 3D cực mạnh (v3.4) */
 }
 
-/* Container sách lật - căn spine vào mốc 20px của viewport (tương đương 50px màn hình) */
+/* Container sách lật - căn giữa tuyệt đối nhờ flexbox viewport */
 .flipbook {
-    position: absolute;
-    right: 70px; /* Dịch nhẹ sang trái 70px để nhường lề phải cho nút điều hướng */
-    left: auto;
+    position: relative !important; /* Dùng relative để flexbox viewport căn giữa chính xác */
+    left: auto !important;
+    right: auto !important;
+    margin: 0 !important;
     height: 90%;
     width: calc(2 * var(--page-width));
     overflow: visible;
-    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65); /* Tăng bóng đổ viền ngoài cho sách (v3.4) */
     border-radius: 0 12px 12px 0;
     transition: box-shadow 0.3s ease;
+    transform-style: preserve-3d; /* Giữ cấu trúc phối cảnh 3D của các trang con khi lật (v3.4) */
 }
 
 /* Từng trang đơn trong sách lật */
@@ -202,8 +205,8 @@ html {
 /* Trang bên TRÁI (Trang trắng / mặt sau): Gáy sách nằm ở phía bên PHẢI */
 .page:nth-child(odd) .page-content {
     box-shadow: 
-        inset -25px 0 35px rgba(0, 0, 0, 0.15),      /* Bóng uốn cong lún vào gáy bên phải */
-        inset -8px 0 12px rgba(0, 0, 0, 0.08),
+        inset -45px 0 48px rgba(0, 0, 0, 0.22),      /* Bóng uốn cong sâu lún vào gáy bên phải (v3.4) */
+        inset -12px 0 16px rgba(0, 0, 0, 0.12),
         inset 10px 0 15px rgba(255, 255, 255, 0.05),  /* Ánh sáng nhẹ ở lề ngoài bên trái */
         1px 0 3px rgba(0, 0, 0, 0.03);
     border-radius: 12px 0 0 12px;                    /* Bo viền lề ngoài bên trái */
@@ -213,8 +216,8 @@ html {
 /* Trang bên PHẢI (Trang chứa hình ảnh): Gáy sách nằm ở phía bên TRÁI */
 .page:nth-child(even) .page-content {
     box-shadow: 
-        inset 25px 0 35px rgba(0, 0, 0, 0.18),       /* Bóng uốn cong lún vào gáy bên trái */
-        inset 8px 0 12px rgba(0, 0, 0, 0.1),
+        inset 45px 0 48px rgba(0, 0, 0, 0.25),       /* Bóng uốn cong sâu lún vào gáy bên trái (v3.4) */
+        inset 12px 0 16px rgba(0, 0, 0, 0.15),
         inset -12px 0 15px rgba(255, 255, 255, 0.08), /* Ánh sáng nhẹ ở lề ngoài bên phải */
         -1px 0 3px rgba(0, 0, 0, 0.02);
     border-radius: 0 12px 12px 0;                    /* Bo viền lề ngoài bên phải */
@@ -254,10 +257,10 @@ html {
     position: absolute;
     top: 5%;
     height: 90%;
-    right: calc(70px + var(--page-width)); /* Căn rãnh gáy ở giữa 2 trang trên Desktop */
-    left: auto;
+    left: 50% !important; /* Căn gáy sách chính giữa màn hình (v3.4) */
+    right: auto !important;
     width: 50px; /* Tăng độ rộng để dải bóng mềm mại hơn */
-    transform: translateX(50%); /* Căn giữa hoàn hảo trên đường trục gáy */
+    transform: translateX(-50%) !important; /* Căn giữa hoàn hảo trên đường trục gáy */
     z-index: 999;
     pointer-events: none;
     /* Cho phép bấm lướt xuyên qua gáy */
@@ -280,8 +283,8 @@ html {
 /* Hiệu ứng chồng nhiều lớp viền giấy (Page Stack) ở lề trái từ 30px đến 50px */
 .book-page-stack {
     position: absolute;
-    right: calc(70px + var(--page-width) + 20px); /* Đặt chồng giấy bên trái gáy trên Desktop */
-    left: auto;
+    left: calc(50% - var(--page-width) - 20px) !important; /* Nằm sát lề trái cuốn sách (v3.4) */
+    right: auto !important;
     top: 5%;
     height: 90%;
     width: 20px;
