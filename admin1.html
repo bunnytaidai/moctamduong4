@@ -273,7 +273,7 @@
             border: 1px solid var(--border-glass);
             border-radius: 30px;
             padding: 4px;
-            z-index: 10;
+            z-index: 100;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             align-items: center;
         }
@@ -304,6 +304,157 @@
             box-shadow: 0 0 10px var(--gold-glow);
         }
 
+        /* REALISTIC DEVICE FRAMES (BỘ GIẢ LẬP KHUNG THIẾT BỊ VẬT LÝ) */
+        .device-frame {
+            position: relative;
+            background: #020617;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 5;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Chế độ PC (Windows 11 Browser) */
+        .device-frame.mode-pc {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            border: 4px solid #334155;
+        }
+
+        /* Thanh trình duyệt giả lập trên PC */
+        .browser-header-mockup {
+            display: none;
+            height: 38px;
+            background: #1e293b;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            align-items: center;
+            padding: 0 16px;
+            gap: 15px;
+            color: #94a3b8;
+            font-size: 0.75rem;
+            user-select: none;
+        }
+        .device-frame.mode-pc .browser-header-mockup {
+            display: flex;
+        }
+        .browser-dots {
+            display: flex;
+            gap: 6px;
+        }
+        .browser-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #475569;
+        }
+        .browser-dot.red { background: #ef4444; }
+        .browser-dot.yellow { background: #f59e0b; }
+        .browser-dot.green { background: #10b981; }
+
+        .browser-address-bar {
+            flex: 1;
+            background: #0f172a;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-family: monospace;
+            color: #64748b;
+            text-align: center;
+        }
+
+        /* Chế độ iPad Pro (Tablet 4:3) */
+        .device-frame.mode-tablet {
+            width: 720px;
+            height: 520px;
+            border-radius: 28px;
+            border: 18px solid #1e293b;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+        }
+        /* iPad Home indicator bar */
+        .device-frame.mode-tablet::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: #ffffff;
+            border-radius: 2px;
+            z-index: 1000;
+            opacity: 0.6;
+        }
+
+        /* Chế độ iPhone 13 Pro Max (Mobile ~19.5:9) */
+        .device-frame.mode-mobile {
+            width: 320px;
+            height: 640px;
+            border-radius: 42px;
+            border: 14px solid #1c1917;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+        }
+
+        /* iPhone Notch Tai thỏ */
+        .device-frame.mode-mobile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 22px;
+            background: #1c1917;
+            border-bottom-left-radius: 14px;
+            border-bottom-right-radius: 14px;
+            z-index: 1000;
+        }
+
+        /* iPhone Home indicator */
+        .device-frame.mode-mobile::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 4px;
+            background: #ffffff;
+            border-radius: 2px;
+            z-index: 1000;
+            opacity: 0.7;
+        }
+
+        /* Màn hình thiết bị bên trong (Device Screen Viewport) */
+        .device-screen {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-image: url('images/spa_background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Vignette overlay inside simulated screen */
+        .device-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(18, 22, 18, 0.1) 0%, rgba(18, 22, 18, 0.7) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
         /* Mock Double-Page Book Spread */
         .mock-book-spread {
             position: relative;
@@ -312,8 +463,9 @@
             display: flex;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
             border-radius: 0 12px 12px 0;
-            z-index: 1;
+            z-index: 2;
             perspective: 2500px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         /* Golden resize handle at the bottom-right corner */
@@ -334,6 +486,15 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 8px var(--gold-glow);
             font-size: 0.75rem;
             transition: transform 0.2s;
+        }
+        /* PC Mode only resizable book spread */
+        .device-frame.mode-pc .book-resize-handle {
+            display: flex;
+        }
+        /* Hide resizer handle on mobile/tablet simulator to force exact device sizes */
+        .device-frame.mode-tablet .book-resize-handle,
+        .device-frame.mode-mobile .book-resize-handle {
+            display: none;
         }
 
         .book-resize-handle:hover {
@@ -386,6 +547,7 @@
             overflow: hidden;
             position: relative;
             border-radius: 12px 0 0 12px;
+            transition: opacity 0.3s;
         }
 
         /* Left page shadows mirroring client */
@@ -676,10 +838,10 @@
         .preview-3d-wrapper {
             display: none;
             position: absolute;
-            top: 70px; 
+            top: 0;
             left: 0;
             width: 100%;
-            height: calc(100% - 70px);
+            height: 100%;
             background: rgba(18,22,18,0.1);
             align-items: center;
             justify-content: center;
@@ -694,12 +856,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         .flipbook {
             width: 100%;
             height: 100%;
             background: transparent;
+            transition: all 0.3s ease;
         }
 
         .page {
@@ -758,6 +922,26 @@
             background: var(--accent);
             color: var(--bg-dark);
             box-shadow: 0 0 12px var(--gold-glow);
+        }
+
+        /* 3D Preview: Simulated Mobile Overrides (Ép book dịch chuyển trái chuẩn 100% di động) */
+        .preview-3d-wrapper.simulated-mobile .flipbook {
+            position: absolute !important;
+            left: calc(15px - var(--canvas-w)) !important;
+            right: auto !important;
+        }
+
+        .preview-3d-wrapper.simulated-mobile .book-crease-overlay {
+            left: 15px !important;
+            right: auto !important;
+            transform: translateX(-50%) !important;
+        }
+
+        .preview-3d-wrapper.simulated-mobile .book-page-stack {
+            left: -5px !important;
+            right: auto !important;
+            width: 20px !important;
+            opacity: 0 !important;
         }
 
         .service-list-edit {
@@ -918,70 +1102,89 @@
         <main class="editor-container">
             <!-- Device Size Selector Floating Bar -->
             <div class="device-selector-bar">
-                <button class="device-btn active" id="btn-device-desktop" title="Kiểm tra màn hình máy tính PC">
+                <button class="device-btn active" id="btn-device-desktop" title="Mô phỏng máy tính PC (Windows)">
                     <i class="fa-solid fa-desktop"></i> Máy Tính
                 </button>
-                <button class="device-btn" id="btn-device-tablet" title="Kiểm tra kích thước Máy Tính Bảng (Tablet)">
+                <button class="device-btn" id="btn-device-tablet" title="Mô phỏng Máy Tính Bảng (iPad Pro)">
                     <i class="fa-solid fa-tablet-screen-button"></i> Máy Tính Bảng
                 </button>
-                <button class="device-btn" id="btn-device-mobile" title="Kiểm tra kích thước Điện Thoại (Mobile)">
+                <button class="device-btn" id="btn-device-mobile" title="Mô phỏng Điện Thoại (iPhone 13 Pro Max)">
                     <i class="fa-solid fa-mobile-screen-button"></i> Điện Thoại
                 </button>
                 <span class="tooltip-container">
                     <i class="fa-solid fa-circle-info"></i>
                     <span class="tooltip-content">
-                        Chọn kích thước hiển thị để tự động mô phỏng và căn chuẩn tỉ lệ kéo thả trên các dòng thiết bị khác nhau.
+                        Bộ mô phỏng thiết bị thực tế ảo. Hệ thống sẽ ép cuốn sách hiển thị đúng cơ chế responsive riêng biệt của từng thiết bị.
                     </span>
                 </span>
             </div>
 
-            <!-- 2D Mock Book Spread -->
-            <div class="mock-book-spread" id="book-spread-container">
-                <!-- Golden Resize Handle ở góc dưới bên phải để phóng to / thu nhỏ toàn bộ khung sách -->
-                <div class="book-resize-handle" id="book-resize-handle" title="Giữ chuột và kéo góc này để Phóng to / Thu nhỏ toàn bộ cuốn sách">
-                    <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
-                </div>
-
-                <!-- Chồng giấy lề trái -->
-                <div class="book-page-stack" id="designer-page-stack">
-                    <div class="stack-line line-1"></div>
-                    <div class="stack-line line-2"></div>
-                    <div class="stack-line line-3"></div>
-                    <div class="stack-line line-4"></div>
-                </div>
-
-                <!-- Trang bên trái (Trong suốt / Trắng) -->
-                <div class="mock-page-left" id="designer-left-page">
-                    <div class="page-content"></div>
-                </div>
-
-                <!-- Gáy sách 3D -->
-                <div class="book-crease-overlay" id="designer-crease"></div>
-
-                <!-- Trang bên phải (CHÍNH LÀ CANVAS 2D ĐỂ THIẾT KẾ KÉO THẢ) -->
-                <div class="canvas-2d-wrapper" id="canvas-2d">
-                    <div class="canvas-grid"></div>
-                    <!-- Các phần tử con sẽ được render động tại đây -->
-                    <div class="canvas-tip">Trang Thiết Kế 2D (Kéo thả/Co giãn chữ tại đây)</div>
-                </div>
-            </div>
-
-            <!-- 3D Preview Mode Book -->
-            <div class="preview-3d-wrapper" id="preview-3d">
-                <div class="book-viewport" id="preview-viewport">
-                    <div class="book-crease-overlay"></div>
-                    <div class="flipbook" id="preview-book">
-                        <!-- Cấu trúc sách 3D St.PageFlip sẽ render tại đây -->
+            <!-- BỘ GIẢ LẬP KHUNG THIẾT BỊ VẬT LÝ (Device Simulator Bezel Frame) -->
+            <div class="device-frame mode-pc" id="simulator-frame">
+                <!-- Tab bar & Address bar giả lập cho PC -->
+                <div class="browser-header-mockup">
+                    <div class="browser-dots">
+                        <span class="browser-dot red"></span>
+                        <span class="browser-dot yellow"></span>
+                        <span class="browser-dot green"></span>
                     </div>
+                    <div class="browser-address-bar">http://127.0.0.1:8080/index.html</div>
+                    <i class="fa-solid fa-arrows-rotate"></i>
                 </div>
 
-                <div class="book-navigation">
-                    <button class="nav-btn" id="preview-prev-btn" title="Trang trước">
-                        <i class="fa-solid fa-chevron-left"></i>
-                    </button>
-                    <button class="nav-btn" id="preview-next-btn" title="Trang sau">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </button>
+                <!-- Màn hình bên trong -->
+                <div class="device-screen" id="simulator-screen">
+                    
+                    <!-- 2D Mock Book Spread -->
+                    <div class="mock-book-spread" id="book-spread-container">
+                        <!-- Golden Resize Handle chỉ dùng ở PC mode -->
+                        <div class="book-resize-handle" id="book-resize-handle" title="Giữ chuột và kéo góc này để Phóng to / Thu nhỏ toàn bộ cuốn sách">
+                            <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                        </div>
+
+                        <!-- Chồng giấy lề trái -->
+                        <div class="book-page-stack" id="designer-page-stack">
+                            <div class="stack-line line-1"></div>
+                            <div class="stack-line line-2"></div>
+                            <div class="stack-line line-3"></div>
+                            <div class="stack-line line-4"></div>
+                        </div>
+
+                        <!-- Trang bên trái (Trong suốt / Trắng) -->
+                        <div class="mock-page-left" id="designer-left-page">
+                            <div class="page-content"></div>
+                        </div>
+
+                        <!-- Gáy sách 3D -->
+                        <div class="book-crease-overlay" id="designer-crease"></div>
+
+                        <!-- Trang bên phải (CHÍNH LÀ CANVAS 2D ĐỂ THIẾT KẾ KÉO THẢ) -->
+                        <div class="canvas-2d-wrapper" id="canvas-2d">
+                            <div class="canvas-grid"></div>
+                            <!-- Các phần tử con sẽ được render động tại đây -->
+                            <div class="canvas-tip">Trang Thiết Kế 2D (Kéo thả/Co giãn chữ tại đây)</div>
+                        </div>
+                    </div>
+
+                    <!-- 3D Preview Mode Book -->
+                    <div class="preview-3d-wrapper" id="preview-3d">
+                        <div class="book-viewport" id="preview-viewport">
+                            <div class="book-crease-overlay"></div>
+                            <div class="flipbook" id="preview-book">
+                                <!-- Cấu trúc sách 3D St.PageFlip sẽ render tại đây -->
+                            </div>
+                        </div>
+
+                        <div class="book-navigation">
+                            <button class="nav-btn" id="preview-prev-btn" title="Trang trước">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <button class="nav-btn" id="preview-next-btn" title="Trang sau">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </main>
@@ -1054,6 +1257,7 @@
         let selectedPageIndex = 0;
         let selectedElementId = null;
         let pageFlipInstance = null;
+        let activeDevice = 'desktop'; // 'desktop' | 'tablet' | 'mobile'
 
         // Dữ liệu mẫu khởi tạo ban đầu cho các khối kéo thả
         const defaultPreset = [
@@ -1132,16 +1336,21 @@
             
             // Phục hồi lại vị trí trang đang chỉnh sửa gần nhất từ LocalStorage
             const savedPageIndex = localStorage.getItem('muxintang_selected_page_idx');
+            const savedDevice = localStorage.getItem('muxintang_selected_device') || 'desktop';
+
             if (savedPageIndex !== null) {
                 const parsedIdx = parseInt(savedPageIndex);
                 if (parsedIdx >= 0 && parsedIdx < bookPages.length) {
-                    selectPage(parsedIdx);
+                    selectedPageIndex = parsedIdx;
                 } else {
-                    selectPage(1); 
+                    selectedPageIndex = 1; 
                 }
             } else {
-                selectPage(1);
+                selectedPageIndex = 1;
             }
+
+            // Đồng bộ bộ giả lập thiết bị
+            changeDeviceMode(savedDevice);
 
             initInteractJS();
             registerEventListeners();
@@ -1170,7 +1379,7 @@
         }
 
         // -------------------------------------------------------------
-        // Nạp và lưu cấu hình (Tích hợp Auto-Save liên tục bảo vệ dữ liệu)
+        // Nạp và lưu cấu hình
         // -------------------------------------------------------------
         function loadConfigFromLocalStorage() {
             const dataStr = localStorage.getItem('muxintang_ui_sync');
@@ -1227,10 +1436,8 @@
         }
 
         // -------------------------------------------------------------
-        // Quản lý trang & Sắp xếp kéo thả (Sidebar Drag & Drop)
+        // Quản lý trang & Sắp xếp kéo thả
         // -------------------------------------------------------------
-        let dragSourceIdx = null;
-
         function renderSidebarPages() {
             const listEl = document.getElementById('sidebar-page-list');
             listEl.innerHTML = '';
@@ -1276,16 +1483,13 @@
                 const targetIdx = parseInt(item.getAttribute('data-index'));
                 
                 if (dragSourceIdx !== null && dragSourceIdx !== targetIdx) {
-                    // Sắp xếp lại danh sách các trang
                     const movedPage = bookPages.splice(dragSourceIdx, 1)[0];
                     bookPages.splice(targetIdx, 0, movedPage);
                     
-                    // Cập nhật lại order của các trang
                     bookPages.forEach((p, index) => {
                         p.order = index + 1;
                     });
 
-                    // Đồng bộ thứ tự mới sang DataManager đám mây nếu có
                     if (window.DataManager) {
                         const orderedIds = bookPages.map(p => p.id);
                         window.DataManager.updatePagesOrder(orderedIds).catch(err => {
@@ -1322,20 +1526,8 @@
             document.getElementById('prop-page-name').value = page.name;
             document.getElementById('prop-page-bg').value = page.image || page.bg_image || '';
 
-            const leftPage = document.getElementById('designer-left-page');
-            const pageStack = document.getElementById('designer-page-stack');
-
-            if (idx === 0) {
-                leftPage.className = 'mock-page-left page-transparent';
-                leftPage.innerHTML = '<div class="page-content"></div>';
-                pageStack.style.opacity = '0';
-            } else {
-                leftPage.className = 'mock-page-left page-white';
-                leftPage.innerHTML = '<div class="page-content"></div>';
-                pageStack.style.opacity = '0.9';
-            }
-            
-            renderCanvasElements();
+            // Tái kích hoạt tính toán vị trí theo bộ giả lập
+            resizeSimulator();
         }
 
         // -------------------------------------------------------------
@@ -1504,7 +1696,6 @@
         // Interact.js Drag & Resize (Kéo thả phẳng & Co giãn toàn khung)
         // -------------------------------------------------------------
         function initInteractJS() {
-            // 1. Kéo thả và co giãn phần tử con bên trong canvas
             interact('.design-element')
                 .draggable({
                     inertia: false,
@@ -1573,23 +1764,21 @@
                     ]
                 });
 
-            // 2. Co giãn phóng to/thu nhỏ toàn bộ cuốn sách bằng kéo ở góc phải dưới
             interact('#book-spread-container')
                 .resizable({
                     edges: { right: '#book-resize-handle', bottom: '#book-resize-handle' },
                     listeners: {
                         move(event) {
+                            // Chỉ cho phép co giãn tay nắm thủ công khi ở chế độ PC (Windows)
+                            if (activeDevice !== 'desktop') return;
+
                             const newW = event.rect.width;
-                            // Tính toán chiều rộng trang đơn (chiều rộng spread chia đôi)
                             let singlePageW = Math.max(150, Math.min(800, newW / 2));
-                            // Tính chiều cao trang đơn theo tỷ lệ vàng gốc 0.73
                             let singlePageH = Math.floor(singlePageW / 0.73);
 
-                            // Cập nhật biến CSS toàn cục
                             document.documentElement.style.setProperty('--canvas-w', `${singlePageW}px`);
                             document.documentElement.style.setProperty('--canvas-h', `${singlePageH}px`);
 
-                            // Vẽ lại canvas để cập nhật vị trí tương thích của các phần tử con theo kích thước mới
                             renderCanvasElements();
                         }
                     }
@@ -1661,33 +1850,6 @@
             }
         }
 
-        window.updateServiceRow = function(idx, key, val) {
-            const page = bookPages[selectedPageIndex];
-            const pageConfig = activePageData.find(p => p.id === page.id);
-            if (pageConfig) {
-                const el = pageConfig.elements.find(item => item.id === selectedElementId);
-                if (el && el.services[idx]) {
-                    el.services[idx][key] = val;
-                    autoSave();
-                    renderCanvasElements();
-                }
-            }
-        }
-
-        window.deleteServiceRow = function(idx) {
-            const page = bookPages[selectedPageIndex];
-            const pageConfig = activePageData.find(p => p.id === page.id);
-            if (pageConfig) {
-                const el = pageConfig.elements.find(item => item.id === selectedElementId);
-                if (el) {
-                    el.services.splice(idx, 1);
-                    renderEditServicesList(el);
-                    autoSave();
-                    renderCanvasElements();
-                }
-            }
-        }
-
         // -------------------------------------------------------------
         // Chuyển đổi qua lại giữa Thiết Kế 2D và Xem Trước 3D (Đồng bộ bất đồng bộ)
         // -------------------------------------------------------------
@@ -1713,7 +1875,6 @@
                 bookSpread.style.display = 'none';
                 preview3d.style.display = 'flex';
                 
-                // Giải quyết triệt để lỗi đua lệnh (race condition) bằng việc đợi vẽ xong HTML mới khởi tạo St.PageFlip
                 buildFlipbookHTML().then(() => {
                     initFlipbook3D();
                 });
@@ -1758,7 +1919,6 @@
                     pageContent.style.backgroundImage = `url('${imageUrl}')`;
                 }
 
-                // Vẽ các phần tử kéo thả đè lên
                 const pageConfig = activePageData.find(p => p.id === page.id);
                 if (pageConfig) {
                     pageConfig.elements.forEach(el => {
@@ -1834,22 +1994,84 @@
             };
         }
 
-        // Thay đổi kích thước viewport giả lập thiết bị (PC, Tablet, Mobile)
+        // BỘ GIẢ LẬP KHUNG THIẾT BỊ VẬT LÝ VÀ ÉP WEBSITE NHẬN DIỆN MÀN HÌNH THẬT
         function changeDeviceMode(deviceType) {
+            activeDevice = deviceType;
+            localStorage.setItem('muxintang_selected_device', deviceType);
+
             document.querySelectorAll('.device-btn').forEach(btn => btn.classList.remove('active'));
+
+            const frame = document.getElementById('simulator-frame');
+            const preview3d = document.getElementById('preview-3d');
+            
+            frame.className = 'device-frame';
+            preview3d.className = 'preview-3d-wrapper';
 
             if (deviceType === 'desktop') {
                 document.getElementById('btn-device-desktop').classList.add('active');
-                document.documentElement.style.setProperty('--canvas-w', '380px');
-                document.documentElement.style.setProperty('--canvas-h', '540px');
+                frame.classList.add('mode-pc');
             } else if (deviceType === 'tablet') {
                 document.getElementById('btn-device-tablet').classList.add('active');
-                document.documentElement.style.setProperty('--canvas-w', '300px');
-                document.documentElement.style.setProperty('--canvas-h', '420px');
+                frame.classList.add('mode-tablet');
             } else if (deviceType === 'mobile') {
                 document.getElementById('btn-device-mobile').classList.add('active');
-                document.documentElement.style.setProperty('--canvas-w', '220px');
-                document.documentElement.style.setProperty('--canvas-h', '310px');
+                frame.classList.add('mode-mobile');
+                preview3d.classList.add('simulated-mobile'); // Ép cuốn sách lật 3D dịch chuyển theo tỉ lệ di động
+            }
+
+            resizeSimulator();
+        }
+
+        function resizeSimulator() {
+            const screen = document.getElementById('simulator-screen');
+            if (!screen) return;
+
+            const screenW = screen.clientWidth;
+            const screenH = screen.clientHeight;
+
+            let singlePageW, singlePageH;
+
+            // Tính toán kích thước thật theo tỉ lệ màn hình thiết bị giả lập
+            if (activeDevice === 'desktop') {
+                singlePageH = Math.floor(screenH * 0.85);
+                if (singlePageH > 560) singlePageH = 560;
+                singlePageW = Math.floor(singlePageH * 0.73);
+            } else if (activeDevice === 'tablet') {
+                // Tỉ lệ iPad Pro (iPad Pro screen width: ~684px)
+                singlePageH = Math.floor(screenH * 0.85); // 410px
+                singlePageW = Math.floor(singlePageH * 0.73); // 300px
+            } else if (activeDevice === 'mobile') {
+                // Tỉ lệ iPhone 13 Pro Max (screen width: 292px)
+                // Đảm bảo vừa khít màn hình di động, chừa 25px lề giống client thật
+                singlePageW = screenW - 25; // ~267px
+                singlePageH = Math.floor(singlePageW / 0.73); // ~365px
+            }
+
+            document.documentElement.style.setProperty('--canvas-w', `${singlePageW}px`);
+            document.documentElement.style.setProperty('--canvas-h', `${singlePageH}px`);
+
+            // Ép cấu trúc HTML nhận dạng định vị
+            const bookSpread = document.getElementById('book-spread-container');
+            const leftPage = document.getElementById('designer-left-page');
+            const pageStack = document.getElementById('designer-page-stack');
+
+            if (activeDevice === 'mobile') {
+                // Trên Mobile: Trượt sách sang trái để ẩn trang lót trái, chỉ hiện trang thiết kế phải chuẩn iPhone
+                bookSpread.style.position = 'absolute';
+                bookSpread.style.left = `calc(15px - ${singlePageW}px)`;
+                leftPage.style.opacity = '0';
+                pageStack.style.opacity = '0';
+            } else {
+                // Trên PC và Tablet: Hiện trang đôi song song
+                bookSpread.style.position = 'relative';
+                bookSpread.style.left = 'auto';
+                leftPage.style.opacity = '1';
+                
+                if (selectedPageIndex === 0) {
+                    pageStack.style.opacity = '0';
+                } else {
+                    pageStack.style.opacity = '0.9';
+                }
             }
 
             renderCanvasElements();
@@ -1861,6 +2083,13 @@
                 });
             }
         }
+
+        // Lắng nghe resize cửa sổ để tự động tính lại PC mode
+        window.addEventListener('resize', () => {
+            if (activeDevice === 'desktop') {
+                resizeSimulator();
+            }
+        });
 
         // -------------------------------------------------------------
         // Lắng nghe sự kiện (Event Listeners)
