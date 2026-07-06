@@ -1,0 +1,47 @@
+# Quy trình tự động biên dịch và xuất bản thực đơn Muxintang lên GitHub Pages (v3.2)
+name: Deploy static content to Pages
+
+on:
+  # Tự động chạy mỗi khi Thỏ lưu thực đơn từ Admin (push code lên nhánh main)
+  push:
+    branches: ["main"]
+
+  # Cho phép kích hoạt chạy thủ công từ tab Actions
+  workflow_dispatch:
+
+# Cấp quyền ghi cho robot để deploy lên GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Tránh xung đột nếu có nhiều người cùng lưu cấu hình một lúc
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      # Bước 1: Quét và tải toàn bộ mã nguồn của Thỏ vào môi trường ảo
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Bước 2: Khởi tạo cấu hình Pages tĩnh
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      # Bước 3: Đóng gói toàn bộ thư mục dự án
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      # Bước 4: Đẩy trang web lên online chính thức
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
