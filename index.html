@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Muxintang Moxibustion Wellness Center v3.1 | 沐心堂艾灸养生会馆 v3.1</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Trải nghiệm dịch vụ gội đầu dưỡng sinh, massage trị liệu, ngâm chân thảo dược và cứu ngải (艾灸) tại Muxintang (沐心堂) dưỡng sinh hội quán. Liên hệ Hotline: 0968.868.712.">
+    <meta name="keywords" content="Muxintang, 沐心堂, gội đầu dưỡng sinh, massage trị liệu, ngâm chân thảo dược, 艾灸, cứu ngải dưỡng sinh">
+    <meta name="author" content="Muxintang Wellness Spa">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="Muxintang Moxibustion Wellness Center | 沐心堂艾灸养生会馆">
+    <meta property="og:description" content="Trải nghiệm liệu trình chăm sóc sức khoẻ dưỡng sinh đông y hàng đầu.">
+    <meta property="og:image" content="images/dau.jpg">
+    <meta property="og:type" content="website">
+
+    <!-- Premium Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Core Styling -->
+    <link rel="stylesheet" href="index.css">
+    
+    <!-- Preload Critical Assets for Instant Rendering -->
+    <link rel="preload" href="images/spa_background.png" as="image">
+    <link rel="preload" href="images/dau.jpg" as="image">
+    
+    <!-- StPageFlip CDN (Dependency-free Browser Bundle) -->
+    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+</head>
+<body>
+
+    <!-- Khung 1: Khung Nền Bao Bọc Toàn Bộ Giao Diện -->
+    <main class="main-wrapper" id="frame-1">
+        <div class="vignette-overlay"></div>
+        
+        <!-- Khung 2: Khung Tiêu Đề Trên Cùng (Trong suốt) -->
+        <header class="top-header" id="frame-2">
+            <div class="header-content">
+            </div>
+        </header>
+
+        <!-- Khung 4: Khung Nội Dung Chính Giữa (60% Height, Trong suốt) -->
+        <section class="content-frame" id="frame-4">
+            
+            <!-- Book Viewport: Cắt lề trái ở 30px, gáy sách nằm ở 50px -->
+            <div class="book-viewport" id="book-viewport">
+                
+                <!-- Gáy sách 3D mềm mại với hiệu ứng chuyển bóng và nổi hạt giấy -->
+                <div class="book-crease-overlay" id="book-crease"></div>
+                
+                <!-- Các lớp viền giả lập tập giấy dày bên lề trái (30px - 50px) -->
+                <div class="book-page-stack" id="page-stack">
+                    <div class="stack-line line-1"></div>
+                    <div class="stack-line line-2"></div>
+                    <div class="stack-line line-3"></div>
+                    <div class="stack-line line-4"></div>
+                </div>
+                
+                <!-- Đối tượng sách lật ftPageFlip -->
+                <div class="flipbook" id="book">
+                    <!-- Trang 1: Trong suốt (Trang lót bên trái khi chưa mở bìa) -->
+                    <div class="page page-transparent" data-density="hard">
+                        <div class="page-content"></div>
+                    </div>
+                    
+                    <!-- Trang 2: Trang bìa (dau.jpg) (nằm bên phải) -->
+                    <div class="page page-image" data-density="hard">
+                        <div class="page-content" style="background-image: url('images/dau.jpg');"></div>
+                    </div>
+
+                    <!-- Trang 3: Trang trắng mặt sau (nằm bên trái) -->
+                    <div class="page page-white">
+                        <div class="page-content"></div>
+                    </div>
+                    <!-- Trang 4: Trang 2.jpg (nằm bên phải) -->
+                    <div class="page page-image">
+                        <div class="page-content" style="background-image: url('images/2.jpg');"></div>
+                    </div>
+
+                    <!-- Trang 5: Trang trắng mặt sau (nằm bên trái) -->
+                    <div class="page page-white">
+                        <div class="page-content"></div>
+                    </div>
+                    <!-- Trang 6: Trang 3.jpg (nằm bên phải) -->
+                    <div class="page page-image">
+                        <div class="page-content" style="background-image: url('images/3.jpg');"></div>
+                    </div>
+
+                    <!-- Trang 7: Trang trắng mặt sau (nằm bên trái) -->
+                    <div class="page page-white">
+                        <div class="page-content"></div>
+                    </div>
+                    <!-- Trang 8: Trang 4.jpg (nằm bên phải) -->
+                    <div class="page page-image">
+                        <div class="page-content" style="background-image: url('images/4.jpg');"></div>
+                    </div>
+
+                    <!-- Trang 9: Trang trắng mặt sau (nằm bên trái) -->
+                    <div class="page page-white">
+                        <div class="page-content"></div>
+                    </div>
+                    <!-- Trang 10: Trang 5.jpg (nằm bên phải) -->
+                    <div class="page page-image">
+                        <div class="page-content" style="background-image: url('images/5.jpg');"></div>
+                    </div>
+
+                    <!-- Trang 11: Trang trắng mặt sau (nằm bên trái) -->
+                    <div class="page page-white">
+                        <div class="page-content"></div>
+                    </div>
+                    <!-- Trang 12: Trang 6.jpg (nằm bên phải) -->
+                    <div class="page page-image">
+                        <div class="page-content" style="background-image: url('images/6.jpg');"></div>
+                    </div>
+
+                    <!-- Trang 13: Trang trắng mặt sau (nằm bên trái) -->
+                    <div class="page page-white">
+                        <div class="page-content"></div>
+                    </div>
+                    <!-- Trang 14: Trang bìa cuối (cuoi.jpg) (nằm bên phải) -->
+                    <div class="page page-image" data-density="hard">
+                        <div class="page-content" style="background-image: url('images/cuoi.jpg');"></div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            
+            <!-- Nút điều hướng sách lật -->
+            <div class="book-navigation">
+                <button class="nav-btn nav-prev" id="btn-prev-page" aria-label="Trang trước" title="Trang trước">
+                    <i class="fa-solid fa-chevron-up"></i>
+                </button>
+                <button class="nav-btn nav-next" id="btn-next-page" aria-label="Trang sau" title="Trang sau">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+            </div>
+            
+            <!-- Chỉ mục trang hiện tại -->
+            <div class="page-indicator" id="page-indicator">
+                <span class="current-idx">1</span> / <span class="total-pages">4</span>
+            </div>
+        </section>
+
+        <!-- Khung 3: Khung Liên Hệ Dưới Cùng (20% Height, Trong suốt) -->
+        <footer class="bottom-footer" id="frame-3">
+            <div class="contact-bar">
+                
+                <!-- Nút Gọi Hotline Dưỡng Sinh (Pulsing) -->
+                <a href="tel:0968868712" class="contact-btn hotline-btn" id="btn-hotline">
+                    <div class="icon-circle">
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                    <div class="btn-info">
+                        <span class="btn-label">HOTLINE</span>
+                        <span class="btn-val">0968 868 712</span>
+                    </div>
+                </a>
+
+                <!-- Nút Zalo Tư Vấn Dưỡng Sinh -->
+                <a href="https://zalo.me/0968868712" target="_blank" class="contact-btn zalo-btn" id="btn-zalo">
+                    <div class="icon-circle">
+                        <!-- Custom Zalo Text/Icon since FontAwesome lacks Zalo -->
+                        <span class="zalo-text">Zalo</span>
+                    </div>
+                    <div class="btn-info">
+                        <span class="btn-label">TƯ VẤN</span>
+                        <span class="btn-val">Nhắn Zalo</span>
+                    </div>
+                </a>
+
+                <!-- Nút WeChat Dưỡng Sinh -->
+                <button class="contact-btn wechat-btn" id="btn-wechat">
+                    <div class="icon-circle">
+                        <i class="fa-brands fa-weixin"></i>
+                    </div>
+                    <div class="btn-info">
+                        <span class="btn-label">WECHAT</span>
+                        <span class="btn-val">NGALADY0708</span>
+                    </div>
+                </button>
+
+                <!-- Nút Bản Đồ Vị Trí -->
+                <a href="https://maps.app.goo.gl/SF9DLhzzgzkMXWKm7" target="_blank" class="contact-btn maps-btn" id="btn-maps">
+                    <div class="icon-circle">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div class="btn-info">
+                        <span class="btn-label">BẢN ĐỒ</span>
+                        <span class="btn-val">Chỉ Đường</span>
+                    </div>
+                </a>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Hộp thoại thông báo WeChat ID (QR Code / Copy) -->
+    <div class="modal" id="wechat-modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-modal">&times;</span>
+            <i class="fa-brands fa-weixin modal-icon"></i>
+            <h3>沐心堂 WeChat</h3>
+            <p class="wechat-id-text">ID WeChat: <strong id="wechat-id">NGALADY0708</strong></p>
+            <button class="copy-btn" id="btn-copy-wechat">Sao Chép ID</button>
+            <span class="copy-toast" id="copy-toast">Đã sao chép vào bộ nhớ tạm!</span>
+        </div>
+    </div>
+
+    <!-- Firebase Compat SDKs (Tải thư viện kết nối thời gian thực) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+    <!-- Core Scripts -->
+    <script src="data-manager.js"></script>
+    <script src="main.js"></script>
+    <script src="icon.js"></script>
+</body>
+</html>

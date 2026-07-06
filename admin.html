@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Điều Khiển Quản Trị v3.1 - Muxintang Wellness Spa</title>
+    
+    <!-- Premium Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@300;400;600;700&family=Charm:wght@400;700&family=Charmonman:wght@400;700&family=Dancing+Script:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Cropper.js (Thư viện cắt xén hình ảnh chuyên nghiệp) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <!-- Firebase Compat SDKs (Đồng bộ trực tuyến thời gian thực) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <!-- StPageFlip (Hiệu ứng lật trang 3D chuyên nghiệp) -->
+    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+
+    <style>
+        /* ==========================================================================
+           HỆ THỐNG GIAO DIỆN DARK MODE & GLASSMORPHISM SANG TRỌNG
+           ========================================================================== */
+        :root {
+            --gold-color: #d4af37;
+            --gold-glow: rgba(212, 175, 55, 0.3);
+            --gold-glow-strong: rgba(212, 175, 55, 0.6);
+            --bronze-color: #c5a059;
+            --bg-dark: #0f120f;
+            --bg-card: rgba(25, 30, 25, 0.7);
+            --border-glass: rgba(197, 160, 89, 0.25);
+            --text-main: #f5f5ee;
+            --text-muted: #a8a090;
+            --accent-red: #a62b2b;
+            --font-main: 'Montserrat', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 50% 50%, rgba(20, 30, 20, 0.6) 0%, var(--bg-dark) 100%), url('images/spa_background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: var(--font-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Styles cho flipbook xem trước v3.1 */
+        .flipbook {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+        .page {
+            overflow: hidden;
+            background-color: #fdfcf7;
+        }
+        .page-content {
+            width: 100%;
+            height: 100%;
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+        .page:nth-child(odd) .page-content {
+            box-shadow: 
+                inset -25px 0 35px rgba(0, 0, 0, 0.15),
+                inset -8px 0 12px rgba(0, 0, 0, 0.08),
+                inset 10px 0 15px rgba(255, 255, 255, 0.05),
+                1px 0 3px rgba(0, 0, 0, 0.03);
+            border-radius: 12px 0 0 12px;
+            border-right: 1px solid rgba(0, 0, 0, 0.25);
+        }
+        .page:nth-child(even) .page-content {
+            box-shadow: 
+                inset 25px 0 35px rgba(0, 0, 0, 0.18),
+                inset 8px 0 12px rgba(0, 0, 0, 0.1),
+                inset -12px 0 15px rgba(255, 255, 255, 0.08),
+                -1px 0 3px rgba(0, 0, 0, 0.02);
+            border-radius: 0 12px 12px 0;
+            border-left: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .page-white {
+            background-color: #fdfcf7 !important;
+        }
+        .page-white .page-content {
+            background-color: #fdfcf7 !important;
+        }
+        .page-transparent,
+        .page-transparent .page-content {
+            background: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
+        .page:not(.page-transparent) {
+            border-radius: 0 8px 8px 0;
+        }
+        .page-custom {
+            position: relative;
+            background-color: #fdfcf7;
+        }
+        .page-custom .page-content {
+            background-size: cover !important;
+            background-position: center !important;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .custom-text-element {
+            position: absolute;
+            line-height: 1.4;
+            word-wrap: break-word;
+            cursor: default;
+            user-select: none;
+            pointer-events: none;
+            color: #333;
+        }
+        .custom-services-container {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 15px;
+            background: rgba(253, 252, 247, 0.9);
+            border: 1px solid rgba(197, 160, 89, 0.4);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            pointer-events: none;
+        }
+        .service-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 0.92rem;
+            color: #2b2b2b;
+        }
+        .service-name {
+            font-weight: 600;
+            white-space: nowrap;
+            padding-right: 5px;
+        }
+        .service-line {
+            flex-grow: 1;
+            border-bottom: 1.5px dotted rgba(197, 160, 89, 0.6);
+            margin: 0 8px;
+            align-self: flex-end;
+            margin-bottom: 4px;
+        }
+        .service-price {
+            font-weight: 700;
+            color: #a62b2b;
+            padding-left: 5px;
+            white-space: nowrap;
+        }
+
+        /* Thanh tiêu đề quản trị */
+        header.admin-header {
+            background: rgba(15, 18, 15, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1.5px solid var(--border-glass);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .logo-section h1 {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.4rem;
+            color: var(--gold-color);
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--gold-glow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-section span {
+            font-size: 0.8rem;
+            font-family: var(--font-main);
+            color: var(--text-muted);
+            border-left: 1px solid var(--border-glass);
+            padding-left: 10px;
+            margin-left: 5px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* Nút Tooltip "i" tự chế */
+        .info-btn {
+            position: relative;
+            background: none;
+            border: none;
+            color: var(--gold-color);
+            font-size: 1.15rem;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .info-btn:hover {
+            background: var(--gold-color);
+            color: var(--bg-dark);
+            box-shadow: 0 0 8px var(--gold-color);
+        }
+
+        /* Popup tooltip giải thích */
+        .tooltip-text {
+            visibility: hidden;
+            width: 250px;
+            background: rgba(18, 22, 18, 0.95);
+            color: #fff;
+            text-align: left;
+            border: 1px solid var(--gold-color);
+            border-radius: 6px;
+            padding: 10px 15px;
+            position: absolute;
+            z-index: 200;
+            right: 0;
+            top: 35px;
+            font-size: 0.78rem;
+            line-height: 1.4;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            pointer-events: none;
+        }
+
+        .info-btn:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .btn-premium {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--gold-color);
+            color: var(--gold-color);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.82rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-premium:hover {
+            background: var(--gold-color);
+            color: var(--bg-dark);
+            box-shadow: 0 0 15px var(--gold-glow-strong);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: rgba(166, 43, 43, 0.1);
+            border: 1px solid var(--accent-red);
+            color: #ff6b6b;
+        }
+
+        .btn-danger:hover {
+            background: var(--accent-red);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(166, 43, 43, 0.5);
+        }
+
+        /* Khu vực hiển thị chính (2 Cột) */
+        .admin-container {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            gap: 20px;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* -------------------------------------------------------------
+           CỘT TRÁI: SƠ ĐỒ TRANG VÀ THỨ TỰ (30% WIDTH)
+           ------------------------------------------------------------- */
+        .sidebar {
+            width: 28%;
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 1.1rem;
+            color: var(--gold-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-glass);
+            padding-bottom: 10px;
+        }
+
+        /* Danh sách trang */
+        .page-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 5px;
+        }
+
+        .page-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .page-item:hover {
+            background: rgba(212, 175, 55, 0.05);
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+
+        .page-item.active {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--gold-color);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+        }
+
+        .page-item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 70%;
+        }
+
+        .page-thumb {
+            width: 35px;
+            height: 50px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background-color: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .page-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .page-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .page-type {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .action-icon-btn:hover {
+            color: var(--gold-color);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .action-icon-btn.btn-delete-page:hover {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        /* -------------------------------------------------------------
+           CỘT PHẢI: KHU VỰC BIÊN TẬP NỘI DUNG (72% WIDTH)
+           ------------------------------------------------------------- */
+        .main-editor {
+            width: 72%;
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-height: calc(100vh - 120px);
+        }
+
+        /* Bên Trái của Trình Biên Tập: Khung mô phỏng kéo thả (WYSIWYG) */
+        .preview-pane {
+            width: 48%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 15px;
+            justify-content: center;
+        }
+
+        .preview-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--gold-color);
+            letter-spacing: 1px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Khung chứa giả lập tỷ lệ 380:540 */
+        .page-canvas-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+        }
+
+        .page-canvas {
+            width: 310px;  /* Kích thước vừa phải để edit trên admin */
+            height: 440px; /* Căn chỉnh theo tỷ lệ 0.73 */
+            background-color: #fdfcf7;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            border-radius: 0 8px 8px 0; /* Bìa bo viền phải giống flipbook */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-canvas.page-transparent {
+            background: transparent !important;
+            box-shadow: none !important;
+            border: 1px dashed rgba(255,255,255,0.2);
+        }
+
+        /* Phần tử chữ giả lập kéo thả */
+        .canvas-text-el {
+            position: absolute;
+            line-height: 1.4;
+            word-wrap: break-word;
+            padding: 4px 8px;
+            border: 1px dashed transparent;
+            cursor: move;
+            user-select: none;
+        }
+
+        .canvas-text-el:hover {
+            border-color: var(--gold-color);
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .canvas-text-el.selected {
+            border: 1px solid var(--gold-color);
+            background: rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 8px var(--gold-glow);
+        }
+
+        /* Tay nắm thay đổi kích thước (Resize Handle) */
+        .resize-handle {
+            width: 8px;
+            height: 8px;
+            background-color: var(--gold-color);
+            position: absolute;
+            right: -4px;
+            bottom: -4px;
+            cursor: se-resize;
+            border-radius: 50%;
+            display: none;
+        }
+
+        .canvas-text-el.selected .resize-handle {
+            display: block;
+        }
+
+        /* Khung dịch vụ giả lập */
+        .canvas-services-container {
+            position: absolute;
+            background: rgba(253, 252, 247, 0.9);
+            border: 1px solid rgba(197, 160, 89, 0.4);
+            border-radius: 8px;
+            padding: 10px;
+            cursor: move;
+            user-select: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .canvas-services-container:hover {
+            border-color: var(--gold-color);
+        }
+
+        .canvas-services-container.selected {
+            border: 1.5px solid var(--gold-color);
+            box-shadow: 0 0 10px var(--gold-glow-strong);
+        }
+
+        /* Bên Phải của Trình Biên Tập: Bảng điều khiển thuộc tính (52% WIDTH) */
+        .control-pane {
+            width: 52%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .pane-section {
+            background: rgba(255,255,255,0.02);
+            border: 1.5px solid var(--border-glass);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .pane-section-title {
+            font-size: 0.9rem;
+            color: var(--gold-color);
+            font-weight: 600;
+            border-bottom: 1px solid rgba(197, 160, 89, 0.15);
+            padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-input, .form-select {
+            background: rgba(18, 22, 18, 0.8);
+            border: 1px solid var(--border-glass);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: var(--font-main);
+            font-size: 0.8rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            border-color: var(--gold-color);
+            box-shadow: 0 0 8px var(--gold-glow);
+        }
+
+        /* Nút thiết lập nhanh */
+        .btn-group-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-tab {
+            flex: 1;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-tab.active {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold-color);
+            color: var(--gold-color);
+            font-weight: 600;
+        }
+
+        /* Thanh công cụ định dạng chữ */
+        .text-format-bar {
+            display: flex;
+            gap: 6px;
+            background: rgba(0,0,0,0.2);
+            padding: 4px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .format-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .format-btn:hover {
+            color: var(--text-main);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .format-btn.active {
+            color: var(--gold-color);
+            background: rgba(212, 175, 55, 0.15);
+        }
+
+        /* Danh sách dịch vụ báo giá */
+        .service-list-editor {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 6px;
+            padding: 8px;
+            background: rgba(0,0,0,0.15);
+        }
+
+        .service-edit-item {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .service-edit-item input {
+            padding: 6px 10px;
+            font-size: 0.75rem;
+        }
+
+        /* -------------------------------------------------------------
+           MODALS & POPUPS
+           ------------------------------------------------------------- */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(12, 15, 12, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: rgba(20, 26, 20, 0.95);
+            border: 1.5px solid var(--gold-color);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 20px var(--gold-glow);
+            width: 450px;
+            padding: 25px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-glass);
+            padding-bottom: 10px;
+        }
+
+        .modal-header h3 {
+            font-size: 1.05rem;
+            color: var(--gold-color);
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            cursor: pointer;
+        }
+
+        .close-modal-btn:hover {
+            color: #fff;
+        }
+
+        /* Modal Cắt ảnh */
+        .cropper-modal-content {
+            width: 600px;
+            max-width: 95%;
+        }
+
+        .cropper-container {
+            width: 100%;
+            height: 380px;
+            background: #222;
+            overflow: hidden;
+            border-radius: 6px;
+            border: 1px solid var(--border-glass);
+        }
+
+        .cropper-container img {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+        }
+
+        /* Trạng thái lưu thành công (Notification Toast) */
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: rgba(20, 30, 20, 0.95);
+            border: 1.5px solid var(--gold-color);
+            color: var(--gold-color);
+            padding: 12px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.5), 0 0 15px var(--gold-glow);
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast i {
+            font-size: 1.1rem;
+        }
+
+        /* Hide elements on loading state */
+        .no-data-msg {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 40px 10px;
+            line-height: 1.6;
+        }
+
+        /* Style cho tabs cấu hình đám mây */
+        .cloud-tabs {
+            display: flex;
+            border-bottom: 1.5px solid var(--border-glass);
+            margin-bottom: 5px;
+            gap: 8px;
+        }
+        .cloud-tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            outline: none;
+        }
+        .cloud-tab-btn.active {
+            color: var(--gold-color);
+            border-bottom-color: var(--gold-color);
+            text-shadow: 0 0 6px var(--gold-glow);
+        }
+        .cloud-tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .cloud-tab-content.active {
+            display: flex;
+        }
+
+        /* Responsive Device Preview Switcher */
+        .device-switcher {
+            display: flex;
+            gap: 8px;
+            background: rgba(0,0,0,0.4);
+            padding: 5px 12px;
+            border-radius: 30px;
+            border: 1px solid var(--border-glass);
+            margin-bottom: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .device-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .device-btn:hover {
+            color: var(--text-main);
+            background: rgba(255,255,255,0.05);
+        }
+        .device-btn.active {
+            background: var(--gold-color);
+            color: var(--bg-dark);
+            box-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        /* Hộp Nhật Ký Hoạt Động Terminal Log */
+        .log-panel {
+            background: rgba(10, 14, 10, 0.95);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.7rem;
+            color: #4af626; /* Màu xanh lá ma trận */
+            height: 110px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.8);
+        }
+        .log-panel-title {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--gold-color);
+            border-bottom: 1px solid rgba(197, 160, 89, 0.15);
+            padding-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .log-container {
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            padding-right: 4px;
+            text-align: left;
+        }
+        .log-item {
+            line-height: 1.3;
+            word-break: break-all;
+        }
+        .log-item.error {
+            color: #ff4a4a;
+        }
+        .log-item.info {
+            color: #4ad2ff;
+        }
+        .log-item.success {
+            color: #4aff4a;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header quản trị -->
+    <header class="admin-header">
+        <div class="logo-section">
+            <h1><i class="fa-solid fa-compass-drafting"></i> 沐心堂 Muxintang <span>BẢNG ĐIỀU KHIỂN ADMIN v3.1</span></h1>
+        </div>
+        <div class="header-controls">
+            <!-- Xem trang khách -->
+            <a href="index.html" target="_blank" class="btn-premium" style="text-decoration: none;">
+                <i class="fa-solid fa-eye"></i> Xem Menu Online
+            </a>
+            
+            <!-- Cài đặt Đám Mây -->
+            <button class="btn-premium" id="btn-open-cloud-modal">
+                <i class="fa-solid fa-cloud"></i> Cài Đặt Đám Mây (Free)
+            </button>
+
+            <!-- Hướng dẫn (i) -->
+            <button class="info-btn" aria-label="Hướng dẫn sử dụng">
+                <i class="fa-solid fa-info"></i>
+                <div class="tooltip-text">
+                    <strong>Hướng dẫn nhanh:</strong><br>
+                    1. Cột trái hiển thị sơ đồ và thứ tự trang. Bạn có thể sắp xếp bằng nút mũi tên.<br>
+                    2. Cột phải là nơi chỉnh sửa nội dung trang được chọn.<br>
+                    3. Đối với trang tùy biến, bạn có thể Click vào chữ để chỉnh sửa thuộc tính, hoặc GIỮ CHUỘT KÉO chữ/bảng giá để thay đổi vị trí.<br>
+                    4. Khi ấn "LƯU TRANG", menu online sẽ tự cập nhật ngay lập tức mà không cần reload trang.
+                </div>
+            </button>
+        </div>
+    </header>
+
+    <!-- Content chính (2 cột) -->
+    <div class="admin-container">
+        
+        <!-- CỘT TRÁI: SƠ ĐỒ TRANG -->
+        <aside class="sidebar">
+            <h2>
+                <span><i class="fa-solid fa-folder-tree"></i> Sơ đồ trang</span>
+                <button class="action-icon-btn" id="btn-add-page" title="Thêm trang mới">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </h2>
+            <div class="page-list" id="page-list-container">
+                <!-- Javascript sẽ tự động render danh sách trang ở đây -->
+                <div class="no-data-msg">Đang đồng bộ dữ liệu...</div>
+            </div>
+
+            <!-- Cài đặt chung của website -->
+            <div class="pane-section" style="padding: 10px; margin-top: 5px; border-radius: 8px;">
+                <div class="pane-section-title" style="font-size: 0.76rem; padding-bottom: 5px; margin-bottom: 8px;">
+                    <span><i class="fa-solid fa-gears"></i> Cài đặt chung (v3.1)</span>
+                </div>
+                <div class="form-group" style="margin-bottom: 8px;">
+                    <label for="input-site-title" style="font-size: 0.68rem; color: var(--text-muted); font-weight: 500;">Tiêu đề trang web (Title)</label>
+                    <input type="text" class="form-input" id="input-site-title" placeholder="Nhập tiêu đề website..." style="padding: 6px 10px; font-size: 0.75rem;">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 0.68rem; color: var(--text-muted); font-weight: 500;">Hình nền website (Background)</label>
+                    <input type="file" id="global-bg-uploader" accept="image/*" style="display: none;">
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn-premium" onclick="document.getElementById('global-bg-uploader').click()" style="flex: 1; padding: 6px 10px; font-size: 0.72rem; justify-content: center; gap: 4px;">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Tải ảnh lên
+                        </button>
+                        <button class="btn-premium btn-danger" id="btn-delete-global-bg" title="Dùng ảnh nền mặc định" style="padding: 6px 8px; font-size: 0.72rem; display: none;">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                    <div id="global-bg-thumbnail" style="display: none; margin-top: 5px; width: 100%; height: 45px; background-size: cover; background-position: center; border-radius: 4px; border: 1px solid var(--border-glass);"></div>
+                </div>
+                
+                <!-- Panel nút Lưu/Hủy riêng biệt của Cài đặt chung (v3.2) -->
+                <div id="global-settings-actions" style="display: none; justify-content: flex-end; gap: 8px; margin-top: 10px; padding-top: 8px; border-top: 1.5px dashed var(--border-glass);">
+                    <button class="btn-premium btn-danger" id="btn-discard-global" style="padding: 4px 10px; font-size: 0.72rem; margin: 0;">Hủy</button>
+                    <button class="btn-premium" id="btn-save-global" style="padding: 4px 10px; font-size: 0.72rem; margin: 0; background: var(--gold-color); color: var(--bg-dark);">Lưu cài đặt</button>
+                </div>
+            </div>
+
+            <!-- Panel nhật ký hoạt động -->
+            <div class="log-panel" style="margin-top: 5px;">
+                <div class="log-panel-title">
+                    <span><i class="fa-solid fa-terminal"></i> Nhật ký hoạt động</span>
+                    <button class="action-icon-btn" id="btn-clear-logs" title="Xóa nhật ký" style="font-size: 0.65rem; width: 18px; height: 18px;"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+                <div class="log-container" id="log-container">
+                    <div class="log-item info">[18:15:00] Hệ thống Muxintang v3.0 đã khởi chạy cục bộ.</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CỘT PHẢI: TRÌNH BIÊN TẬP NỘI DUNG -->
+        <main class="main-editor">
+            
+            <!-- Vùng mô phỏng WYSIWYG -->
+            <section class="preview-pane" style="position: relative;">
+                <div class="preview-title" id="editor-page-title">CHƯA CHỌN TRANG</div>
+                
+                <!-- Nhãn hiển thị kích thước xem trước thời gian thực -->
+                <div id="preview-resolution" style="font-size: 0.72rem; color: var(--gold-color); font-weight: 600; text-shadow: 0 0 4px var(--gold-glow); letter-spacing: 0.5px;">Kích thước: 380px x 540px (Desktop)</div>
+                
+                <!-- Thanh chọn thiết bị xem trước Responsive và nút chế độ -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%;">
+                    <div class="device-switcher" style="margin-top: 2px; margin-bottom: 2px;">
+                        <button class="device-btn active" id="btn-device-desktop" title="Máy tính (Gốc)"><i class="fa-solid fa-desktop"></i></button>
+                        <button class="device-btn" id="btn-device-tablet" title="Máy tính bảng"><i class="fa-solid fa-tablet-screen-button"></i></button>
+                        <button class="device-btn" id="btn-device-mobile" title="Điện thoại di động"><i class="fa-solid fa-mobile-screen-button"></i></button>
+                    </div>
+                    
+                    <!-- Chuyển đổi giữa chế độ biên tập và lật trang -->
+                    <div class="btn-group-row" style="gap: 5px; width: auto; background: rgba(0,0,0,0.25); padding: 3px; border-radius: 6px; border: 1px solid var(--border-glass);">
+                        <button class="btn-tab active" id="btn-preview-mode-edit" style="padding: 4px 10px; font-size: 0.72rem; border-radius: 4px;"><i class="fa-solid fa-pen-to-square"></i> Chế độ sửa</button>
+                        <button class="btn-tab" id="btn-preview-mode-flip" style="padding: 4px 10px; font-size: 0.72rem; border-radius: 4px;"><i class="fa-solid fa-book-open"></i> Chế độ lật 3D</button>
+                    </div>
+                </div>
+
+                <div class="page-canvas-container" style="position: relative; width: 100%; display: flex; justify-content: center; align-items: center; flex: 1; min-height: 380px;">
+                    <!-- Canvas mô phỏng cuốn sách đơn (310x440) -->
+                    <div class="page-canvas" id="canvas-preview">
+                        <!-- Content render động ở đây -->
+                    </div>
+
+                    <!-- Khung xem trước lật trang 3D (Ban đầu ẩn) -->
+                    <div id="flip-preview-container" style="display: none; width: 100%; height: 100%; position: relative; justify-content: center; align-items: center; flex-direction: column; gap: 8px;">
+                        <div id="flip-preview-book-viewport" style="position: relative; overflow: hidden; border: 1.5px solid var(--border-glass); border-radius: 8px; background: rgba(0,0,0,0.45); padding: 15px; display: flex; justify-content: center; align-items: center;">
+                            <div class="flipbook" id="flip-preview-book" style="background: transparent;">
+                                <!-- Các trang lật sẽ sinh động ở đây -->
+                            </div>
+                        </div>
+                        <!-- Nút bấm lật trang thu nhỏ -->
+                        <div style="display: flex; gap: 12px; align-items: center; margin-top: 5px;">
+                            <button class="btn-premium" id="btn-flip-prev" style="padding: 4px 10px; font-size: 0.72rem;"><i class="fa-solid fa-chevron-left"></i> Trang trước</button>
+                            <div id="flip-page-indicator" style="font-size: 0.72rem; color: var(--gold-color); font-weight: 600;">1 / 4</div>
+                            <button class="btn-premium" id="btn-flip-next" style="padding: 4px 10px; font-size: 0.72rem;">Trang sau <i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="editor-hint-msg" style="font-size: 0.72rem; color: var(--text-muted);">
+                    <i class="fa-solid fa-arrows-up-down-left-right"></i> Giữ chuột kéo các phần tử chữ/dịch vụ trên ảnh để đổi vị trí
+                </div>
+            </section>
+
+            <!-- Vùng bảng điều khiển thuộc tính -->
+            <section class="control-pane" id="editor-controls-pane" style="display: none;">
+                
+                <!-- Section 1: Cấu hình chung của trang -->
+                <div class="pane-section">
+                    <div class="pane-section-title">
+                        <span><i class="fa-solid fa-sliders"></i> Cài đặt trang</span>
+                        <span id="label-page-order" style="font-size: 0.75rem; color: var(--gold-color);">Trang #1</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="input-page-name">Tên trang quản lý</label>
+                        <input type="text" class="form-input" id="input-page-name" placeholder="Ví dụ: Giới thiệu ngâm chân">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Loại nội dung trang</label>
+                        <div class="btn-group-row">
+                            <button class="btn-tab active" id="btn-type-image">Chỉ up ảnh</button>
+                            <button class="btn-tab" id="btn-type-custom">Thiết kế tùy chỉnh</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Upload Ảnh & Cắt Ảnh -->
+                <div class="pane-section" id="section-image-uploader">
+                    <div class="pane-section-title">
+                        <span><i class="fa-solid fa-image"></i> Hình ảnh nội dung</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label id="upload-label">Tải ảnh lên (Tự động cắt tỉ lệ chuẩn)</label>
+                        <input type="file" id="file-uploader" accept="image/*" style="display: none;">
+                        <button class="btn-premium" onclick="document.getElementById('file-uploader').click()">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Chọn ảnh & cắt xén
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Section 3: Quản lý Chữ (Chỉ hiện khi là custom page) -->
+                <div class="pane-section" id="section-text-manager" style="display: none;">
+                    <div class="pane-section-title">
+                        <span><i class="fa-solid fa-font"></i> Quản lý Chữ (Text)</span>
+                        <button class="btn-premium" style="padding: 4px 10px; font-size: 0.72rem;" id="btn-add-text">
+                            <i class="fa-solid fa-plus"></i> Thêm chữ
+                        </button>
+                    </div>
+
+                    <!-- Không chọn chữ thì hiện hướng dẫn -->
+                    <div id="text-edit-instructions" style="font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 10px 0;">
+                        Chọn một ô chữ trên hình mô phỏng để bắt đầu chỉnh sửa thuộc tính
+                    </div>
+
+                    <!-- Bảng chỉnh sửa chữ được chọn -->
+                    <div id="text-element-editor" style="display: none; flex-direction: column; gap: 10px;">
+                        <div class="form-group">
+                            <label for="input-text-content">Nội dung chữ</label>
+                            <input type="text" class="form-input" id="input-text-content" placeholder="Nhập nội dung chữ...">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="select-text-font">Kiểu Font chữ (Đã hỗ trợ tiếng Việt)</label>
+                            <select class="form-select" id="select-text-font">
+                                <option value="Montserrat">Montserrat (Hiện đại, thanh mảnh)</option>
+                                <option value="Noto Serif SC">Noto Serif SC (Cổ điển, Trung Hoa)</option>
+                                <option value="Playfair Display">Playfair Display (Quý phái, chân phương)</option>
+                                <option value="Charm">Charm (Thư pháp bay bổng)</option>
+                                <option value="Charmonman">Charmonman (Thư pháp mềm mại)</option>
+                                <option value="Dancing Script">Dancing Script (Viết tay nghệ thuật)</option>
+                                <option value="Great Vibes">Great Vibes (Mềm mại phương Tây)</option>
+                            </select>
+                        </div>
+
+                        <div class="btn-group-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="input-text-size">Cỡ chữ (px)</label>
+                                <input type="number" class="form-input" id="input-text-size" min="10" max="100" value="16">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="input-text-color">Màu chữ</label>
+                                <div style="display: flex; gap: 5px;">
+                                    <input type="color" class="form-input" id="input-text-color" style="padding: 0; width: 40px; height: 35px; cursor: pointer;" value="#c5a059">
+                                    <input type="text" class="form-input" id="input-text-color-hex" style="flex: 1; font-size: 0.75rem;" value="#c5a059">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Định dạng</label>
+                            <div class="text-format-bar">
+                                <button class="format-btn" id="btn-format-bold" title="In đậm"><i class="fa-solid fa-bold"></i></button>
+                                <button class="format-btn" id="btn-format-italic" title="In nghiêng"><i class="fa-solid fa-italic"></i></button>
+                                <button class="format-btn" id="btn-format-underline" title="Gạch chân"><i class="fa-solid fa-underline"></i></button>
+                                <div style="flex: 1;"></div>
+                                <button class="format-btn btn-danger" id="btn-delete-text" title="Xóa chữ này" style="color: #ff6b6b;"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Quản lý Báo Giá Dịch Vụ (Chỉ hiện khi là custom page) -->
+                <div class="pane-section" id="section-services-manager" style="display: none;">
+                    <div class="pane-section-title">
+                        <span><i class="fa-solid fa-file-invoice-dollar"></i> Menu Báo Giá</span>
+                        <div style="display: flex; gap: 6px;">
+                            <button class="btn-premium" style="padding: 4px 10px; font-size: 0.72rem;" id="btn-toggle-services">
+                                Bật bảng giá
+                            </button>
+                            <button class="btn-premium" style="padding: 4px 10px; font-size: 0.72rem; display: none;" id="btn-add-service">
+                                <i class="fa-solid fa-plus"></i> Thêm món
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="services-editor-container" style="display: none; flex-direction: column; gap: 10px;">
+                        <div class="service-list-editor" id="service-list-editor-dom">
+                            <!-- Danh sách các ô dịch vụ sẽ sinh ở đây -->
+                        </div>
+                    </div>
+                    
+                    <div id="services-disabled-msg" style="font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 10px 0;">
+                        Bảng báo giá hiện đang tắt trên trang này
+                    </div>
+                </div>
+
+                <!-- Khu vực nút Lưu / Hủy thay đổi (Chỉ hiện khi có sửa đổi nháp) -->
+                <div id="editor-action-buttons" style="display: none; gap: 10px; margin-top: 10px;">
+                    <button class="btn-premium btn-danger" id="btn-discard-page-changes" style="flex: 1; padding: 10px; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-trash-can"></i> Hủy nháp
+                    </button>
+                    <button class="btn-premium" id="btn-save-page-changes" style="flex: 1; padding: 10px; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Chưa chọn trang nào -->
+            <div id="no-page-selected" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; color: var(--text-muted);">
+                <i class="fa-solid fa-book-open" style="font-size: 4rem; color: rgba(197, 160, 89, 0.2);"></i>
+                <p>Vui lòng chọn một trang ở sơ đồ bên trái để bắt đầu chỉnh sửa</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- -------------------------------------------------------------
+       MODAL CẤU HÌNH CLOUD FIREBASE
+       ------------------------------------------------------------- -->
+    <!-- -------------------------------------------------------------
+       MODAL CẤU HÌNH ĐÁM MÂY KÉP (FIREBASE & GITHUB CLOUD)
+       ------------------------------------------------------------- -->
+    <div class="modal" id="cloud-modal">
+        <div class="modal-content" style="width: 480px; max-width: 95%;">
+            <div class="modal-header">
+                <h3>Cấu Hình Đám Mây Muxintang</h3>
+                <button class="close-modal-btn" id="btn-close-cloud-modal">&times;</button>
+            </div>
+            
+            <!-- Tabs chuyển đổi giữa Firebase và Github -->
+            <div class="cloud-tabs">
+                <button class="cloud-tab-btn active" id="tab-btn-firebase"><i class="fa-solid fa-fire"></i> Firebase (Realtime)</button>
+                <button class="cloud-tab-btn" id="tab-btn-github"><i class="fa-brands fa-github"></i> GitHub Cloud (Tự Chủ)</button>
+            </div>
+
+            <!-- NỘI DUNG TAB FIREBASE -->
+            <div class="cloud-tab-content active" id="tab-content-firebase">
+                <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
+                    Lưu trữ đám mây Firebase Realtime Database. <strong>Chú ý quan trọng:</strong> Bạn bắt buộc phải đổi rules thành <code>{ ".read": true, ".write": true }</code> trên Firebase Console để tránh bị khoá đọc/ghi sau 30 ngày (quy tắc mặc định của Firebase).
+                </p>
+                <div class="form-group">
+                    <label for="input-fb-api-key">API Key</label>
+                    <input type="text" class="form-input" id="input-fb-api-key" placeholder="AIzaSy...">
+                </div>
+                <div class="form-group">
+                    <label for="input-fb-db-url">Database URL</label>
+                    <input type="text" class="form-input" id="input-fb-db-url" placeholder="https://....firebaseio.com">
+                </div>
+                <div class="form-group">
+                    <label for="input-fb-proj-id">Project ID</label>
+                    <input type="text" class="form-input" id="input-fb-proj-id" placeholder="project-id">
+                </div>
+                <div class="form-group">
+                    <label for="input-fb-storage-bucket">Storage Bucket</label>
+                    <input type="text" class="form-input" id="input-fb-storage-bucket" placeholder="project-id.appspot.com">
+                </div>
+                <div class="form-group">
+                    <label for="input-fb-app-id">App ID</label>
+                    <input type="text" class="form-input" id="input-fb-app-id" placeholder="1:12345:web:...">
+                </div>
+                <div class="btn-group-row">
+                    <button class="btn-premium btn-danger" id="btn-clear-firebase" style="flex: 1;">Xóa cấu hình Firebase</button>
+                    <button class="btn-premium" id="btn-save-firebase" style="flex: 1;">Lưu Firebase</button>
+                </div>
+            </div>
+
+            <!-- NỘI DUNG TAB GITHUB CLOUD -->
+            <div class="cloud-tab-content" id="tab-content-github">
+                <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
+                    <strong>Giải pháp vĩnh cửu miễn phí 100% cho từ thiện:</strong> Tự động lưu trữ dữ liệu & hình ảnh trực tiếp lên kho chứa GitHub của bạn. Không lo sập hay giới hạn kết nối!
+                </p>
+                <!-- Bước 1: Nhập token và Kiểm tra -->
+                <div class="form-group">
+                    <label for="input-gh-token">GitHub Access Token (PAT) <span style="color: var(--gold-color); font-size: 0.72rem; cursor: pointer;" title="Cách tạo: Vào GitHub -> Settings -> Developer Settings -> Personal Access Tokens -> Tokens (classic) -> Generate new token -> Chọn quyền 'repo' để cho phép đẩy code">(i) Hướng dẫn tạo</span></label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="password" class="form-input" id="input-gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="flex: 1;">
+                        <button class="btn-premium" id="btn-check-gh-token" style="padding: 8px 14px; font-size: 0.75rem;"><i class="fa-solid fa-key"></i> Kiểm tra</button>
+                    </div>
+                </div>
+                <!-- Bước 2: Tự động nạp tài khoản và Kho chứa -->
+                <div class="form-group">
+                    <label for="input-gh-username">GitHub Username (Tên tài khoản)</label>
+                    <input type="text" class="form-input" id="input-gh-username" placeholder="Sẽ tự điền sau khi kiểm tra Token" disabled style="opacity: 0.7; background: #1a1a1a;">
+                </div>
+                <div class="form-group">
+                    <label for="select-gh-repo">Chọn Kho Chứa (Repository)</label>
+                    <select class="form-select" id="select-gh-repo" style="width: 100%;">
+                        <option value="">-- Vui lòng kiểm tra Token trước --</option>
+                    </select>
+                </div>
+                <!-- Vùng ẩn hiện tạo mới Repo -->
+                <div id="new-repo-creator" style="display: none; flex-direction: column; gap: 8px; border: 1px dashed var(--gold-color); padding: 10px; border-radius: 6px; margin-top: 5px;">
+                    <label for="input-new-gh-repo" style="font-size: 0.72rem; color: var(--gold-color); font-weight: 500;">Tạo Repository mới trực tuyến</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" class="form-input" id="input-new-gh-repo" placeholder="Tên repo (Ví dụ: menumoctamduong)" style="flex: 2; font-size: 0.75rem;">
+                        <button class="btn-premium" id="btn-create-gh-repo" style="flex: 1; font-size: 0.72rem; padding: 6px; justify-content: center;"><i class="fa-solid fa-folder-plus"></i> Tạo & Chọn</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="input-gh-branch">Nhánh chứa code (Branch)</label>
+                    <input type="text" class="form-input" id="input-gh-branch" placeholder="Mặc định: main" value="main">
+                </div>
+                <div class="btn-group-row" style="margin-top: 5px;">
+                    <button class="btn-premium btn-danger" id="btn-clear-github" style="flex: 1; justify-content: center;">Xóa cấu hình GitHub</button>
+                    <button class="btn-premium" id="btn-save-github" style="flex: 1; justify-content: center;">Lưu GitHub</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- -------------------------------------------------------------
+       MODAL CẮT ẢNH (IMAGE CROPPER)
+       ------------------------------------------------------------- -->
+    <div class="modal" id="cropper-modal">
+        <div class="modal-content cropper-modal-content">
+            <div class="modal-header">
+                <h3>Cắt Xén Ảnh Đúng Tỷ Lệ</h3>
+                <button class="close-modal-btn" id="btn-close-cropper-modal">&times;</button>
+            </div>
+            
+            <div class="cropper-container">
+                <img id="cropper-target-img" src="" alt="Cần cắt">
+            </div>
+
+            <div class="btn-group-row">
+                <button class="btn-premium btn-danger" id="btn-cancel-crop" style="flex: 1;">Hủy bỏ</button>
+                <button class="btn-premium" id="btn-confirm-crop" style="flex: 1;">
+                    <i class="fa-solid fa-crop-simple"></i> Cắt & Áp Dụng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast thông báo nhanh -->
+    <div class="toast" id="toast-notification">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-message">Đã lưu và cập nhật menu online!</span>
+    </div>
+
+    <!-- Core Admin Logic -->
+    <script src="data-manager.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

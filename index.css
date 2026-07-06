@@ -1,0 +1,970 @@
+/* ==========================================================================
+   DESIGN SYSTEM & CUSTOM VARIABLE Fallbacks (Calculated dynamically in JS)
+   ========================================================================== */
+:root {
+    --page-width: 380px;
+    /* Chiều rộng trang đơn - cập nhật qua JS */
+    --page-height: 540px;
+    /* Chiều cao trang đơn - cập nhật qua JS */
+    --gold-color: #d4af37;
+    /* Màu vàng kim hoàng gia */
+    --gold-glow: rgba(212, 175, 55, 0.4);
+    --bronze-color: #c5a059;
+    /* Màu đồng cổ */
+    --bg-dark: #121612;
+    /* Màu tối spa thảo mộc */
+}
+
+/* Reset cơ bản */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body,
+html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--bg-dark);
+    font-family: 'Montserrat', sans-serif;
+    color: #f5f5ee;
+    touch-action: none; /* Khóa hoàn toàn mọi thao tác thu phóng (zoom) và cuộn (scroll) mặc định của trình duyệt */
+}
+
+/* ==========================================================================
+   KHUNG 1: KHUNG NỀN BAO BỌC TOÀN BỘ (Wrap all frames)
+   ========================================================================== */
+.main-wrapper {
+    width: 100dvw;
+    height: 100dvh;
+    position: relative;
+    background-image: url('images/spa_background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+
+/* Hiệu ứng làm tối rìa màn hình (Vignette) tập trung thị giác vào cuốn sách giữa */
+.vignette-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(18, 22, 18, 0.1) 0%, rgba(18, 22, 18, 0.7) 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* ==========================================================================
+   KHUNG 2: KHUNG TIÊU ĐỀ TRÊN CÙNG (Height = 20%, Trong suốt)
+   ========================================================================== */
+.top-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5%; /* Giảm từ 10% xuống 5% vì đã bỏ tiêu đề chữ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    pointer-events: none;
+    /* Tránh cản trở việc click/vuốt sách */
+}
+
+.header-content {
+    text-align: center;
+    pointer-events: auto;
+    /* Cho phép tương tác tiêu đề nếu cần */
+    position: relative;
+    padding: 10px 30px;
+}
+
+/* Dấu ấn thư pháp đỏ truyền thống */
+.calligraphy-seal {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    color: #a62b2b;
+    border: 2px solid #a62b2b;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-5deg);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    text-shadow: none;
+}
+
+.main-title {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 2.2rem;
+    color: var(--gold-color);
+    letter-spacing: 6px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.3);
+    margin-top: 10px;
+}
+
+.subtitle {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #e5dfd3;
+    letter-spacing: 5px;
+    margin-top: 6px;
+    opacity: 0.9;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.header-divider {
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold-color), transparent);
+    margin: 10px auto 0;
+}
+
+/* ==========================================================================
+   KHUNG 4: KHUNG NỘI DUNG CHÍNH (Height = 60%, Trong suốt)
+   ========================================================================== */
+.content-frame {
+    position: absolute;
+    top: 5%; /* Đẩy sát lên top 5% */
+    left: 0;
+    width: 100%;
+    height: 85%; /* Tăng từ 80% lên 85% trên Desktop nhờ việc thu nhỏ header */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    z-index: 30; /* Tăng từ 10 lên 30 để lướt 3D trang sách trên cùng, không bị header/footer che khuất */
+    overflow: visible;
+    pointer-events: none; /* Cho phép sự kiện click đi xuyên qua vùng trống của khung nội dung */
+}
+
+/* Viewport cuốn sách: Cắt phần thừa lề trái ở 30px */
+.book-viewport {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0; /* Cho phép mở rộng toàn màn hình để dễ dàng căn lề phải */
+    right: 0;
+    overflow: hidden;
+    /* Cắt các trang/nội dung bị tràn ra ngoài màn hình */
+    display: flex;
+    align-items: center;
+    pointer-events: auto; /* Kích hoạt lại tương tác click/vuốt trên vùng sách */
+}
+
+/* Container sách lật - căn spine vào mốc 20px của viewport (tương đương 50px màn hình) */
+.flipbook {
+    position: absolute;
+    right: 70px; /* Dịch nhẹ sang trái 70px để nhường lề phải cho nút điều hướng */
+    left: auto;
+    height: 90%;
+    width: calc(2 * var(--page-width));
+    overflow: visible;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6);
+    border-radius: 0 12px 12px 0;
+    transition: box-shadow 0.3s ease;
+}
+
+/* Từng trang đơn trong sách lật */
+.page {
+    width: var(--page-width);
+    height: var(--page-height);
+    overflow: hidden;
+    background-color: #fdfcf7;
+    /* Nền giấy ngà ấm áp */
+}
+
+/* Nội dung ảnh của trang */
+.page-content {
+    width: 100%;
+    height: 100%;
+    background-size: 100% 100%;
+    /* Căng khít ảnh đầy đủ */
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* ==========================================================================
+   HIỆU ỨNG TRANG SÁCH THẬT (3D SHADOW & BENDING EFFECTS)
+   ========================================================================== */
+
+/* Trang bên TRÁI (Trang trắng / mặt sau): Gáy sách nằm ở phía bên PHẢI */
+.page:nth-child(odd) .page-content {
+    box-shadow: 
+        inset -25px 0 35px rgba(0, 0, 0, 0.15),      /* Bóng uốn cong lún vào gáy bên phải */
+        inset -8px 0 12px rgba(0, 0, 0, 0.08),
+        inset 10px 0 15px rgba(255, 255, 255, 0.05),  /* Ánh sáng nhẹ ở lề ngoài bên trái */
+        1px 0 3px rgba(0, 0, 0, 0.03);
+    border-radius: 12px 0 0 12px;                    /* Bo viền lề ngoài bên trái */
+    border-right: 1px solid rgba(0, 0, 0, 0.25);     /* Rãnh cắt gáy sách */
+}
+
+/* Trang bên PHẢI (Trang chứa hình ảnh): Gáy sách nằm ở phía bên TRÁI */
+.page:nth-child(even) .page-content {
+    box-shadow: 
+        inset 25px 0 35px rgba(0, 0, 0, 0.18),       /* Bóng uốn cong lún vào gáy bên trái */
+        inset 8px 0 12px rgba(0, 0, 0, 0.1),
+        inset -12px 0 15px rgba(255, 255, 255, 0.08), /* Ánh sáng nhẹ ở lề ngoài bên phải */
+        -1px 0 3px rgba(0, 0, 0, 0.02);
+    border-radius: 0 12px 12px 0;                    /* Bo viền lề ngoài bên phải */
+    border-left: 1px solid rgba(255, 255, 255, 0.15); /* Nẹp gáy sáng */
+}
+
+/* Trang trắng chất liệu cao cấp (Ngăn ngừa lỗi ô đen) */
+.page-white {
+    background-color: #fdfcf7 !important;
+}
+.page-white .page-content {
+    background-color: #fdfcf7 !important;
+}
+
+/* Phục vụ trang đầu tiên trong suốt ở lề trái */
+.page-transparent,
+.page-transparent .page-content {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Phục vụ trang đầu tiên trong suốt ở lề trái */
+.page-transparent,
+.page-transparent .page-content {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Bo góc cho bìa ngoài cùng */
+.page:not(.page-transparent) {
+    border-radius: 0 8px 8px 0;
+}
+
+/* Hiệu ứng 3D gáy sách mềm mại đè lên các trang sách ở mốc 50px */
+.book-crease-overlay {
+    position: absolute;
+    top: 5%;
+    height: 90%;
+    right: calc(70px + var(--page-width)); /* Căn rãnh gáy ở giữa 2 trang trên Desktop */
+    left: auto;
+    width: 50px; /* Tăng độ rộng để dải bóng mềm mại hơn */
+    transform: translateX(50%); /* Căn giữa hoàn hảo trên đường trục gáy */
+    z-index: 999;
+    pointer-events: none;
+    /* Cho phép bấm lướt xuyên qua gáy */
+    background: linear-gradient(to right,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0.04) 20%,
+            rgba(0, 0, 0, 0.2) 40%,
+            rgba(0, 0, 0, 0.55) 46%,
+            rgba(0, 0, 0, 0.85) 49%,      /* Rãnh khâu gáy siêu tối sâu hoắm */
+            rgba(0, 0, 0, 0.95) 50%,      /* Khe sách thật */
+            rgba(255, 255, 255, 0.25) 51%, /* Mép giấy sáng 3D chân thực */
+            rgba(0, 0, 0, 0.4) 54%,
+            rgba(0, 0, 0, 0.15) 65%,
+            rgba(0, 0, 0, 0.02) 80%,
+            rgba(0, 0, 0, 0) 100%);
+    opacity: 0.85;
+    transition: opacity 0.5s ease;
+}
+
+/* Hiệu ứng chồng nhiều lớp viền giấy (Page Stack) ở lề trái từ 30px đến 50px */
+.book-page-stack {
+    position: absolute;
+    right: calc(70px + var(--page-width) + 20px); /* Đặt chồng giấy bên trái gáy trên Desktop */
+    left: auto;
+    top: 5%;
+    height: 90%;
+    width: 20px;
+    /* Khoảng trống gáy sách cách lề ngoài */
+    z-index: 5;
+    pointer-events: none;
+    background: linear-gradient(to right,
+            rgba(235, 230, 215, 0.95) 0%,
+            rgba(220, 210, 190, 0.98) 75%,
+            rgba(160, 145, 120, 1) 100%
+            /* Màu tối hơn nơi nếp gấp gáy */
+        );
+    border-left: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow:
+        1px 0 0 rgba(0, 0, 0, 0.08),
+        2px 0 0 rgba(255, 255, 255, 0.7),
+        3px 0 0 rgba(0, 0, 0, 0.08),
+        4px 0 0 rgba(255, 255, 255, 0.6),
+        5px 0 0 rgba(0, 0, 0, 0.08),
+        6px 0 0 rgba(255, 255, 255, 0.4);
+    opacity: 0.9;
+}
+
+.stack-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.line-1 {
+    left: 4px;
+}
+
+.line-2 {
+    left: 8px;
+}
+
+.line-3 {
+    left: 12px;
+}
+
+.line-4 {
+    left: 16px;
+}
+
+/* ==========================================================================
+   CHỈ MỤC & CỬ CHỈ GỢI Ý
+   ========================================================================== */
+
+/* Chỉ mục số trang */
+.page-indicator {
+    position: absolute;
+    top: 15px; /* Đưa lên phía trên đầu màn hình để tránh đè footer */
+    bottom: auto;
+    right: calc(70px + (var(--page-width) / 2)); /* Căn giữa chỉ số theo trang đang hiển thị */
+    left: auto;
+    transform: translateX(50%);
+    background: rgba(18, 22, 18, 0.7);
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    color: #e5dfd3;
+    z-index: 12;
+    pointer-events: auto; /* Kích hoạt lại tương tác cho phần chỉ số trang */
+}
+
+.page-indicator span {
+    font-weight: 600;
+}
+
+.page-indicator .current-idx {
+    color: var(--gold-color);
+}
+
+/* Thanh điều hướng sách lật bên viền phải */
+.book-navigation {
+    position: absolute;
+    right: 15px; /* Sát viền ngoài cùng bên phải */
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Khoảng cách dọc giữa 2 nút */
+    z-index: 1000;
+    pointer-events: auto; /* Kích hoạt lại tương tác cho phần các nút mũi tên */
+}
+
+/* Nút mũi tên điều hướng tròn cao cấp */
+.nav-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(18, 22, 18, 0.75);
+    border: 1.5px solid var(--gold-color);
+    color: var(--gold-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 10px var(--gold-glow);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    outline: none;
+}
+
+.nav-btn:hover {
+    background: var(--gold-color);
+    color: var(--bg-dark);
+    box-shadow: 0 0 15px var(--gold-color);
+    transform: scale(1.1);
+}
+
+.nav-btn:active {
+    transform: scale(0.95);
+}
+
+.nav-btn:disabled,
+.nav-btn.disabled {
+    opacity: 0.3 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    border-color: #555 !important;
+    color: #555 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Gợi ý vuốt lướt ban đầu */
+.swipe-hint {
+    position: absolute;
+    right: 60px; /* Định vị dựa theo lề phải */
+    left: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0.9;
+    animation: fadePulse 2.5s infinite ease-in-out;
+}
+
+.hint-text {
+    font-size: 0.65rem;
+    color: var(--gold-color);
+    background: rgba(18, 22, 18, 0.85);
+    border: 1px solid var(--gold-color);
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    text-shadow: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hint-hand {
+    font-size: 1.6rem;
+    color: var(--gold-color);
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+    animation: handSwipe 1.8s infinite cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
+
+/* Animation cho bàn tay vuốt */
+@keyframes handSwipe {
+    0% {
+        transform: translateX(0) scale(1);
+        opacity: 0;
+    }
+
+    15% {
+        transform: translateX(0) scale(0.95);
+        opacity: 1;
+    }
+
+    75% {
+        transform: translateX(-40px) scale(0.95);
+        opacity: 1;
+    }
+
+    90% {
+        transform: translateX(-45px) scale(1);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(0) scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes fadePulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* ==========================================================================
+   KHUNG 3: KHUNG LIÊN HỆ DƯỚI CÙNG (Height = 20%, Trong suốt)
+   ========================================================================== */
+.bottom-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 10%; /* Giảm từ 20% xuống 10% trên Desktop để các nút vừa vặn, không bị trống trải */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    pointer-events: none;
+}
+
+.contact-bar {
+    display: flex;
+    gap: 25px;
+    pointer-events: auto;
+    /* Kích hoạt nút bấm tương tác */
+    z-index: 21;
+}
+
+/* Nút liên hệ chung */
+.contact-btn {
+    text-decoration: none;
+    background: rgba(18, 22, 18, 0.8);
+    border: 1px solid rgba(197, 160, 89, 0.4);
+    border-radius: 50px;
+    padding: 6px 18px 6px 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #e5dfd3;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.contact-btn:hover {
+    border-color: var(--gold-color);
+    box-shadow: 0 0 15px var(--gold-glow);
+    transform: translateY(-4px);
+    color: #fff;
+}
+
+/* Vòng tròn icon nổi bật */
+.icon-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--bronze-color);
+    color: var(--bg-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.15rem;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.contact-btn:hover .icon-circle {
+    background: var(--gold-color);
+    transform: rotate(15deg) scale(1.05);
+}
+
+/* Nhãn nút bấm */
+.btn-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.btn-label {
+    font-size: 0.58rem;
+    letter-spacing: 1.5px;
+    color: #a8a090;
+    font-weight: 600;
+}
+
+.btn-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Hiệu ứng nhấp nháy cho Hotline */
+.hotline-btn {
+    border-color: #a62b2b;
+}
+
+.hotline-btn .icon-circle {
+    background: #a62b2b;
+    color: #fff;
+    animation: phonePulse 1.5s infinite;
+}
+
+.hotline-btn:hover {
+    border-color: #d94141;
+}
+
+.hotline-btn:hover .icon-circle {
+    background: #d94141;
+}
+
+/* Icon Zalo tùy chỉnh dạng text */
+.zalo-text {
+    font-size: 0.72rem;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+}
+
+@keyframes phonePulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(166, 43, 43, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(166, 43, 43, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(166, 43, 43, 0);
+    }
+}
+
+/* ==========================================================================
+   POPUP MODAL WECHAT
+   ========================================================================== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(12, 15, 12, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+.modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background: rgba(22, 28, 22, 0.95);
+    border: 1.5px solid var(--bronze-color);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(197, 160, 89, 0.15);
+    width: 320px;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    position: relative;
+    transform: translateY(30px);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+}
+
+.modal.active .modal-content {
+    transform: translateY(0);
+}
+
+.close-modal {
+    position: absolute;
+    top: 12px;
+    right: 18px;
+    font-size: 1.6rem;
+    color: #a8a090;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close-modal:hover {
+    color: #fff;
+}
+
+.modal-icon {
+    font-size: 3rem;
+    color: #07c160;
+    /* Màu xanh WeChat đặc trưng */
+    margin-bottom: 15px;
+}
+
+.modal-content h3 {
+    font-family: 'Noto Serif SC', serif;
+    color: var(--gold-color);
+    margin-bottom: 10px;
+    font-size: 1.3rem;
+    letter-spacing: 1px;
+}
+
+.modal-content p {
+    font-size: 0.85rem;
+    color: #a8a090;
+    margin-bottom: 20px;
+}
+
+.wechat-id-text strong {
+    font-size: 1.1rem;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.copy-btn {
+    background: var(--bronze-color);
+    border: none;
+    color: var(--bg-dark);
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s;
+}
+
+.copy-btn:hover {
+    background: var(--gold-color);
+    box-shadow: 0 0 10px var(--gold-glow);
+    transform: scale(1.03);
+}
+
+.copy-toast {
+    display: block;
+    margin-top: 15px;
+    font-size: 0.72rem;
+    color: var(--gold-color);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.copy-toast.show {
+    opacity: 1;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (HỖ TRỢ ĐA MÀN HÌNH)
+   ========================================================================== */
+@media (max-width: 900px) {
+    .contact-bar {
+        gap: 15px;
+    }
+
+    .contact-btn {
+        padding: 5px 12px 5px 6px;
+        gap: 8px;
+    }
+
+    .btn-val {
+        font-size: 0.78rem;
+    }
+
+    .main-title {
+        font-size: 1.8rem;
+        letter-spacing: 4px;
+    }
+}
+
+@media (max-width: 600px) {
+    .header-content {
+        padding: 5px 15px;
+    }
+
+    .main-title {
+        font-size: 1.35rem;
+        letter-spacing: 3px;
+        margin-top: 5px;
+    }
+
+    .subtitle {
+        font-size: 0.55rem;
+        letter-spacing: 2px;
+        margin-top: 4px;
+    }
+
+    .calligraphy-seal {
+        font-size: 0.72rem;
+        top: -12px;
+        padding: 1px 4px;
+    }
+
+
+
+    /* Tối ưu thanh liên hệ dạng lưới 2x2 gọn gàng */
+    .contact-bar {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        width: 95%;
+    }
+
+    .contact-btn {
+        width: calc(50% - 5px);
+        padding: 5px 12px 5px 5px;
+        gap: 8px;
+        border-radius: 35px;
+    }
+
+    .icon-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+
+    .btn-label {
+        font-size: 0.5rem;
+        letter-spacing: 1px;
+    }
+
+    .btn-val {
+        font-size: 0.72rem;
+    }
+
+    /* Điều chỉnh vị trí chỉ số trang và gợi ý vuốt trên mobile */
+    .page-indicator {
+        top: 10px; /* Đưa lên phía trên đầu màn hình di động */
+        bottom: auto;
+        font-size: 0.75rem;
+        padding: 4px 12px;
+        left: calc(40px + (var(--page-width) / 2)) !important; /* Căn giữa theo trang bên Phải đang hiển thị trên Mobile */
+        right: auto !important;
+        transform: translateX(-50%) !important;
+    }
+
+    /* Định vị điều hướng sát lề phải 50px trống trên mobile */
+    .book-navigation {
+        right: 5px !important; /* Giữ ở trung tâm lề trống 50px */
+        gap: 15px !important;
+    }
+
+    .nav-btn {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 0.95rem !important;
+    }
+
+    .swipe-hint {
+        right: 20px; /* Neo mép vuốt vào viền phải màn hình trên Mobile */
+        left: auto;
+    }
+
+    /* Thiết lập lại chiều cao trên di động để vừa với 2 hàng nút */
+    .content-frame {
+        top: 5%;
+        height: 75%; /* Tăng từ 70% lên 75% trên di động để tăng không gian uốn cong chiều cao */
+    }
+
+    .bottom-footer {
+        height: 20%;
+    }
+
+    /* ĐỊNH VỊ CHO DI ĐỘNG: Gáy sách ở 40px, trang trái chừa lộ ra 35px, trang phải cố định căn chỉnh */
+    .flipbook {
+        left: calc(40px - var(--page-width)) !important;
+        right: auto !important;
+    }
+
+    .book-crease-overlay {
+        left: 40px !important; /* Gáy sách nằm ở 40px từ lề trái */
+        right: auto !important;
+        transform: translateX(-50%) !important;
+    }
+
+    .book-page-stack {
+        left: 20px !important; /* Chồng viền giấy nằm dưới trang lót bên trái (rộng 20px) */
+        right: auto !important;
+        width: 20px !important;
+    }
+}
+
+/* Trạng thái đang tải các trang sách */
+.book-loading {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    gap: 18px;
+    color: var(--gold-color);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.1rem;
+    background: rgba(18, 22, 18, 0.4);
+    border-radius: 8px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.book-loading i {
+    font-size: 3rem;
+    color: var(--gold-color);
+    filter: drop-shadow(0 2px 8px var(--gold-glow));
+}
+
+/* ==========================================================================
+   STYLE CHO TRANG TÙY CHỈNH DỰA TRÊN DỮ LIỆU ĐỘNG (CUSTOM PAGES)
+   ========================================================================== */
+.page-custom {
+    position: relative;
+    background-color: #fdfcf7;
+}
+
+.page-custom .page-content {
+    background-size: cover !important;
+    background-position: center !important;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* Các phần tử văn bản trên trang */
+.custom-text-element {
+    position: absolute;
+    line-height: 1.4;
+    word-wrap: break-word;
+    cursor: default;
+    user-select: none;
+    pointer-events: none; /* Ở trang khách thì không tương tác kéo thả */
+}
+
+/* Bảng báo giá & Dịch vụ */
+.custom-services-container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 15px;
+    background: rgba(253, 252, 247, 0.9); /* Nền giấy ngà mờ bảo vệ chữ dễ đọc */
+    border: 1px solid rgba(197, 160, 89, 0.4);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    pointer-events: none;
+}
+
+.service-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 0.92rem;
+    color: #2b2b2b;
+}
+
+.service-name {
+    font-weight: 600;
+    white-space: nowrap;
+    padding-right: 5px;
+}
+
+.service-line {
+    flex-grow: 1;
+    border-bottom: 1.5px dotted rgba(197, 160, 89, 0.6);
+    margin: 0 8px;
+    align-self: flex-end;
+    margin-bottom: 4px;
+}
+
+.service-price {
+    font-weight: 700;
+    color: #a62b2b; /* Màu đỏ mận truyền thống cho giá tiền */
+    white-space: nowrap;
+    padding-left: 5px;
+}
+
+/* Import thêm các font chữ thư pháp, cổ trang Việt hóa từ Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Charmonman:wght@400;700&family=Dancing+Script:wght@400;700&family=Great+Vibes&display=swap');
