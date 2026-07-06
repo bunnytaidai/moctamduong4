@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnDeleteGlobalBg = document.getElementById('btn-delete-global-bg');
     const globalBgThumbnail = document.getElementById('global-bg-thumbnail');
 
-    // Controls Xem trước nâng cấp (v3.7)
+    // Controls Xem trước nâng cấp (v3.7.1)
     const previewResolution = document.getElementById('preview-resolution');
     const btnPreviewModeEdit = document.getElementById('btn-preview-mode-edit');
     const btnPreviewModeFlip = document.getElementById('btn-preview-mode-flip');
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let allPages = [];            // Danh sách tất cả các trang
     let activePageId = null;      // ID của trang đang được sửa
     let activePageData = null;    // Bản sao dữ liệu của trang đang sửa
-    let isInitialLoad = true;     // Cờ hiệu đánh dấu lần đầu tiên tải trang để khôi phục trạng thái (v3.7)
+    let isInitialLoad = true;     // Cờ hiệu đánh dấu lần đầu tiên tải trang để khôi phục trạng thái (v3.7.1)
     
     let siteTitleOriginal = '';   // Tiêu đề trang web gốc từ DB
     let siteTitleDraft = '';      // Tiêu đề trang web nháp đang sửa
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         allPages = pages;
         renderPageList();
         
-        // --- KHÔI PHỤC TRẠNG THÁI CẤU HÌNH KHI F5 TRANG (v3.7) ---
+        // --- KHÔI PHỤC TRẠNG THÁI CẤU HÌNH KHI F5 TRANG (v3.7.1) ---
         if (isInitialLoad && allPages.length > 0) {
             isInitialLoad = false;
             
@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Đồng bộ Cài đặt chung (v3.7)
+        // Đồng bộ Cài đặt chung (v3.7.1)
         try {
             const title = await DataManager.getSiteTitle();
             siteTitleOriginal = title || '';
@@ -692,6 +692,14 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Ẩn bộ nút khi vừa nạp trang mới (do dữ liệu nháp khớp với dữ liệu gốc)
         checkChanges();
+
+        // --- NÂNG CẤP v3.7.1: TỰ ĐỘNG ÉP SÁCH LẬT ĐẾN TRANG ĐƯỢC CHỌN TRONG MENU ADMIN ---
+        if (previewMode === 'flip' && flipPreviewBookInstance) {
+            const activeIdx = allPages.findIndex(p => p.id === pageId);
+            if (activeIdx >= 0) {
+                flipPreviewBookInstance.flip(activeIdx * 2);
+            }
+        }
     }
 
     function closeEditor() {
@@ -1292,7 +1300,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 cropper.destroy();
             }
             
-            // Khởi động Cropper.js với tỉ lệ vàng flipbook (0.7037) và cho phép thu phóng tự do lấy toàn bộ ảnh (v3.7)
+            // Khởi động Cropper.js với tỉ lệ vàng flipbook (0.7037) và cho phép thu phóng tự do lấy toàn bộ ảnh (v3.7.1)
             setTimeout(() => {
                 const cropperZoomSlider = document.getElementById('cropper-zoom-slider');
                 if (cropperZoomSlider) cropperZoomSlider.value = 1; // Reset slider về 1
@@ -1356,7 +1364,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cropper.getCroppedCanvas({
             width: 500, // Định kích thước xuất tối đa để vừa đẹp, không quá nặng
             height: Math.round(500 / MENU_ASPECT_RATIO),
-            fillColor: '#fdfcf7', // Tô màu nền giấy ngà sang trọng cho các khoảng trống nếu thu nhỏ ảnh lấy toàn bộ (v3.7)
+            fillColor: '#fdfcf7', // Tô màu nền giấy ngà sang trọng cho các khoảng trống nếu thu nhỏ ảnh lấy toàn bộ (v3.7.1)
             imageSmoothingQuality: 'high'
         }).toBlob(async (blob) => {
             if (!blob) return;
@@ -1673,7 +1681,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------------------------------------------
-    // 13. CẤU HÌNH CHUNG & XEM TRƯỚC LẬT TRANG 3D ST.PAGEFLIP (v3.7)
+    // 13. CẤU HÌNH CHUNG & XEM TRƯỚC LẬT TRANG 3D ST.PAGEFLIP (v3.7.1)
     // -------------------------------------------------------------
     // A. Đồng bộ cấu hình chung lúc khởi tạo
     async function initGlobalSettingsUI() {
@@ -1897,7 +1905,7 @@ document.addEventListener('DOMContentLoaded', () => {
             addSystemLog('Đã kích hoạt chế độ xem trước lật sách 3D trực quan.', 'info');
         };
 
-        // Tự động khôi phục chế độ xem và thiết bị đã lưu sau khi load (v3.7)
+        // Tự động khôi phục chế độ xem và thiết bị đã lưu sau khi load (v3.7.1)
         setTimeout(() => {
             const savedDevice = localStorage.getItem('muxintang_admin_active_device') || 'desktop';
             switchDevice(savedDevice);
@@ -1937,7 +1945,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // E. Hàm khởi tạo trình lật trang xem trước (v3.7)
+    // E. Hàm khởi tạo trình lật trang xem trước (v3.7.1)
     async function initFlipbookPreview(forcedW, forcedH) {
         if (flipPreviewBookInstance) {
             try {
@@ -2124,6 +2132,18 @@ document.addEventListener('DOMContentLoaded', () => {
             flipPreviewBookInstance.loadFromHTML(bookEl.querySelectorAll('.page'));
             updateFlipPageIndicator();
             
+            // --- NÂNG CẤP v3.7.1: TỰ ĐỘNG LẬT ĐẾN TRANG ĐANG CHỌN KHI KHỞI TẠO XEM TRƯỚC LẬT TRANG 3D ---
+            if (activePageId) {
+                const activeIdx = allPages.findIndex(p => p.id === activePageId);
+                if (activeIdx >= 0) {
+                    setTimeout(() => {
+                        if (flipPreviewBookInstance) {
+                            flipPreviewBookInstance.flip(activeIdx * 2);
+                        }
+                    }, 150);
+                }
+            }
+            
             flipPreviewBookInstance.on('flip', (e) => {
                 updateFlipPageIndicator(e.data);
             });
@@ -2158,7 +2178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================================
-    // 14. LOGIC PHÓNG TO ẢNH XEM CHI TIẾT CHO ADMIN (v3.7)
+    // 14. LOGIC PHÓNG TO ẢNH XEM CHI TIẾT CHO ADMIN (v3.7.1)
     // ==========================================================================
     const adminZoomModal = document.getElementById('admin-image-zoom-modal');
     const adminZoomImg = document.getElementById('admin-zoom-modal-img');
