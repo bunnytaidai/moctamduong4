@@ -79,6 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnDiscardGlobal = document.getElementById('btn-discard-global');
     const globalSettingsActions = document.getElementById('global-settings-actions');
 
+    // Controls Hình ảnh trang v3.2
+    const btnDeletePageImage = document.getElementById('btn-delete-page-image');
+    const pageImageThumbnail = document.getElementById('page-image-thumbnail');
+
     // Controls GitHub Cloud nâng cấp (v3.0)
     const btnCheckGhToken = document.getElementById('btn-check-gh-token');
     const selectGhRepo = document.getElementById('select-gh-repo');
@@ -211,6 +215,23 @@ document.addEventListener('DOMContentLoaded', () => {
         globalBgThumbnail.style.backgroundImage = 'none';
         globalBgThumbnail.style.display = 'none';
         btnDeleteGlobalBg.style.display = 'none';
+    }
+
+    async function updatePageImageUI() {
+        if (!activePageData) return;
+        const imgUri = activePageData.type === 'custom' ? activePageData.bg_image : activePageData.image;
+        if (imgUri) {
+            const actualUrl = await DataManager.getImageUrl(imgUri);
+            if (actualUrl) {
+                pageImageThumbnail.style.backgroundImage = `url('${actualUrl}')`;
+                pageImageThumbnail.style.display = 'block';
+                btnDeletePageImage.style.display = 'block';
+                return;
+            }
+        }
+        pageImageThumbnail.style.backgroundImage = 'none';
+        pageImageThumbnail.style.display = 'none';
+        btnDeletePageImage.style.display = 'none';
     }
 
     // Kiểm tra xem trang hiện tại có thay đổi gì so với dữ liệu gốc không
@@ -619,6 +640,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Khởi tạo trình soạn dịch vụ báo giá
         initServicesEditor();
         
+        // Cập nhật thumbnail hình ảnh của trang hiện tại (v3.2)
+        updatePageImageUI();
+        
         // Ẩn bộ nút khi vừa nạp trang mới (do dữ liệu nháp khớp với dữ liệu gốc)
         checkChanges();
     }
@@ -632,6 +656,13 @@ document.addEventListener('DOMContentLoaded', () => {
         editorPageTitle.textContent = 'CHƯA CHỌN TRANG';
         canvasPreview.innerHTML = '';
         document.querySelectorAll('.page-item').forEach(item => item.classList.remove('active'));
+        
+        // Dọn thumbnail trang v3.2
+        if (pageImageThumbnail && btnDeletePageImage) {
+            pageImageThumbnail.style.backgroundImage = 'none';
+            pageImageThumbnail.style.display = 'none';
+            btnDeletePageImage.style.display = 'none';
+        }
     }
 
     function setPageTypeTab(type) {
@@ -651,12 +682,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnTypeImage.onclick = () => {
         setPageTypeTab('image');
+        updatePageImageUI();
         renderCanvasPreview();
         checkChanges();
     };
 
     btnTypeCustom.onclick = () => {
         setPageTypeTab('custom');
+        updatePageImageUI();
         renderCanvasPreview();
         checkChanges();
     };
@@ -1260,6 +1293,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 showToast('Upload ảnh và cắt xén thành công!');
+                updatePageImageUI();
                 renderCanvasPreview();
                 checkChanges();
             } catch (err) {
@@ -1379,6 +1413,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     renderCanvasPreview();
                     updateTextEditorUI();
                     initServicesEditor();
+                    updatePageImageUI();
                 }
             }
             
@@ -1604,6 +1639,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.style.backgroundImage = `radial-gradient(circle at 50% 50%, rgba(20, 30, 20, 0.6) 0%, var(--bg-dark) 100%), url('images/spa_background.png')`;
                 addSystemLog('Đã gỡ ảnh nền web nháp. Nhấp "Lưu thay đổi" để áp dụng lên đám mây.', 'info');
                 checkChanges();
+            }
+        };
+    }
+
+    if (btnDeletePageImage) {
+        btnDeletePageImage.onclick = () => {
+            if (!activePageData) return;
+            if (confirm('Bạn có chắc chắn muốn gỡ bỏ hình ảnh của trang này không?')) {
+                const imgToDelete = activePageData.type === 'custom' ? activePageData.bg_image : activePageData.image;
+                if (imgToDelete) {
+                    pendingImageDeletions.push(imgToDelete);
+                }
+                
+                if (activePageData.type === 'custom') {
+                    activePageData.bg_image = '';
+                } else {
+                    activePageData.image = '';
+                }
+                
+                updatePageImageUI();
+                renderCanvasPreview();
+                checkChanges();
+                showToast('Đã gỡ ảnh trang nháp! Hãy bấm Lưu thay đổi để áp dụng.', 'info');
+                addSystemLog('Đã gỡ hình ảnh trang nháp. Hãy bấm Lưu thay đổi để hoàn tất.', 'info');
             }
         };
     }

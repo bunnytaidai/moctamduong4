@@ -1139,9 +1139,15 @@
                     <div class="form-group">
                         <label id="upload-label">Tải ảnh lên (Tự động cắt tỉ lệ chuẩn)</label>
                         <input type="file" id="file-uploader" accept="image/*" style="display: none;">
-                        <button class="btn-premium" onclick="document.getElementById('file-uploader').click()">
-                            <i class="fa-solid fa-cloud-arrow-up"></i> Chọn ảnh & cắt xén
-                        </button>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="btn-premium" onclick="document.getElementById('file-uploader').click()" style="flex: 1; justify-content: center; gap: 6px;">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Chọn ảnh & cắt xén
+                            </button>
+                            <button class="btn-premium btn-danger" id="btn-delete-page-image" title="Xóa hình ảnh trang hiện tại" style="padding: 8px 12px; display: none; margin: 0;">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                        <div id="page-image-thumbnail" style="display: none; margin-top: 8px; width: 100%; height: 120px; background-size: contain; background-position: center; background-repeat: no-repeat; border-radius: 6px; border: 1.5px solid var(--border-glass); background-color: rgba(0,0,0,0.25);"></div>
                     </div>
                 </div>
 
