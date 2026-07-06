@@ -1,5 +1,5 @@
 /**
- * data-manager.js (v2.1)
+ * data-manager.js (v2.2)
  * Quản lý dữ liệu thời gian thực cho Menu Online (Firebase, GitHub API & Offline Local Fallback)
  * Hỗ trợ 3 chế độ lưu trữ 100% MIỄN PHÍ:
  *   1. Chế độ FIREBASE (Khuyên dùng cho Realtime): Sử dụng Realtime Database & Storage.
@@ -209,7 +209,46 @@ async function setupDefaultData() {
     }
 }
 
-function loadLocalData() {
+// Hàm tải dữ liệu thực đơn tĩnh từ file menu_data.json trên host tĩnh (v3.3)
+async function loadStaticMenuData() {
+    try {
+        // Thêm query timestamp chống trình duyệt cache kết quả cũ
+        const res = await fetch(`menu_data.json?t=${Date.now()}`);
+        if (res.ok) {
+            const parsedData = await res.json();
+            let pagesList = Array.isArray(parsedData) ? parsedData : (parsedData.pages || []);
+            let globalBg = Array.isArray(parsedData) ? '' : (parsedData.global_bg || '');
+            localStorage.setItem('muxintang_global_bg', globalBg);
+            
+            let siteTitle = Array.isArray(parsedData) ? '' : (parsedData.site_title || '');
+            localStorage.setItem('muxintang_site_title', siteTitle);
+            
+            pagesList.sort((a, b) => a.order - b.order);
+            
+            // Cập nhật bộ nhớ đệm Local để hỗ trợ chạy offline
+            localStorage.setItem('muxintang_menu_pages_cache', JSON.stringify(pagesList));
+            localStorage.setItem('muxintang_menu_pages', JSON.stringify({
+                site_title: siteTitle,
+                global_bg: globalBg,
+                pages: pagesList
+            }));
+            
+            triggerCallbacks(pagesList);
+            console.log("Đồng bộ thành công dữ liệu thực đơn từ menu_data.json trên máy chủ.");
+            return true;
+        }
+    } catch (err) {
+        console.warn("Không thể tự động tải menu_data.json từ máy chủ (đang chạy offline):", err);
+    }
+    return false;
+}
+
+async function loadLocalData() {
+    // 1. Cố gắng nạp dữ liệu thực đơn mới nhất từ file menu_data.json trên server tĩnh
+    const hasLoadedStatic = await loadStaticMenuData();
+    if (hasLoadedStatic) return;
+
+    // 2. Fallback: Nếu không tải được (ví dụ chạy file:// offline hoặc mất kết nối), đọc từ LocalStorage
     let pages = null;
     try {
         const cached = localStorage.getItem('muxintang_menu_pages_cache');
