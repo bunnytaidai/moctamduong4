@@ -191,13 +191,28 @@
             background: rgba(18, 22, 18, 0.4);
             border: 1px solid var(--border-glass);
             border-radius: 8px;
-            cursor: pointer;
+            cursor: grab;
             transition: all 0.2s ease;
+            user-select: none;
         }
 
         .page-item:hover, .page-item.active {
             background: rgba(212, 175, 55, 0.1);
             border-color: var(--accent);
+        }
+
+        .page-item.active {
+            cursor: grab;
+        }
+
+        .page-item.dragging {
+            opacity: 0.4;
+            border: 1px dashed var(--accent);
+        }
+
+        .page-item.drag-over {
+            border: 2px dashed var(--accent);
+            background: rgba(212, 175, 55, 0.15);
         }
 
         .page-item .page-name {
@@ -233,7 +248,7 @@
             background-repeat: no-repeat;
             position: relative;
             overflow: auto;
-            padding: 70px 30px 30px; /* Thêm padding-top để chừa khoảng cho thanh Device Selector */
+            padding: 70px 30px 30px; 
         }
 
         /* Vignette overlay same as index.html */
@@ -299,7 +314,30 @@
             border-radius: 0 12px 12px 0;
             z-index: 1;
             perspective: 2500px;
-            transition: width 0.3s ease, height 0.3s ease;
+        }
+
+        /* Golden resize handle at the bottom-right corner */
+        .book-resize-handle {
+            position: absolute;
+            right: -12px;
+            bottom: -12px;
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            color: var(--bg-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: se-resize;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 8px var(--gold-glow);
+            font-size: 0.75rem;
+            transition: transform 0.2s;
+        }
+
+        .book-resize-handle:hover {
+            transform: scale(1.15);
         }
 
         /* Page stack lines on the left */
@@ -348,7 +386,6 @@
             overflow: hidden;
             position: relative;
             border-radius: 12px 0 0 12px;
-            transition: width 0.3s ease, height 0.3s ease;
         }
 
         /* Left page shadows mirroring client */
@@ -395,7 +432,6 @@
             background-repeat: no-repeat;
             border-left: 1px solid rgba(255, 255, 255, 0.15);
             z-index: 2;
-            transition: width 0.3s ease, height 0.3s ease;
         }
 
         /* Right page shadows mirroring client */
@@ -640,7 +676,7 @@
         .preview-3d-wrapper {
             display: none;
             position: absolute;
-            top: 70px; /* Đồng bộ padding của container */
+            top: 70px; 
             left: 0;
             width: 100%;
             height: calc(100% - 70px);
@@ -658,7 +694,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: width 0.3s ease, height 0.3s ease;
         }
 
         .flipbook {
@@ -845,7 +880,13 @@
         <!-- Sidebar: Danh sách các trang tùy biến -->
         <aside class="sidebar">
             <div class="sidebar-title">
-                Danh Sách Trang
+                Sắp Xếp Thứ Tự Trang
+                <span class="tooltip-container">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span class="tooltip-content">
+                        Nhấp giữ và kéo các trang lên/xuống để sắp xếp lại thứ tự hiển thị trong cuốn sách.
+                    </span>
+                </span>
             </div>
             
             <ul class="page-list" id="sidebar-page-list">
@@ -896,6 +937,11 @@
 
             <!-- 2D Mock Book Spread -->
             <div class="mock-book-spread" id="book-spread-container">
+                <!-- Golden Resize Handle ở góc dưới bên phải để phóng to / thu nhỏ toàn bộ khung sách -->
+                <div class="book-resize-handle" id="book-resize-handle" title="Giữ chuột và kéo góc này để Phóng to / Thu nhỏ toàn bộ cuốn sách">
+                    <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                </div>
+
                 <!-- Chồng giấy lề trái -->
                 <div class="book-page-stack" id="designer-page-stack">
                     <div class="stack-line line-1"></div>
@@ -1091,7 +1137,7 @@
                 if (parsedIdx >= 0 && parsedIdx < bookPages.length) {
                     selectPage(parsedIdx);
                 } else {
-                    selectPage(1); // Mặc định là trang 2 (Cứu ngải)
+                    selectPage(1); 
                 }
             } else {
                 selectPage(1);
@@ -1140,15 +1186,13 @@
             }
         }
 
-        // Tự động lưu cấu hình cục bộ khi có bất kỳ thay đổi nào (Kéo thả, đổi thuộc tính)
         function autoSave() {
             localStorage.setItem('muxintang_ui_sync', JSON.stringify(activePageData));
         }
 
         function saveConfig() {
-            autoSave(); // Đảm bảo đồng bộ cục bộ trước
+            autoSave(); 
             
-            // Lưu sang DataManager đám mây (Firebase/GitHub) nếu có kết nối
             if (window.DataManager) {
                 activePageData.forEach(sp => {
                     const page = bookPages.find(p => p.id === sp.id);
@@ -1183,8 +1227,10 @@
         }
 
         // -------------------------------------------------------------
-        // Quản lý trang (Sidebar)
+        // Quản lý trang & Sắp xếp kéo thả (Sidebar Drag & Drop)
         // -------------------------------------------------------------
+        let dragSourceIdx = null;
+
         function renderSidebarPages() {
             const listEl = document.getElementById('sidebar-page-list');
             listEl.innerHTML = '';
@@ -1192,11 +1238,70 @@
             bookPages.forEach((page, idx) => {
                 const li = document.createElement('li');
                 li.className = `page-item ${idx === selectedPageIndex ? 'active' : ''}`;
+                li.setAttribute('draggable', 'true');
+                li.setAttribute('data-index', idx);
                 li.innerHTML = `
-                    <span class="page-name">${page.name}</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-grip-vertical" style="color: var(--text-muted); cursor: grab; font-size: 0.8rem;"></i>
+                        <span class="page-name">${page.name}</span>
+                    </div>
                 `;
+                
                 li.addEventListener('click', () => selectPage(idx));
+                addDragAndDropListeners(li);
                 listEl.appendChild(li);
+            });
+        }
+
+        function addDragAndDropListeners(item) {
+            item.addEventListener('dragstart', (e) => {
+                dragSourceIdx = parseInt(item.getAttribute('data-index'));
+                item.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                item.classList.add('drag-over');
+            });
+
+            item.addEventListener('dragleave', () => {
+                item.classList.remove('drag-over');
+            });
+
+            item.addEventListener('drop', (e) => {
+                e.preventDefault();
+                item.classList.remove('drag-over');
+                const targetIdx = parseInt(item.getAttribute('data-index'));
+                
+                if (dragSourceIdx !== null && dragSourceIdx !== targetIdx) {
+                    // Sắp xếp lại danh sách các trang
+                    const movedPage = bookPages.splice(dragSourceIdx, 1)[0];
+                    bookPages.splice(targetIdx, 0, movedPage);
+                    
+                    // Cập nhật lại order của các trang
+                    bookPages.forEach((p, index) => {
+                        p.order = index + 1;
+                    });
+
+                    // Đồng bộ thứ tự mới sang DataManager đám mây nếu có
+                    if (window.DataManager) {
+                        const orderedIds = bookPages.map(p => p.id);
+                        window.DataManager.updatePagesOrder(orderedIds).catch(err => {
+                            console.error("Lỗi cập nhật thứ tự trang:", err);
+                        });
+                    }
+
+                    autoSave();
+                    renderSidebarPages();
+                    selectPage(targetIdx);
+                }
+            });
+
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+                document.querySelectorAll('.page-item').forEach(el => el.classList.remove('drag-over'));
             });
         }
 
@@ -1206,7 +1311,6 @@
             selectedElementId = null;
             hideElementProperties();
             
-            // Lưu lại chỉ số trang hiện tại đang chỉnh sửa để phục hồi khi reload
             localStorage.setItem('muxintang_selected_page_idx', idx);
 
             document.querySelectorAll('.page-item').forEach((item, index) => {
@@ -1377,7 +1481,7 @@
             }
 
             pageConfig.elements.push(newElement);
-            autoSave(); // Tự động lưu tức thời
+            autoSave(); 
             renderCanvasElements();
             selectElement(newId);
         }
@@ -1392,14 +1496,15 @@
             }
             selectedElementId = null;
             hideElementProperties();
-            autoSave(); // Tự động lưu tức thời
+            autoSave(); 
             renderCanvasElements();
         }
 
         // -------------------------------------------------------------
-        // Interact.js Drag & Resize (Kéo thả phẳng)
+        // Interact.js Drag & Resize (Kéo thả phẳng & Co giãn toàn khung)
         // -------------------------------------------------------------
         function initInteractJS() {
+            // 1. Kéo thả và co giãn phần tử con bên trong canvas
             interact('.design-element')
                 .draggable({
                     inertia: false,
@@ -1434,7 +1539,7 @@
                             updateElementPositionData(target.id, leftPct, topPct, null, null);
                         },
                         end(event) {
-                            autoSave(); // Tự động lưu trạng thái khi kết thúc kéo thả
+                            autoSave(); 
                         }
                     }
                 })
@@ -1458,7 +1563,7 @@
                             updateElementPositionData(target.id, null, null, widthPct, heightPct);
                         },
                         end(event) {
-                            autoSave(); // Tự động lưu trạng thái khi kết thúc co giãn
+                            autoSave(); 
                         }
                     },
                     modifiers: [
@@ -1466,6 +1571,28 @@
                             min: { width: 50, height: 30 }
                         })
                     ]
+                });
+
+            // 2. Co giãn phóng to/thu nhỏ toàn bộ cuốn sách bằng kéo ở góc phải dưới
+            interact('#book-spread-container')
+                .resizable({
+                    edges: { right: '#book-resize-handle', bottom: '#book-resize-handle' },
+                    listeners: {
+                        move(event) {
+                            const newW = event.rect.width;
+                            // Tính toán chiều rộng trang đơn (chiều rộng spread chia đôi)
+                            let singlePageW = Math.max(150, Math.min(800, newW / 2));
+                            // Tính chiều cao trang đơn theo tỷ lệ vàng gốc 0.73
+                            let singlePageH = Math.floor(singlePageW / 0.73);
+
+                            // Cập nhật biến CSS toàn cục
+                            document.documentElement.style.setProperty('--canvas-w', `${singlePageW}px`);
+                            document.documentElement.style.setProperty('--canvas-h', `${singlePageH}px`);
+
+                            // Vẽ lại canvas để cập nhật vị trí tương thích của các phần tử con theo kích thước mới
+                            renderCanvasElements();
+                        }
+                    }
                 });
         }
 
@@ -1534,8 +1661,35 @@
             }
         }
 
+        window.updateServiceRow = function(idx, key, val) {
+            const page = bookPages[selectedPageIndex];
+            const pageConfig = activePageData.find(p => p.id === page.id);
+            if (pageConfig) {
+                const el = pageConfig.elements.find(item => item.id === selectedElementId);
+                if (el && el.services[idx]) {
+                    el.services[idx][key] = val;
+                    autoSave();
+                    renderCanvasElements();
+                }
+            }
+        }
+
+        window.deleteServiceRow = function(idx) {
+            const page = bookPages[selectedPageIndex];
+            const pageConfig = activePageData.find(p => p.id === page.id);
+            if (pageConfig) {
+                const el = pageConfig.elements.find(item => item.id === selectedElementId);
+                if (el) {
+                    el.services.splice(idx, 1);
+                    renderEditServicesList(el);
+                    autoSave();
+                    renderCanvasElements();
+                }
+            }
+        }
+
         // -------------------------------------------------------------
-        // Chuyển đổi qua lại giữa Thiết Kế 2D và Xem Trước 3D
+        // Chuyển đổi qua lại giữa Thiết Kế 2D và Xem Trước 3D (Đồng bộ bất đồng bộ)
         // -------------------------------------------------------------
         function toggleMode(mode) {
             const bookSpread = document.getElementById('book-spread-container');
@@ -1559,8 +1713,10 @@
                 bookSpread.style.display = 'none';
                 preview3d.style.display = 'flex';
                 
-                buildFlipbookHTML();
-                initFlipbook3D();
+                // Giải quyết triệt để lỗi đua lệnh (race condition) bằng việc đợi vẽ xong HTML mới khởi tạo St.PageFlip
+                buildFlipbookHTML().then(() => {
+                    initFlipbook3D();
+                });
             }
         }
 
@@ -1650,7 +1806,6 @@
             const previewBook = document.getElementById('preview-book');
             if (!previewBook) return;
 
-            // Đọc kích thước hiện tại từ biến CSS để khởi tạo đúng tỉ lệ cho St.PageFlip
             const currentW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--canvas-w')) || 380;
             const currentH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--canvas-h')) || 540;
 
@@ -1681,7 +1836,6 @@
 
         // Thay đổi kích thước viewport giả lập thiết bị (PC, Tablet, Mobile)
         function changeDeviceMode(deviceType) {
-            // Xóa active cũ
             document.querySelectorAll('.device-btn').forEach(btn => btn.classList.remove('active'));
 
             if (deviceType === 'desktop') {
@@ -1698,10 +1852,8 @@
                 document.documentElement.style.setProperty('--canvas-h', '310px');
             }
 
-            // Render lại các phần tử kéo thả cho khít theo tỉ lệ %
             renderCanvasElements();
 
-            // Nếu đang xem trước 3D, khởi tạo lại Flipbook theo size mới
             if (pageFlipInstance) {
                 buildFlipbookHTML().then(() => {
                     try { pageFlipInstance.destroy(); } catch(e) {}
@@ -1717,7 +1869,6 @@
             document.getElementById('btn-mode-design').addEventListener('click', () => toggleMode('design'));
             document.getElementById('btn-mode-preview').addEventListener('click', () => toggleMode('preview'));
 
-            // Đăng ký sự kiện các nút thiết bị
             document.getElementById('btn-device-desktop').addEventListener('click', () => changeDeviceMode('desktop'));
             document.getElementById('btn-device-tablet').addEventListener('click', () => changeDeviceMode('tablet'));
             document.getElementById('btn-device-mobile').addEventListener('click', () => changeDeviceMode('mobile'));
@@ -1725,7 +1876,7 @@
             document.getElementById('btn-load-preset').addEventListener('click', () => {
                 if (confirm("Ghi đè thiết kế hiện tại bằng dữ liệu mẫu mặc định?")) {
                     activePageData = JSON.parse(JSON.stringify(defaultPreset));
-                    autoSave(); // Tự động lưu tức thời
+                    autoSave(); 
                     selectPage(selectedPageIndex);
                 }
             });
@@ -1743,7 +1894,7 @@
                     const el = pageConfig.elements.find(item => item.id === selectedElementId);
                     if (el) {
                         el.content = e.target.value;
-                        autoSave(); // Tự động lưu tức thời
+                        autoSave(); 
                         renderCanvasElements();
                     }
                 }
@@ -1757,7 +1908,7 @@
                     const el = pageConfig.elements.find(item => item.id === selectedElementId);
                     if (el) {
                         el.fontSize = parseInt(e.target.value) || 12;
-                        autoSave(); // Tự động lưu tức thời
+                        autoSave(); 
                         renderCanvasElements();
                     }
                 }
@@ -1771,7 +1922,7 @@
                     const el = pageConfig.elements.find(item => item.id === selectedElementId);
                     if (el) {
                         el.color = e.target.value;
-                        autoSave(); // Tự động lưu tức thời
+                        autoSave(); 
                         renderCanvasElements();
                     }
                 }
@@ -1787,7 +1938,7 @@
                     if (el) {
                         el.bold = !el.bold;
                         toggleStyleBtn('btn-prop-bold', el.bold);
-                        autoSave(); // Tự động lưu tức thời
+                        autoSave(); 
                         renderCanvasElements();
                     }
                 }
@@ -1802,7 +1953,7 @@
                     if (el) {
                         el.italic = !el.italic;
                         toggleStyleBtn('btn-prop-italic', el.italic);
-                        autoSave(); // Tự động lưu tức thời
+                        autoSave(); 
                         renderCanvasElements();
                     }
                 }
@@ -1817,7 +1968,7 @@
                     if (el) {
                         el.underline = !el.underline;
                         toggleStyleBtn('btn-prop-underline', el.underline);
-                        autoSave(); // Tự động lưu tức thời
+                        autoSave(); 
                         renderCanvasElements();
                     }
                 }
@@ -1833,7 +1984,7 @@
                     if (el && el.type === 'services') {
                         el.services.push({ name: 'Tên dịch vụ mới', price: '0 đ' });
                         renderEditServicesList(el);
-                        autoSave(); // Tự động lưu tức thời
+                        autoSave();
                         renderCanvasElements();
                     }
                 }
