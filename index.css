@@ -941,9 +941,14 @@ html {
         bottom: 20px !important;
     }
 
+    .book-viewport {
+        align-items: flex-start !important;
+    }
+
     /* ĐỊNH VỊ CHO DI ĐỘNG: Gáy sách cách lề trái 15px để chừa bóng gáy mượt và phóng to trang phải nội dung chính (v3.4) */
     .flipbook {
         position: absolute !important;
+        top: 5px !important; /* Đẩy cuốn sách cách viền trên cùng book-viewport đúng 5px theo yêu cầu của Thỏ */
         left: calc(15px - var(--page-width)) !important;
         right: auto !important;
         width: calc(2 * var(--page-width)) !important;
@@ -954,8 +959,8 @@ html {
         left: 15px !important; /* Gáy sách nằm ở 15px từ lề trái */
         right: auto !important;
         transform: translateX(-50%) !important;
-        top: auto !important;
-        bottom: 0 !important;
+        top: 5px !important; /* Khớp lề trên với sách */
+        bottom: auto !important;
         height: var(--page-height) !important;
     }
 
@@ -963,8 +968,8 @@ html {
         left: -5px !important; /* Đẩy sát lề trái màn hình để làm điểm tỳ trang giấy lật */
         right: auto !important;
         width: 20px !important;
-        top: auto !important;
-        bottom: 0 !important;
+        top: 5px !important; /* Khớp lề trên với sách */
+        bottom: auto !important;
         height: var(--page-height) !important;
     }
 }
