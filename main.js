@@ -50,7 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // ĐẢM BẢO KHÔNG TRÀN MÀN HÌNH DI ĐỘNG:
         // Căn lề hai bên cực mảnh, riêng trên di động chừa 25px (gáy 15px lề trái, 10px lề phải) để tối ưu không gian hiển thị tối đa trang lẻ bên phải (v3.4)
         const isMobile = window.innerWidth <= 600;
-        const maxAllowedWidth = isMobile ? (window.innerWidth - 25) : (window.innerWidth - 10);
+        const frameWidth = contentFrame.clientWidth;
+        const maxAllowedWidth = isMobile ? (frameWidth - 25) : (frameWidth - 10);
         if (pageWidth > maxAllowedWidth) {
             pageWidth = maxAllowedWidth;
             // Tính ngược lại chiều cao tương ứng theo tỷ lệ vàng để không méo hình
@@ -226,6 +227,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Hàm helper áp dụng CSS 3D & Nền khung cho các phần tử 2D (v3.7.6)
+    function apply3DStylesToElement(domEl, configEl) {
+        if (!configEl) return;
+        // Shadow 3D
+        if (configEl.boxShadow3D === 'soft') domEl.style.boxShadow = '0 4px 10px rgba(0,0,0,0.2)';
+        else if (configEl.boxShadow3D === 'medium') domEl.style.boxShadow = '0 10px 25px rgba(0,0,0,0.35)';
+        else if (configEl.boxShadow3D === 'hard') domEl.style.boxShadow = '0 20px 45px rgba(0,0,0,0.5)';
+        else if (configEl.boxShadow3D === 'gold-glow') domEl.style.boxShadow = '0 0 15px rgba(212,175,55,0.6), 0 5px 15px rgba(0,0,0,0.3)';
+        else if (configEl.boxShadow3D === 'none') domEl.style.boxShadow = 'none';
+
+        // Rotate X/Y
+        const rotX = configEl.rotateX3D || 0;
+        const rotY = configEl.rotateY3D || 0;
+        if (rotX !== 0 || rotY !== 0) {
+            domEl.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+        } else {
+            domEl.style.transform = '';
+        }
+
+        // Background
+        if (configEl.bg3D === 'paper') domEl.style.background = 'rgba(253, 252, 247, 0.95)';
+        else if (configEl.bg3D === 'dark-herb') domEl.style.background = 'rgba(18, 22, 18, 0.85)';
+        else if (configEl.bg3D === 'glass') {
+            domEl.style.background = 'rgba(255, 255, 255, 0.1)';
+            domEl.style.backdropFilter = 'blur(8px)';
+            domEl.style.webkitBackdropFilter = 'blur(8px)';
+        }
+        else if (configEl.bg3D === 'gold-grad') domEl.style.background = 'linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(181, 146, 47, 0.2) 100%)';
+        else if (configEl.bg3D === 'transparent') domEl.style.background = 'transparent';
+
+        // Border 3D
+        if (configEl.border3D === 'thin-gold') domEl.style.border = '1px solid rgba(212, 175, 55, 0.4)';
+        else if (configEl.border3D === 'double-gold') domEl.style.border = '3px double #d4af37';
+        else if (configEl.border3D === 'bevel-3d') {
+            domEl.style.border = '1.5px solid rgba(255, 255, 255, 0.25)';
+            domEl.style.borderBottomColor = 'rgba(0, 0, 0, 0.4)';
+            domEl.style.borderRightColor = 'rgba(0, 0, 0, 0.4)';
+        } else if (configEl.border3D === 'none') {
+            domEl.style.border = 'none';
+        }
+    }
+
     // Hàm render động cấu trúc cuốn sách từ dữ liệu DataManager
     async function renderPagesDynamic(pages) {
         if (!bookEl) return;
@@ -283,6 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (pageData.elements && pageData.elements.length > 0) {
                     pageData.elements.forEach(el => {
                         const div = document.createElement('div');
+                        apply3DStylesToElement(div, el);
                         let style = `position: absolute; left: ${el.x}%; top: ${el.y}%; width: ${el.w}%; height: ${el.h}%;`;
                         
                         if (el.type === 'text') {
@@ -504,28 +548,33 @@ document.addEventListener('DOMContentLoaded', () => {
             const config = layout.selectors[selector];
             let el = document.querySelector(selector);
             
-            // Nếu không tìm thấy và có khai báo parent thì tự động tạo động phần tử mới
-            if (!el && config.parent) {
-                const parentEl = document.querySelector(config.parent);
-                if (parentEl) {
-                    el = document.createElement(config.tagName || 'div');
-                    if (selector.startsWith('#')) {
-                        el.id = selector.substring(1);
-                    } else if (selector.startsWith('.')) {
-                        el.className = selector.substring(1);
-                    }
-                    parentEl.appendChild(el);
-                }
-            }
-            
             if (el) {
+                // Di chuyển ra làm con trực tiếp của .main-wrapper để căn toạ độ tuyệt đối khớp 100% với simulator
+                if (selector === '#frame-2' || selector === '#frame-3' || selector === '#book-viewport') {
+                    const mainWrapper = document.querySelector('.main-wrapper');
+                    if (mainWrapper && el.parentNode !== mainWrapper) {
+                        mainWrapper.appendChild(el);
+                    }
+                }
+
                 // Áp dụng mã HTML
                 if (config.html !== undefined) {
                     el.innerHTML = config.html;
                 }
-                // Áp dụng mã CSS
+                // Áp dụng mã CSS kèm theo !important cho từng thuộc tính để đè bẹp stylesheet mặc định
                 if (config.css !== undefined) {
-                    el.style.cssText = config.css;
+                    let cssWithImportant = config.css.split(';').map(style => {
+                        let trimmed = style.trim();
+                        if (!trimmed) return '';
+                        if (trimmed.includes('!important')) return trimmed;
+                        let colonIdx = trimmed.indexOf(':');
+                        if (colonIdx === -1) return trimmed;
+                        let key = trimmed.substring(0, colonIdx).trim();
+                        let val = trimmed.substring(colonIdx + 1).trim();
+                        return `${key}: ${val} !important`;
+                    }).filter(Boolean).join('; ') + ';';
+                    
+                    el.style.cssText = cssWithImportant;
                 }
                 // Áp dụng sự kiện click JS
                 if (config.js !== undefined && config.js !== '') {

@@ -46,6 +46,47 @@ html {
     background-position: center;
     background-repeat: no-repeat;
     overflow: hidden;
+    display: flex !important;
+    flex-direction: row !important;
+}
+
+/* Khung 1: Bên trái chiếm 85% chiều rộng */
+#khung-1 {
+    width: 85% !important;
+    height: 100% !important;
+    position: relative !important;
+    overflow: visible !important; /* Đổi thành visible để không che khuất bóng đổ ngoài của sách */
+}
+
+/* Khung 2: Bên phải chiếm phần tự động còn lại (15%) */
+#khung-2 {
+    width: 15% !important;
+    height: 100% !important;
+    position: relative !important;
+    background: rgba(18, 22, 18, 0.7) !important;
+    border-left: 1.5px solid rgba(197, 160, 89, 0.3) !important;
+    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.6) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 30px 10px !important;
+    z-index: 50 !important;
+}
+
+/* Định vị lại header trong khung 2 */
+#khung-2 .top-header {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    top: auto !important;
+    left: auto !important;
+    z-index: auto !important;
+    pointer-events: auto !important;
 }
 
 /* Hiệu ứng làm tối rìa màn hình (Vignette) tập trung thị giác vào cuốn sách giữa */
@@ -140,10 +181,11 @@ html {
     top: 0; /* Đẩy sát lên top 0 để tràn viền tuyệt đối (v3.4) */
     left: 0;
     width: 100%;
-    height: 100%; /* Chiếm trọn 100% chiều cao để trang sách bay đè qua các khung khác (v3.4) */
+    bottom: 79px !important; /* Trừ đi 20px bottom + 54px nút + 5px khoảng cách */
+    height: auto !important; /* Cho phép co giãn tự động theo bottom */
     display: flex;
-    align-items: center;
-    justify-content: flex-start;
+    align-items: flex-end; /* Căn sách lật sát đáy của vùng khả dụng */
+    justify-content: center;
     z-index: 30; /* Tăng từ 10 lên 30 để lướt 3D trang sách trên cùng, không bị header/footer che khuất */
     overflow: visible;
     pointer-events: none; /* Cho phép sự kiện click đi xuyên qua vùng trống của khung nội dung */
@@ -156,10 +198,10 @@ html {
     bottom: 0;
     left: 0;
     right: 0;
-    overflow: hidden;
+    overflow: visible; /* Đổi thành visible để bóng đổ ngoài của sách lan tỏa tự nhiên */
     display: flex;
     justify-content: center; /* Căn giữa cuốn sách theo chiều ngang (v3.4) */
-    align-items: center;     /* Căn giữa cuốn sách theo chiều dọc */
+    align-items: flex-end !important; /* Đẩy sát đáy của viewport (cách nút 5px) */
     pointer-events: auto; /* Kích hoạt lại tương tác click/vuốt trên vùng sách */
     perspective: 2500px; /* Tạo chiều sâu phối cảnh không gian 3D cực mạnh (v3.4) */
 }
@@ -262,8 +304,9 @@ html {
 /* Hiệu ứng 3D gáy sách mềm mại đè lên các trang sách ở mốc 50px */
 .book-crease-overlay {
     position: absolute;
-    top: 5%;
-    height: 90%;
+    height: var(--page-height) !important; /* Chiều cao khớp 100% với cuốn sách */
+    top: auto !important;
+    bottom: 0 !important; /* Đặt sát đáy giống như cuốn sách */
     left: 50% !important; /* Căn gáy sách chính giữa màn hình (v3.4) */
     right: auto !important;
     width: 50px; /* Tăng độ rộng để dải bóng mềm mại hơn */
@@ -292,8 +335,9 @@ html {
     position: absolute;
     left: calc(50% - var(--page-width) - 20px) !important; /* Nằm sát lề trái cuốn sách (v3.4) */
     right: auto !important;
-    top: 5%;
-    height: 90%;
+    top: auto !important;
+    bottom: 0 !important; /* Đặt sát đáy giống như cuốn sách */
+    height: var(--page-height) !important; /* Chiều cao khớp 100% với cuốn sách */
     width: 20px;
     /* Khoảng trống gáy sách cách lề ngoài */
     z-index: 5;
@@ -348,9 +392,9 @@ html {
     position: absolute;
     top: 15px; /* Đưa lên phía trên đầu màn hình để tránh đè footer */
     bottom: auto;
-    right: calc(70px + (var(--page-width) / 2)); /* Căn giữa chỉ số theo trang đang hiển thị */
-    left: auto;
-    transform: translateX(50%);
+    left: calc(50% + (var(--page-width) / 2)); /* Căn giữa chỉ số theo trang bên phải đang hiển thị */
+    right: auto;
+    transform: translateX(-50%);
     background: rgba(18, 22, 18, 0.7);
     border: 1px solid rgba(197, 160, 89, 0.3);
     padding: 6px 16px;
@@ -371,15 +415,16 @@ html {
     color: var(--gold-color);
 }
 
-/* Thanh điều hướng sách lật bên viền phải */
+/* Thanh điều hướng sách lật bên viền phải (Đã chuyển sang Khung 2) */
 .book-navigation {
     position: absolute;
-    right: 15px; /* Sát viền ngoài cùng bên phải */
-    top: 50%;
-    transform: translateY(-50%);
+    left: 50% !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Khoảng cách dọc giữa 2 nút */
+    gap: 20px; /* Khoảng cách dọc giữa 2 nút */
     z-index: 1000;
     pointer-events: auto; /* Kích hoạt lại tương tác cho phần các nút mũi tên */
 }
@@ -507,74 +552,76 @@ html {
    ========================================================================== */
 .bottom-footer {
     position: absolute;
-    bottom: 0;
+    bottom: 20px;
     left: 0;
     width: 100%;
-    height: 10%; /* Giảm từ 20% xuống 10% trên Desktop để các nút vừa vặn, không bị trống trải */
+    height: auto;
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 20;
+    z-index: 40;
     pointer-events: none;
 }
 
 .contact-bar {
-    display: flex;
-    gap: 25px;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 20px;
     pointer-events: auto;
-    /* Kích hoạt nút bấm tương tác */
-    z-index: 21;
+    z-index: 41;
 }
 
-/* Nút liên hệ chung */
+/* Nút liên hệ chung dạng hình tròn */
 .contact-btn {
     text-decoration: none;
-    background: rgba(18, 22, 18, 0.8);
-    border: 1px solid rgba(197, 160, 89, 0.4);
-    border-radius: 50px;
-    padding: 6px 18px 6px 8px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    background: rgba(18, 22, 18, 0.85);
+    border: 1.5px solid rgba(197, 160, 89, 0.4);
+    border-radius: 50% !important;
+    width: 54px !important;
+    height: 54px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     color: #e5dfd3;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .contact-btn:hover {
-    border-color: var(--gold-color);
-    box-shadow: 0 0 15px var(--gold-glow);
-    transform: translateY(-4px);
+    border-color: var(--gold-color) !important;
+    box-shadow: 0 0 15px var(--gold-color) !important;
+    transform: translateY(-4px) scale(1.05);
     color: #fff;
 }
 
 /* Vòng tròn icon nổi bật */
 .icon-circle {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: var(--bronze-color);
-    color: var(--bg-dark);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.15rem;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    color: inherit !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    font-size: 1.25rem !important;
     font-weight: 700;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: none !important;
     transition: all 0.3s ease;
 }
 
 .contact-btn:hover .icon-circle {
-    background: var(--gold-color);
-    transform: rotate(15deg) scale(1.05);
+    transform: rotate(15deg);
 }
 
 /* Nhãn nút bấm */
 .btn-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    display: none !important;
 }
 
 .btn-label {
@@ -614,6 +661,14 @@ html {
     font-size: 0.72rem;
     font-family: 'Montserrat', sans-serif;
     font-weight: 700;
+}
+
+.icon-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 4px;
+    display: block;
 }
 
 @keyframes phonePulse {
@@ -798,23 +853,29 @@ html {
 
     /* Tối ưu thanh liên hệ dạng lưới 2x2 gọn gàng */
     .contact-bar {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-        width: 95%;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 15px !important;
+        width: auto !important;
     }
 
     .contact-btn {
-        width: calc(50% - 5px);
-        padding: 5px 12px 5px 5px;
-        gap: 8px;
-        border-radius: 35px;
+        width: 44px !important;
+        height: 44px !important;
+        border-radius: 50% !important;
+        padding: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
     }
 
     .icon-circle {
-        width: 32px;
-        height: 32px;
-        font-size: 0.9rem;
+        width: 100% !important;
+        height: 100% !important;
+        font-size: 1.05rem !important;
     }
 
     .btn-label {
@@ -832,14 +893,17 @@ html {
         bottom: auto;
         font-size: 0.75rem;
         padding: 4px 12px;
-        left: calc(40px + (var(--page-width) / 2)) !important; /* Căn giữa theo trang bên Phải đang hiển thị trên Mobile */
+        left: calc(15px + (var(--page-width) / 2)) !important; /* Căn giữa theo trang bên Phải đang hiển thị trên Mobile */
         right: auto !important;
         transform: translateX(-50%) !important;
     }
 
-    /* Định vị điều hướng sát lề phải 50px trống trên mobile */
+    /* Định vị điều hướng ở chính giữa Khung 2 trên mobile */
     .book-navigation {
-        right: 5px !important; /* Giữ ở trung tâm lề trống 50px */
+        left: 50% !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
         gap: 15px !important;
     }
 
@@ -857,11 +921,13 @@ html {
     /* Thiết lập lại chiều cao trên di động để vừa với 2 hàng nút */
     .content-frame {
         top: 5%;
-        height: 75%; /* Tăng từ 70% lên 75% trên di động để tăng không gian uốn cong chiều cao */
+        bottom: 69px !important; /* 20px bottom + 44px button + 5px spacing */
+        height: auto !important;
     }
 
     .bottom-footer {
-        height: 20%;
+        height: auto !important;
+        bottom: 20px !important;
     }
 
     /* ĐỊNH VỊ CHO DI ĐỘNG: Gáy sách cách lề trái 15px để chừa bóng gáy mượt và phóng to trang phải nội dung chính (v3.4) */
@@ -875,12 +941,18 @@ html {
         left: 15px !important; /* Gáy sách nằm ở 15px từ lề trái */
         right: auto !important;
         transform: translateX(-50%) !important;
+        top: auto !important;
+        bottom: 0 !important;
+        height: var(--page-height) !important;
     }
 
     .book-page-stack {
         left: -5px !important; /* Đẩy sát lề trái màn hình để làm điểm tỳ trang giấy lật */
         right: auto !important;
         width: 20px !important;
+        top: auto !important;
+        bottom: 0 !important;
+        height: var(--page-height) !important;
     }
 }
 

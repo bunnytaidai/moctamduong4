@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Muxintang Moxibustion Wellness Center v3.5 | 沐心堂艾灸养生会馆 v3.5</title>
+    <title>Muxintang Moxibustion Wellness Center v3.7.6 | 沐心堂艾灸养生会馆 v3.7.6</title>
     
     <!-- SEO Meta Tags -->
     <meta name="description" content="Trải nghiệm dịch vụ gội đầu dưỡng sinh, massage trị liệu, ngâm chân thảo dược và cứu ngải (艾灸) tại Muxintang (沐心堂) dưỡng sinh hội quán. Liên hệ Hotline: 0968.868.712.">
@@ -36,105 +36,162 @@
 </head>
 <body>
 
-    <!-- Khung 1: Khung Nền Bao Bọc Toàn Bộ Giao Diện -->
-    <main class="main-wrapper" id="frame-1">
+    <!-- Khung nền chính bao bọc toàn bộ -->
+    <main class="main-wrapper">
         <div class="vignette-overlay"></div>
         
-        <!-- Khung 2: Khung Tiêu Đề Trên Cùng (Trong suốt) -->
-        <header class="top-header" id="frame-2">
-            <div class="header-content">
-            </div>
-        </header>
-
-        <!-- Khung 4: Khung Nội Dung Chính Giữa (60% Height, Trong suốt) -->
-        <section class="content-frame" id="frame-4">
-            
-            <!-- Book Viewport: Cắt lề trái ở 30px, gáy sách nằm ở 50px -->
-            <div class="book-viewport" id="book-viewport">
+        <!-- Khung 1: Bên trái (85% width, 100% height) -->
+        <div class="layout-frame-1" id="khung-1">
+            <!-- Khung 4: Khung Nội Dung Chính Giữa (Trong suốt) -->
+            <section class="content-frame" id="frame-4">
                 
-                <!-- Gáy sách 3D mềm mại với hiệu ứng chuyển bóng và nổi hạt giấy -->
-                <div class="book-crease-overlay" id="book-crease"></div>
-                
-                <!-- Các lớp viền giả lập tập giấy dày bên lề trái (30px - 50px) -->
-                <div class="book-page-stack" id="page-stack">
-                    <div class="stack-line line-1"></div>
-                    <div class="stack-line line-2"></div>
-                    <div class="stack-line line-3"></div>
-                    <div class="stack-line line-4"></div>
-                </div>
-                
-                <!-- Đối tượng sách lật ftPageFlip -->
-                <div class="flipbook" id="book">
-                    <!-- Trang 1: Trong suốt (Trang lót bên trái khi chưa mở bìa) -->
-                    <div class="page page-transparent" data-density="hard">
-                        <div class="page-content"></div>
+                <!-- Book Viewport: Cắt lề trái ở 30px, gáy sách nằm ở 50px -->
+                <div class="book-viewport" id="book-viewport">
+                    
+                    <!-- Gáy sách 3D mềm mại với hiệu ứng chuyển bóng và nổi hạt giấy -->
+                    <div class="book-crease-overlay" id="book-crease"></div>
+                    
+                    <!-- Các lớp viền giả lập tập giấy dày bên lề trái (30px - 50px) -->
+                    <div class="book-page-stack" id="page-stack">
+                        <div class="stack-line line-1"></div>
+                        <div class="stack-line line-2"></div>
+                        <div class="stack-line line-3"></div>
+                        <div class="stack-line line-4"></div>
                     </div>
                     
-                    <!-- Trang 2: Trang bìa (dau.jpg) (nằm bên phải) -->
-                    <div class="page page-image" data-density="hard">
-                        <div class="page-content" style="background-image: url('images/dau.jpg');"></div>
-                    </div>
+                    <!-- Đối tượng sách lật ftPageFlip -->
+                    <div class="flipbook" id="book">
+                        <!-- Trang 1: Trong suốt (Trang lót bên trái khi chưa mở bìa) -->
+                        <div class="page page-transparent" data-density="hard">
+                            <div class="page-content"></div>
+                        </div>
+                        
+                        <!-- Trang 2: Trang bìa (dau.jpg) (nằm bên phải) -->
+                        <div class="page page-image" data-density="hard">
+                            <div class="page-content" style="background-image: url('images/dau.jpg');"></div>
+                        </div>
 
-                    <!-- Trang 3: Trang trắng mặt sau (nằm bên trái) -->
-                    <div class="page page-white">
-                        <div class="page-content"></div>
-                    </div>
-                    <!-- Trang 4: Trang 2.jpg (nằm bên phải) -->
-                    <div class="page page-image">
-                        <div class="page-content" style="background-image: url('images/2.jpg');"></div>
-                    </div>
+                        <!-- Trang 3: Trang trắng mặt sau (nằm bên trái) -->
+                        <div class="page page-white">
+                            <div class="page-content"></div>
+                        </div>
+                        <!-- Trang 4: Trang 2.jpg (nằm bên phải) -->
+                        <div class="page page-image">
+                            <div class="page-content" style="background-image: url('images/2.jpg');"></div>
+                        </div>
 
-                    <!-- Trang 5: Trang trắng mặt sau (nằm bên trái) -->
-                    <div class="page page-white">
-                        <div class="page-content"></div>
-                    </div>
-                    <!-- Trang 6: Trang 3.jpg (nằm bên phải) -->
-                    <div class="page page-image">
-                        <div class="page-content" style="background-image: url('images/3.jpg');"></div>
-                    </div>
+                        <!-- Trang 5: Trang trắng mặt sau (nằm bên trái) -->
+                        <div class="page page-white">
+                            <div class="page-content"></div>
+                        </div>
+                        <!-- Trang 6: Trang 3.jpg (nằm bên phải) -->
+                        <div class="page page-image">
+                            <div class="page-content" style="background-image: url('images/3.jpg');"></div>
+                        </div>
 
-                    <!-- Trang 7: Trang trắng mặt sau (nằm bên trái) -->
-                    <div class="page page-white">
-                        <div class="page-content"></div>
-                    </div>
-                    <!-- Trang 8: Trang 4.jpg (nằm bên phải) -->
-                    <div class="page page-image">
-                        <div class="page-content" style="background-image: url('images/4.jpg');"></div>
-                    </div>
+                        <!-- Trang 7: Trang trắng mặt sau (nằm bên trái) -->
+                        <div class="page page-white">
+                            <div class="page-content"></div>
+                        </div>
+                        <!-- Trang 8: Trang 4.jpg (nằm bên phải) -->
+                        <div class="page page-image">
+                            <div class="page-content" style="background-image: url('images/4.jpg');"></div>
+                        </div>
 
-                    <!-- Trang 9: Trang trắng mặt sau (nằm bên trái) -->
-                    <div class="page page-white">
-                        <div class="page-content"></div>
-                    </div>
-                    <!-- Trang 10: Trang 5.jpg (nằm bên phải) -->
-                    <div class="page page-image">
-                        <div class="page-content" style="background-image: url('images/5.jpg');"></div>
-                    </div>
+                        <!-- Trang 9: Trang trắng mặt sau (nằm bên trái) -->
+                        <div class="page page-white">
+                            <div class="page-content"></div>
+                        </div>
+                        <!-- Trang 10: Trang 5.jpg (nằm bên phải) -->
+                        <div class="page page-image">
+                            <div class="page-content" style="background-image: url('images/5.jpg');"></div>
+                        </div>
 
-                    <!-- Trang 11: Trang trắng mặt sau (nằm bên trái) -->
-                    <div class="page page-white">
-                        <div class="page-content"></div>
-                    </div>
-                    <!-- Trang 12: Trang 6.jpg (nằm bên phải) -->
-                    <div class="page page-image">
-                        <div class="page-content" style="background-image: url('images/6.jpg');"></div>
-                    </div>
+                        <!-- Trang 11: Trang trắng mặt sau (nằm bên trái) -->
+                        <div class="page page-white">
+                            <div class="page-content"></div>
+                        </div>
+                        <!-- Trang 12: Trang 6.jpg (nằm bên phải) -->
+                        <div class="page page-image">
+                            <div class="page-content" style="background-image: url('images/6.jpg');"></div>
+                        </div>
 
-                    <!-- Trang 13: Trang trắng mặt sau (nằm bên trái) -->
-                    <div class="page page-white">
-                        <div class="page-content"></div>
-                    </div>
-                    <!-- Trang 14: Trang bìa cuối (cuoi.jpg) (nằm bên phải) -->
-                    <div class="page page-image" data-density="hard">
-                        <div class="page-content" style="background-image: url('images/cuoi.jpg');"></div>
+                        <!-- Trang 13: Trang trắng mặt sau (nằm bên trái) -->
+                        <div class="page page-white">
+                            <div class="page-content"></div>
+                        </div>
+                        <!-- Trang 14: Trang bìa cuối (cuoi.jpg) (nằm bên phải) -->
+                        <div class="page page-image" data-density="hard">
+                            <div class="page-content" style="background-image: url('images/cuoi.jpg');"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
+                <!-- Chỉ mục trang hiện tại -->
+                <div class="page-indicator" id="page-indicator">
+                    <span class="current-idx">1</span> / <span class="total-pages">4</span>
+                </div>
+            </section>
 
+            <!-- Khung 3: Khung Liên Hệ Dưới Cùng (Trong suốt) -->
+            <footer class="bottom-footer" id="frame-3">
+                <div class="contact-bar">
+                    
+                    <!-- Nút Gọi Hotline Dưỡng Sinh (Pulsing) -->
+                    <a href="tel:0968868712" class="contact-btn hotline-btn" id="btn-hotline">
+                        <div class="icon-circle">
+                            <img src="icon/1-phone.png" alt="Hotline" style="width: 100%; height: 100%; object-fit: contain; padding: 4px;">
+                        </div>
+                        <div class="btn-info">
+                            <span class="btn-label">HOTLINE</span>
+                            <span class="btn-val">0968 868 712</span>
+                        </div>
+                    </a>
 
+                    <!-- Nút Zalo Tư Vấn Dưỡng Sinh -->
+                    <a href="https://zalo.me/0968868712" target="_blank" class="contact-btn zalo-btn" id="btn-zalo">
+                        <div class="icon-circle">
+                            <img src="icon/3-zalo.png" alt="Zalo" style="width: 100%; height: 100%; object-fit: contain; padding: 4px;">
+                        </div>
+                        <div class="btn-info">
+                            <span class="btn-label">TƯ VẤN</span>
+                            <span class="btn-val">Nhắn Zalo</span>
+                        </div>
+                    </a>
 
-            
+                    <!-- Nút WeChat Dưỡng Sinh -->
+                    <button class="contact-btn wechat-btn" id="btn-wechat">
+                        <div class="icon-circle">
+                            <img src="icon/2-wechat.png" alt="WeChat" style="width: 100%; height: 100%; object-fit: contain; padding: 4px;">
+                        </div>
+                        <div class="btn-info">
+                            <span class="btn-label">WECHAT</span>
+                            <span class="btn-val">NGALADY0708</span>
+                        </div>
+                    </button>
+
+                    <!-- Nút Bản Đồ Vị Trí -->
+                    <a href="https://maps.app.goo.gl/SF9DLhzzgzkMXWKm7" target="_blank" class="contact-btn maps-btn" id="btn-maps">
+                        <div class="icon-circle">
+                            <img src="icon/4-maps.png" alt="Bản đồ" style="width: 100%; height: 100%; object-fit: contain; padding: 4px;">
+                        </div>
+                        <div class="btn-info">
+                            <span class="btn-label">BẢN ĐỒ</span>
+                            <span class="btn-val">Chỉ Đường</span>
+                        </div>
+                    </a>
+                </div>
+            </footer>
+        </div>
+
+        <!-- Khung 2: Bên phải (15% width, 100% height) -->
+        <div class="layout-frame-2" id="khung-2">
+            <!-- Khung 2: Khung Tiêu Đề Trên Cùng (Trong suốt) -->
+            <header class="top-header" id="frame-2">
+                <div class="header-content">
+                </div>
+            </header>
+
             <!-- Nút điều hướng sách lật -->
             <div class="book-navigation">
                 <button class="nav-btn nav-prev" id="btn-prev-page" aria-label="Trang trước" title="Trang trước">
@@ -144,65 +201,7 @@
                     <i class="fa-solid fa-chevron-down"></i>
                 </button>
             </div>
-            
-            <!-- Chỉ mục trang hiện tại -->
-            <div class="page-indicator" id="page-indicator">
-                <span class="current-idx">1</span> / <span class="total-pages">4</span>
-            </div>
-        </section>
-
-        <!-- Khung 3: Khung Liên Hệ Dưới Cùng (20% Height, Trong suốt) -->
-        <footer class="bottom-footer" id="frame-3">
-            <div class="contact-bar">
-                
-                <!-- Nút Gọi Hotline Dưỡng Sinh (Pulsing) -->
-                <a href="tel:0968868712" class="contact-btn hotline-btn" id="btn-hotline">
-                    <div class="icon-circle">
-                        <i class="fa-solid fa-phone"></i>
-                    </div>
-                    <div class="btn-info">
-                        <span class="btn-label">HOTLINE</span>
-                        <span class="btn-val">0968 868 712</span>
-                    </div>
-                </a>
-
-                <!-- Nút Zalo Tư Vấn Dưỡng Sinh -->
-                <a href="https://zalo.me/0968868712" target="_blank" class="contact-btn zalo-btn" id="btn-zalo">
-                    <div class="icon-circle">
-                        <!-- Custom Zalo Text/Icon since FontAwesome lacks Zalo -->
-                        <span class="zalo-text">Zalo</span>
-                    </div>
-                    <div class="btn-info">
-                        <span class="btn-label">TƯ VẤN</span>
-                        <span class="btn-val">Nhắn Zalo</span>
-                    </div>
-                </a>
-
-                <!-- Nút WeChat Dưỡng Sinh -->
-                <button class="contact-btn wechat-btn" id="btn-wechat">
-                    <div class="icon-circle">
-                        <i class="fa-brands fa-weixin"></i>
-                    </div>
-                    <div class="btn-info">
-                        <span class="btn-label">WECHAT</span>
-                        <span class="btn-val">NGALADY0708</span>
-                    </div>
-                </button>
-
-                <!-- Nút Bản Đồ Vị Trí -->
-                <a href="https://maps.app.goo.gl/SF9DLhzzgzkMXWKm7" target="_blank" class="contact-btn maps-btn" id="btn-maps">
-                    <div class="icon-circle">
-                        <i class="fa-solid fa-location-dot"></i>
-                    </div>
-                    <div class="btn-info">
-                        <span class="btn-label">BẢN ĐỒ</span>
-                        <span class="btn-val">Chỉ Đường</span>
-                    </div>
-                </a>
-            </div>
-        </footer>
-
-    </main>
+        </div>
 
     <!-- Hộp thoại thông báo WeChat ID (QR Code / Copy) -->
     <div class="modal" id="wechat-modal">
