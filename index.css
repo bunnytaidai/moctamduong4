@@ -583,22 +583,23 @@ html {
     z-index: 41;
 }
 
-/* Nút liên hệ chung dạng hình tròn */
+/* Nút liên hệ chung dạng hình tròn tối giản sang trọng theo ảnh 2 */
 .contact-btn {
     text-decoration: none;
-    background: rgba(18, 22, 18, 0.85);
-    border: 1.5px solid rgba(197, 160, 89, 0.4);
+    background: rgba(18, 22, 18, 0.85) !important;
+    border: 1.5px solid rgba(212, 175, 55, 0.5) !important; /* Viền vàng kim mảnh */
     border-radius: 50% !important;
-    width: 54px !important;
-    height: 54px !important;
+    width: 44px !important; /* Thu nhỏ nút từ 54px xuống 44px cho tinh tế */
+    height: 44px !important;
     padding: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     color: #e5dfd3;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    z-index: 99999 !important; /* Luôn nằm trên cùng */
 }
 
 .contact-btn:hover {
@@ -618,8 +619,6 @@ html {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    font-size: 1.25rem !important;
-    font-weight: 700;
     box-shadow: none !important;
     transition: all 0.3s ease;
 }
@@ -646,38 +645,45 @@ html {
     letter-spacing: 0.5px;
 }
 
-/* Hiệu ứng nhấp nháy cho Hotline */
+/* Khử màu đỏ rực của Hotline để đồng bộ tông vàng kim tối giản */
 .hotline-btn {
-    border-color: #a62b2b;
+    border-color: rgba(212, 175, 55, 0.5) !important;
 }
 
 .hotline-btn .icon-circle {
-    background: #a62b2b;
-    color: #fff;
-    animation: phonePulse 1.5s infinite;
+    background: transparent !important;
+    color: inherit !important;
+    animation: goldPulse 1.8s infinite; /* Nhấp nháy viền vàng kim nhẹ nhàng sang trọng */
 }
 
 .hotline-btn:hover {
-    border-color: #d94141;
+    border-color: var(--gold-color) !important;
 }
 
 .hotline-btn:hover .icon-circle {
-    background: #d94141;
+    background: rgba(212, 175, 55, 0.15) !important;
 }
 
-/* Icon Zalo tùy chỉnh dạng text */
-.zalo-text {
-    font-size: 0.72rem;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
+@keyframes goldPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(212, 175, 55, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(212, 175, 55, 0);
+    }
 }
 
+/* Định dạng ảnh logo nhỏ gọn bên trong giống ảnh 2 */
 .icon-circle img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    padding: 4px;
-    display: block;
+    width: 24px !important; /* Đặt cứng kích thước ảnh logo 24px để cân đối */
+    height: 24px !important;
+    object-fit: contain !important;
+    padding: 0 !important; /* Loại bỏ padding cũ */
+    display: block !important;
+    border-radius: 6px; /* Bo nhẹ góc của icon cho mượt */
 }
 
 @keyframes phonePulse {
