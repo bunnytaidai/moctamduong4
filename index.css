@@ -412,7 +412,7 @@ html {
     font-size: 0.85rem;
     letter-spacing: 2px;
     color: #e5dfd3;
-    z-index: 12;
+    z-index: 10000 !important; /* Đảm bảo nổi lên trên cuốn sách */
     pointer-events: auto; /* Kích hoạt lại tương tác cho phần chỉ số trang */
 }
 
@@ -589,8 +589,8 @@ html {
     background: rgba(18, 22, 18, 0.85) !important;
     border: 1.5px solid rgba(212, 175, 55, 0.5) !important; /* Viền vàng kim mảnh */
     border-radius: 50% !important;
-    width: 44px !important; /* Thu nhỏ nút từ 54px xuống 44px cho tinh tế */
-    height: 44px !important;
+    width: 50px !important; /* Điều chỉnh kích thước 50px cho hài hòa */
+    height: 50px !important;
     padding: 0 !important;
     display: flex !important;
     align-items: center !important;
@@ -678,8 +678,8 @@ html {
 
 /* Định dạng ảnh logo nhỏ gọn bên trong giống ảnh 2 */
 .icon-circle img {
-    width: 24px !important; /* Đặt cứng kích thước ảnh logo 24px để cân đối */
-    height: 24px !important;
+    width: 32px !important; /* Tăng kích thước từ 24px lên 32px cho to rõ hài hòa */
+    height: 32px !important;
     object-fit: contain !important;
     padding: 0 !important; /* Loại bỏ padding cũ */
     display: block !important;
@@ -911,6 +911,7 @@ html {
         left: calc(15px + (var(--page-width) / 2)) !important; /* Căn giữa theo trang bên Phải đang hiển thị trên Mobile */
         right: auto !important;
         transform: translateX(-50%) !important;
+        z-index: 10000 !important; /* Đảm bảo nổi lên trên cuốn sách trên mobile */
     }
 
     /* Định vị điều hướng ở chính giữa Khung 2 trên mobile */
