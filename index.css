@@ -1067,10 +1067,7 @@ html {
     z-index: 100 !important; /* Đẩy khung trái lên trên cùng để các trang lật bay tràn qua khung phải */
 }
 
-.flipbook.flipping-active {
-    /* Giữ nguyên kích thước gốc không tự ý phóng to co giãn khi chạm vuốt lật trang (v3.9.0-debug-03) */
-    box-shadow: 0 45px 105px rgba(0, 0, 0, 0.85) !important; /* Chỉ tạo bóng đổ động cực lớn lan tỏa tạo chiều sâu 3D */
-}
+/* Đã bỏ hiệu ứng nổi (tăng bóng đổ 3D) của flipbook khi ấn lật trang theo yêu cầu của Thỏ (v3.9.0-debug-06) */
 
 /* C. Thiết kế Kéo Thả trang sách (Drag & Drop) */
 .page-item[draggable="true"] {
