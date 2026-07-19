@@ -195,7 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             showCover: false,      // Sử dụng trang đôi liên tục.
             usePortrait: false,    // Ép hiển thị trang đôi kể cả trên mobile ngang.
-            orientation: "landscape", // Bắt buộc luôn hiển thị chế độ trang đôi trên mọi thiết bị để giữ nguyên vị trí và kích thước gốc
             
             flippingTime: 600,     // Chuyển động lật trang mềm mại, tự nhiên như sách thật (600ms)
             swipeDistance: 30,     // Khoảng cách vuốt tay tối ưu tự nhiên và mượt mà
