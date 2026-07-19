@@ -105,28 +105,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // C. Logic gáy sách & Chồng viền giấy lề trái (30px - 50px)
-        // Khi đang ở Trang bìa đầu tiên (đôi trang 1: index 0, 1):
-        // Trang bên trái là trong suốt (index 0) nên chưa có trang nào lật sang bên trái.
-        if (pageStack) {
-            if (currentSpread === 1) {
-                pageStack.style.opacity = '0'; // Ẩn chồng giấy bên trái
-            } else {
-                pageStack.style.opacity = '0.9'; // Hiện chồng giấy tượng trưng các trang đã lật qua
+        const orientation = pageFlip.getOrientation();
+        if (orientation === 'portrait') {
+            // Chế độ trang đơn (mobile dọc): Ẩn gáy sách và chồng giấy để tránh đè giữa trang bìa
+            if (pageStack) pageStack.style.display = 'none';
+            if (creaseOverlay) creaseOverlay.style.display = 'none';
+        } else {
+            // Chế độ trang đôi (desktop/landscape): Hiện gáy sách và chồng giấy bình thường
+            if (pageStack) {
+                pageStack.style.display = 'block';
+                if (currentSpread === 1) {
+                    pageStack.style.opacity = '0'; // Ẩn chồng giấy bên trái
+                } else {
+                    pageStack.style.opacity = '0.9'; // Hiện chồng giấy tượng trưng các trang đã lật qua
+                }
             }
-        }
+            if (creaseOverlay) {
+                creaseOverlay.style.display = 'block';
+                // Tự động kiểm tra xem trang bên trái của đôi trang hiện tại có phải là trang trong suốt hay không (v3.4)
+                const pages = bookEl ? bookEl.querySelectorAll('.page') : [];
+                const leftPageIdx = (currentSpread - 1) * 2;
+                const isLeftPageTransparent = pages[leftPageIdx] && pages[leftPageIdx].classList.contains('page-transparent');
 
-        if (creaseOverlay) {
-            // Tự động kiểm tra xem trang bên trái của đôi trang hiện tại có phải là trang trong suốt hay không (v3.4)
-            const pages = bookEl ? bookEl.querySelectorAll('.page') : [];
-            const leftPageIdx = (currentSpread - 1) * 2;
-            const isLeftPageTransparent = pages[leftPageIdx] && pages[leftPageIdx].classList.contains('page-transparent');
-
-            if (isLeftPageTransparent) {
-                // Dịch gáy sách lệch sang để chỉ tạo bóng đổ cho trang phải vì bên trái trong suốt
-                creaseOverlay.style.background = 'linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 48%, rgba(0,0,0,0.85) 49.5%, rgba(255,255,255,0.25) 50.5%, rgba(0,0,0,0.3) 53%, rgba(0,0,0,0.1) 70%, rgba(0,0,0,0) 100%)';
-            } else {
-                // Trả về gáy 3D đối xứng 2 bên mềm mại cân đối chính giữa trục gáy
-                creaseOverlay.style.background = 'linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.04) 20%, rgba(0, 0, 0, 0.2) 40%, rgba(0, 0, 0, 0.55) 46%, rgba(0, 0, 0, 0.85) 49%, rgba(0, 0, 0, 0.95) 50%, rgba(255, 255, 255, 0.25) 51%, rgba(0, 0, 0, 0.4) 54%, rgba(0, 0, 0, 0.15) 65%, rgba(0, 0, 0, 0.02) 80%, rgba(0, 0, 0, 0) 100%)';
+                if (isLeftPageTransparent) {
+                    // Dịch gáy sách lệch sang để chỉ tạo bóng đổ cho trang phải vì bên trái trong suốt
+                    creaseOverlay.style.background = 'linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 48%, rgba(0,0,0,0.85) 49.5%, rgba(255,255,255,0.25) 50.5%, rgba(0,0,0,0.3) 53%, rgba(0,0,0,0.1) 70%, rgba(0,0,0,0) 100%)';
+                } else {
+                    // Trả về gáy 3D đối xứng 2 bên mềm mại cân đối chính giữa trục gáy
+                    creaseOverlay.style.background = 'linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.04) 20%, rgba(0, 0, 0, 0.2) 40%, rgba(0, 0, 0, 0.55) 46%, rgba(0, 0, 0, 0.85) 49%, rgba(0, 0, 0, 0.95) 50%, rgba(255, 255, 255, 0.25) 51%, rgba(0, 0, 0, 0.4) 54%, rgba(0, 0, 0, 0.15) 65%, rgba(0, 0, 0, 0.02) 80%, rgba(0, 0, 0, 0) 100%)';
+                }
             }
         }
 
@@ -199,12 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Nạp nội dung từ các div .page đã được render động trong DOM mới
         pageFlip.loadFromHTML(currentBookEl.querySelectorAll('.page'));
 
-        // Thiết lập hiệu ứng phóng to trang bìa và chặn vuốt lật trang
-        const pages = currentBookEl.querySelectorAll('.page');
-        if (pages && pages.length > 1) {
-            const coverPageEl = pages[1]; // Trang bìa đầu tiên (index 1)
-            setupCoverPageZoom(coverPageEl);
-        }
+
 
         // Cập nhật trạng thái ban đầu và khôi phục trang trước khi resize
         if (savedIdx > 0 && savedIdx < pageFlip.getPageCount()) {
@@ -248,79 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Hàm thiết lập hiệu ứng zoom cho trang bìa và chặn vuốt lật trang
-    function setupCoverPageZoom(coverPageEl) {
-        if (!coverPageEl) return;
 
-        coverPageEl.classList.add('page-cover-zoom');
-
-        let isTouching = false;
-        let startX = 0;
-        let startY = 0;
-
-        const handleStart = (clientX, clientY) => {
-            isTouching = true;
-            startX = clientX;
-            startY = clientY;
-            coverPageEl.classList.add('zoomed');
-            coverPageEl.style.transform = `scale(1.15) rotateY(-5deg)`;
-        };
-
-        const handleMove = (clientX, clientY) => {
-            if (!isTouching) return;
-            const deltaX = (clientX - startX) * 0.15;
-            const deltaY = (clientY - startY) * 0.15;
-            const maxOffset = 25;
-            const offsetX = Math.min(Math.max(deltaX, -maxOffset), maxOffset);
-            const offsetY = Math.min(Math.max(deltaY, -maxOffset), maxOffset);
-            // Áp dụng scale zoom, translate 3D parallax và rotate Y nghiêng nhẹ
-            coverPageEl.style.transform = `scale(1.15) translate3d(${offsetX}px, ${offsetY}px, 60px) rotateY(-5deg)`;
-        };
-
-        const handleEnd = () => {
-            if (!isTouching) return;
-            isTouching = false;
-            coverPageEl.classList.remove('zoomed');
-            coverPageEl.style.transform = '';
-        };
-
-        // Chặn tuyệt đối sự kiện lan truyền lên cha (PageFlip) và xử lý zoom
-        const touchEvents = ['touchstart', 'touchmove', 'touchend', 'touchcancel'];
-        touchEvents.forEach(evt => {
-            coverPageEl.addEventListener(evt, (e) => {
-                e.stopPropagation(); // Chặn cử chỉ lật trang của PageFlip
-                
-                if (evt === 'touchstart' && e.touches.length > 0) {
-                    handleStart(e.touches[0].clientX, e.touches[0].clientY);
-                } else if (evt === 'touchmove' && e.touches.length > 0) {
-                    handleMove(e.touches[0].clientX, e.touches[0].clientY);
-                } else if (evt === 'touchend' || evt === 'touchcancel') {
-                    handleEnd();
-                }
-            }, { passive: false });
-        });
-
-        // Mouse Events cho Desktop
-        coverPageEl.addEventListener('mousedown', (e) => {
-            e.stopPropagation();
-            handleStart(e.clientX, e.clientY);
-        });
-
-        coverPageEl.addEventListener('mousemove', (e) => {
-            e.stopPropagation();
-            handleMove(e.clientX, e.clientY);
-        });
-
-        coverPageEl.addEventListener('mouseup', (e) => {
-            e.stopPropagation();
-            handleEnd();
-        });
-
-        coverPageEl.addEventListener('mouseleave', (e) => {
-            e.stopPropagation();
-            handleEnd();
-        });
-    }
 
     // Hàm helper áp dụng CSS 3D & Nền khung cho các phần tử 2D (v3.7.6)
     function apply3DStylesToElement(domEl, configEl) {

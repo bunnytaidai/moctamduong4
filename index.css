@@ -50,17 +50,17 @@ html {
     flex-direction: row !important;
 }
 
-/* Khung 1: Bên trái chiếm 85% chiều rộng */
+/* Khung 1: Bên trái chiếm 93% chiều rộng để nhường không gian cho thực đơn */
 #khung-1 {
-    width: 85% !important;
+    width: 93% !important;
     height: 100% !important;
     position: relative !important;
     overflow: visible !important; /* Đổi thành visible để không che khuất bóng đổ ngoài của sách */
 }
 
-/* Khung 2: Bên phải chiếm phần tự động còn lại (15%) */
+/* Khung 2: Bên phải chiếm 7% chiều rộng (nhỏ gọn tối đa) */
 #khung-2 {
-    width: 15% !important;
+    width: 7% !important;
     height: 100% !important;
     position: relative !important;
     background: transparent !important;
@@ -189,6 +189,7 @@ html {
     z-index: 30; /* Tăng từ 10 lên 30 để lướt 3D trang sách trên cùng, không bị header/footer che khuất */
     overflow: visible;
     pointer-events: none; /* Cho phép sự kiện click đi xuyên qua vùng trống của khung nội dung */
+    background: transparent !important; /* Xóa nền hoàn toàn */
 }
 
 /* Viewport cuốn sách: Căn giữa tự động và tạo chiều sâu 3D phối cảnh */
@@ -212,7 +213,7 @@ html {
     height: 90%;
     width: calc(2 * var(--page-width));
     overflow: visible;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65); /* Tăng bóng đổ viền ngoài cho sách (v3.4) */
+    box-shadow: 0 35px 80px rgba(0, 0, 0, 0.75), 0 10px 30px rgba(0, 0, 0, 0.5); /* Tăng bóng đổ viền ngoài tạo hiệu ứng nổi 3D cực mạnh (v3.9) */
     border-radius: 0 12px 12px 0;
     transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease !important;
     transform-style: preserve-3d; /* Giữ cấu trúc phối cảnh 3D của các trang con khi lật (v3.4) */
@@ -254,23 +255,25 @@ html {
 /* Trang bên TRÁI (Trang trắng / mặt sau): Gáy sách nằm ở phía bên PHẢI */
 .page:nth-child(odd) .page-content {
     box-shadow: 
-        inset -45px 0 48px rgba(0, 0, 0, 0.22),      /* Bóng uốn cong sâu lún vào gáy bên phải (v3.4) */
-        inset -12px 0 16px rgba(0, 0, 0, 0.12),
-        inset 10px 0 15px rgba(255, 255, 255, 0.05),  /* Ánh sáng nhẹ ở lề ngoài bên trái */
-        1px 0 3px rgba(0, 0, 0, 0.03);
+        inset -60px 0 65px rgba(0, 0, 0, 0.32),      /* Tăng mạnh bóng uốn cong gáy (v3.9) */
+        inset -20px 0 30px rgba(0, 0, 0, 0.18),
+        inset 20px 0 30px rgba(0, 0, 0, 0.05),       /* Bóng mờ lề ngoài trái */
+        inset 4px 0 6px rgba(255, 255, 255, 0.2),    /* Nổi mép giấy sáng 3D ở lề ngoài */
+        2px 0 6px rgba(0, 0, 0, 0.15);
     border-radius: 12px 0 0 12px;                    /* Bo viền lề ngoài bên trái */
-    border-right: 1px solid rgba(0, 0, 0, 0.25);     /* Rãnh cắt gáy sách */
+    border-right: 1px solid rgba(0, 0, 0, 0.3);      /* Rãnh cắt gáy sách rõ hơn */
 }
 
 /* Trang bên PHẢI (Trang chứa hình ảnh): Gáy sách nằm ở phía bên TRÁI */
 .page:nth-child(even) .page-content {
     box-shadow: 
-        inset 45px 0 48px rgba(0, 0, 0, 0.25),       /* Bóng uốn cong sâu lún vào gáy bên trái (v3.4) */
-        inset 12px 0 16px rgba(0, 0, 0, 0.15),
-        inset -12px 0 15px rgba(255, 255, 255, 0.08), /* Ánh sáng nhẹ ở lề ngoài bên phải */
-        -1px 0 3px rgba(0, 0, 0, 0.02);
+        inset 60px 0 65px rgba(0, 0, 0, 0.35),       /* Tăng mạnh bóng uốn cong gáy (v3.9) */
+        inset 20px 0 30px rgba(0, 0, 0, 0.2),
+        inset -20px 0 30px rgba(0, 0, 0, 0.05),      /* Bóng mờ lề ngoài phải */
+        inset -4px 0 6px rgba(255, 255, 255, 0.2),   /* Nổi mép giấy sáng 3D ở lề ngoài */
+        -2px 0 6px rgba(0, 0, 0, 0.15);
     border-radius: 0 12px 12px 0;                    /* Bo viền lề ngoài bên phải */
-    border-left: 1px solid rgba(255, 255, 255, 0.15); /* Nẹp gáy sáng */
+    border-left: 1px solid rgba(255, 255, 255, 0.2);  /* Nẹp gáy sáng rõ hơn */
 }
 
 /* Trang trắng chất liệu cao cấp (Ngăn ngừa lỗi ô đen) */
@@ -923,6 +926,7 @@ html {
         top: 5%;
         bottom: 69px !important; /* 20px bottom + 44px button + 5px spacing */
         height: auto !important;
+        background: transparent !important; /* Xóa nền hoàn toàn */
     }
 
     .bottom-footer {
@@ -1056,22 +1060,7 @@ html {
    HIỆU ỨNG NÂNG CẤP MẠNH MẼ (v3.8) - TRÀN KHUNG 3D & ZOOM BÌA
    ========================================================================== */
 
-/* A. Hiệu ứng phóng to trang bìa khi tương tác chạm vuốt/nhấn giữ */
-.page-cover-zoom {
-    transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.35s ease !important;
-    transform-origin: center right !important; /* Phóng to hướng về phía bên phải (hướng vào trung tâm màn hình) */
-    cursor: grab;
-}
 
-.page-cover-zoom:active {
-    cursor: grabbing;
-}
-
-.page-cover-zoom.zoomed {
-    transform: scale(1.15) !important; /* Phóng to 1.15 lần để hiển thị cực nét */
-    z-index: 1000 !important; /* Đè lên toàn bộ các trang khác khi zoom */
-    box-shadow: 0 45px 95px rgba(0, 0, 0, 0.85) !important; /* Tỏa bóng đổ cực dày và mượt */
-}
 
 /* B. Hiệu ứng tràn khung 3D mạnh mẽ cho khung-1 khi sách đang lật */
 #khung-1.flipping-active {
