@@ -850,6 +850,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     textEl.setAttribute('data-id', text.id);
                     
                     let style = `left: ${text.x}%; top: ${text.y}%; font-family: ${text.font || 'Montserrat'}, sans-serif; font-size: ${Math.floor(text.size * 0.81 * scaleRatio)}px; color: ${text.color || '#333'}; white-space: pre-wrap;`;
+                    if (text.w !== undefined) style += ` width: ${text.w}%;`;
+                    if (text.h !== undefined) style += ` height: ${text.h}%;`;
                     if (text.bold) style += ' font-weight: bold;';
                     if (text.italic) style += ' font-style: italic;';
                     if (text.underline) style += ' text-decoration: underline;';
@@ -858,7 +860,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (text.align) style += ` text-align: ${text.align};`;
                     
                     // Nâng cấp: Nền khung
-                    if (text.bgTransparent) {
+                    if (text.bgTransparent !== false) {
                         style += ' background-color: transparent;';
                     } else if (text.bgColor) {
                         style += ` background-color: ${text.bgColor};`;
@@ -1079,42 +1081,59 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener(isTouch ? 'touchend' : 'mouseup', onMouseUp);
     }
 
-    // Co giãn kích thước font chữ khi kéo góc
+    // Co giãn kích thước chiều rộng/chiều cao của khung chữ khi kéo góc (Resize)
     function initResizeElement(event, element, textId) {
         event.preventDefault();
-        const startX = event.clientX;
+        const isTouch = event.type.startsWith('touch');
+        const startX = isTouch ? event.touches[0].clientX : event.clientX;
+        const startY = isTouch ? event.touches[0].clientY : event.clientY;
+        
         const textObj = activePageData.texts.find(t => t.id === textId);
         if (!textObj) return;
         
-        const initialSize = textObj.size || 16;
+        const canvasRect = canvasPreview.getBoundingClientRect();
+        const initialWidthPx = element.offsetWidth;
+        const initialHeightPx = element.offsetHeight;
         
         function onMouseMove(e) {
-            const deltaX = e.clientX - startX;
-            // Mỗi 5px kéo ngang tương đương tăng/giảm 1px font size
-            let newSize = initialSize + Math.round(deltaX / 5);
-            if (newSize < 10) newSize = 10;
-            if (newSize > 100) newSize = 100;
+            const moveX = isTouch ? e.touches[0].clientX : e.clientX;
+            const moveY = isTouch ? e.touches[0].clientY : e.clientY;
             
-            textObj.size = newSize;
+            const deltaX = moveX - startX;
+            const deltaY = moveY - startY;
             
-            // Update tạm thời lên canvas để mượt
-            element.style.fontSize = `${Math.floor(newSize * 0.81)}px`;
+            let newWidthPx = initialWidthPx + deltaX;
+            let newHeightPx = initialHeightPx + deltaY;
             
-            // Update input nếu text này đang được chọn
-            if (selectedTextId === textId) {
-                inputTextSize.value = newSize;
-            }
+            // Giới hạn kích thước tối thiểu
+            if (newWidthPx < 40) newWidthPx = 40;
+            if (newHeightPx < 15) newHeightPx = 15;
+            
+            // Giới hạn kích thước tối đa không tràn canvas
+            const maxW = canvasRect.width - element.offsetLeft;
+            const maxH = canvasRect.height - element.offsetTop;
+            if (newWidthPx > maxW) newWidthPx = maxW;
+            if (newHeightPx > maxH) newHeightPx = maxH;
+            
+            // Lưu tạm thời lên DOM element
+            element.style.width = `${newWidthPx}px`;
+            element.style.height = `${newHeightPx}px`;
         }
         
         function onMouseUp() {
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-            renderCanvasPreview(); // Khởi tạo vẽ lại hoàn chỉnh
+            document.removeEventListener(isTouch ? 'touchmove' : 'mousemove', onMouseMove);
+            document.removeEventListener(isTouch ? 'touchend' : 'mouseup', onMouseUp);
+            
+            // Quy đổi sang % để lưu vào dữ liệu
+            textObj.w = parseFloat(((element.offsetWidth / canvasRect.width) * 100).toFixed(2));
+            textObj.h = parseFloat(((element.offsetHeight / canvasRect.height) * 100).toFixed(2));
+            
+            renderCanvasPreview();
             checkChanges();
         }
         
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
+        document.addEventListener(isTouch ? 'touchmove' : 'mousemove', onMouseMove);
+        document.addEventListener(isTouch ? 'touchend' : 'mouseup', onMouseUp);
     }
 
     // -------------------------------------------------------------
@@ -1404,7 +1423,9 @@ document.addEventListener('DOMContentLoaded', () => {
             italic: false,
             underline: false,
             x: 20, // Ở giữa trái canvas
-            y: 40
+            y: 40,
+            w: 30, // Chiều rộng mặc định 30%
+            h: 8   // Chiều cao mặc định 8%
         };
         
         activePageData.texts.push(newText);
@@ -2468,6 +2489,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         const scaleRatio = bookW / 380;
                         
                         let style = `position: absolute; left: ${text.x}%; top: ${text.y}%; font-family: ${text.font || 'Montserrat'}, sans-serif; font-size: ${Math.floor(text.size * 0.81 * scaleRatio)}px; color: ${text.color || '#333'};`;
+                        if (text.w !== undefined) style += ` width: ${text.w}%;`;
+                        if (text.h !== undefined) style += ` height: ${text.h}%;`;
                         if (text.bold) style += ' font-weight: bold;';
                         if (text.italic) style += ' font-style: italic;';
                         if (text.underline) style += ' text-decoration: underline;';

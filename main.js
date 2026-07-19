@@ -423,6 +423,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             textEl.className = 'custom-text-element';
                             
                             let style = `position: absolute; left: ${text.x}%; top: ${text.y}%; font-family: ${text.font || 'Montserrat'}, sans-serif; font-size: ${text.size || 16}px; color: ${text.color || '#333'}; white-space: pre-wrap;`;
+                            if (text.w !== undefined) style += ` width: ${text.w}%;`;
+                            if (text.h !== undefined) style += ` height: ${text.h}%;`;
                             if (text.bold) style += ' font-weight: bold;';
                             if (text.italic) style += ' font-style: italic;';
                             if (text.underline) style += ' text-decoration: underline;';
@@ -431,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (text.align) style += ` text-align: ${text.align};`;
                             
                             // Nền khung chữ
-                            if (text.bgTransparent) {
+                            if (text.bgTransparent !== false) {
                                 style += ' background-color: transparent;';
                             } else if (text.bgColor) {
                                 style += ` background-color: ${text.bgColor};`;

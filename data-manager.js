@@ -181,7 +181,14 @@ const DEFAULT_PAGES = [
 ];
 
 async function setupDefaultData() {
-    const defaultData = JSON.parse(JSON.stringify(DEFAULT_PAGES));
+    let defaultData = JSON.parse(JSON.stringify(DEFAULT_PAGES));
+    try {
+        const imgFiles = await fetchImageFilesList();
+        defaultData = syncPagesWithImageFiles(defaultData, imgFiles);
+    } catch (e) {
+        console.error("Lỗi đồng bộ trong setupDefaultData:", e);
+    }
+    
     if (activeStorageMode === 'firebase' && db) {
         const updates = {};
         defaultData.forEach(page => { updates[`menu_pages/${page.id}`] = page; });
@@ -313,7 +320,30 @@ async function loadLocalData() {
     } catch (e) {
         console.error(e);
     }
-    if (!pages) {
+
+    // Tự động quét và đồng bộ trang theo tệp ảnh trong thư mục images khi chạy local (v3.9)
+    try {
+        const imgFiles = await fetchImageFilesList();
+        pages = syncPagesWithImageFiles(pages || [], imgFiles);
+        // Cập nhật lại bộ nhớ đệm
+        localStorage.setItem('muxintang_menu_pages_cache', JSON.stringify(pages));
+        if (pages && pages.length > 0) {
+            const globalBg = localStorage.getItem('muxintang_global_bg') || '';
+            const siteTitle = localStorage.getItem('muxintang_site_title') || '';
+            const globalLayoutStr = localStorage.getItem('muxintang_global_layout') || '{}';
+            const globalLayout = JSON.parse(globalLayoutStr);
+            localStorage.setItem('muxintang_menu_pages', JSON.stringify({
+                site_title: siteTitle,
+                global_bg: globalBg,
+                pages: pages,
+                global_layout: globalLayout
+            }));
+        }
+    } catch (e) {
+        console.error("Lỗi đồng bộ trang theo thư mục images trong loadLocalData:", e);
+    }
+
+    if (!pages || pages.length === 0) {
         setupDefaultData();
     } else {
         pages.sort((a, b) => a.order - b.order);
@@ -345,7 +375,7 @@ async function fetchImageFilesList() {
                 const files = await res.json();
                 const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp'];
                 return files
-                    .filter(f => f.type === 'file' && imageExtensions.includes(getFilenameExt(f.name).toLowerCase()))
+                    .filter(f => f.type === 'file' && imageExtensions.includes(getFilenameExt(f.name).toLowerCase()) && !f.name.toLowerCase().includes('spa_background'))
                     .map(f => f.name);
             }
         } catch (e) {
@@ -357,7 +387,8 @@ async function fetchImageFilesList() {
     try {
         const res = await fetch('/api/list-images');
         if (res.ok) {
-            return await res.json();
+            const files = await res.json();
+            return files.filter(f => !f.toLowerCase().includes('spa_background'));
         }
     } catch (e) {
         console.warn("Không thể quét images từ API local (chạy tĩnh):", e);

@@ -210,8 +210,8 @@ html {
 /* Container sách lật - mặc định dùng absolute để định vị linh hoạt */
 .flipbook {
     position: absolute;
-    height: 90%;
-    width: calc(2 * var(--page-width));
+    height: var(--page-height) !important;
+    width: calc(2 * var(--page-width)) !important;
     overflow: visible;
     box-shadow: 0 35px 80px rgba(0, 0, 0, 0.75), 0 10px 30px rgba(0, 0, 0, 0.5); /* Tăng bóng đổ viền ngoài tạo hiệu ứng nổi 3D cực mạnh (v3.9) */
     border-radius: 0 12px 12px 0;
@@ -231,17 +231,17 @@ html {
 
 /* Từng trang đơn trong sách lật */
 .page {
-    width: var(--page-width);
-    height: var(--page-height);
+    width: var(--page-width) !important;
+    height: var(--page-height) !important;
     overflow: hidden;
     background-color: #fdfcf7;
-    /* Nền giấy ngà ấm áp */
+    position: absolute !important; /* Cố định vị trí tuyệt đối cho trang con */
 }
 
 /* Nội dung ảnh của trang */
 .page-content {
-    width: 100%;
-    height: 100%;
+    width: 100% !important;
+    height: 100% !important;
     background-size: cover !important;
     /* Giữ đúng tỷ lệ ảnh không bị kéo bóp méo */
     background-position: center;
@@ -939,6 +939,8 @@ html {
         position: absolute !important;
         left: calc(15px - var(--page-width)) !important;
         right: auto !important;
+        width: calc(2 * var(--page-width)) !important;
+        height: var(--page-height) !important;
     }
 
     .book-crease-overlay {

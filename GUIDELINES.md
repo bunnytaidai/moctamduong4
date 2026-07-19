@@ -1,4 +1,4 @@
-# Muxintang Moxibustion Wellness Center - Hướng Dẫn Vận Hành & Phát Triển (v3.9.0-debug-06)
+# Muxintang Moxibustion Wellness Center - Hướng Dẫn Vận Hành & Phát Triển (v3.9.0-debug-07)
 
 Tài liệu này ghi lại các quy định, cấu trúc tài nguyên, quy trình vận hành và cẩm nang xử lý sự cố cho hệ thống Muxintang Moxibustion Wellness Center.
 
@@ -6,19 +6,19 @@ Tài liệu này ghi lại các quy định, cấu trúc tài nguyên, quy trìn
 
 | STT | Tên Tài Nguyên | Phiên Bản | Relative Path | Tác Dụng | Lệnh Tải Bù / CDN |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | Trang Chủ | v3.9.0-debug-06 | `./index.html` | Cấu trúc DOM chính hiển thị cuốn sách 3D và thanh liên hệ | (Có sẵn trong source code) |
-| 2 | Phong Cách Trang Chủ | v3.9.0-debug-06 | `./index.css` | Thiết kế giao diện, phối cảnh 3D, nền trong suốt, hiệu ứng lật trang tràn khung và bóng đổ tĩnh sâu chân thực (loại bỏ hiệu ứng nổi bóng đổ động khi ấn lật trang) | (Có sẵn trong source code) |
-| 3 | Kịch Bản Trang Chủ | v3.9.0-debug-06 | `./main.js` | Logic vận hành Flipbook mượt mà, cố định chế độ trang đôi (orientation: landscape) trên tất cả thiết bị để giữ nguyên vị trí và kích thước gốc khi chạm vuốt | (Có sẵn trong source code) |
+| 1 | Trang Chủ | v3.9.0-debug-07 | `./index.html` | Cấu trúc DOM chính hiển thị cuốn sách 3D và thanh liên hệ | (Có sẵn trong source code) |
+| 2 | Phong Cách Trang Chủ | v3.9.0-debug-07 | `./index.css` | Thiết kế giao diện, phối cảnh 3D, nền trong suốt, hiệu ứng lật trang tràn khung và bóng đổ tĩnh sâu chân thực (loại bỏ hiệu ứng nổi bóng đổ động khi ấn lật trang) | (Có sẵn trong source code) |
+| 3 | Kịch Bản Trang Chủ | v3.9.0-debug-07 | `./main.js` | Logic vận hành Flipbook mượt mà, cố định chế độ trang đôi (orientation: landscape) trên tất cả thiết bị để giữ nguyên vị trí và kích thước gốc khi chạm vuốt | (Có sẵn trong source code) |
 | 4 | Server Cục Bộ | v1.1 | `./server.js` | Server tĩnh bằng Node.js thuần hỗ trợ thêm API `/api/list-images` quét ảnh động | (Có sẵn trong source code) |
 | 5 | Script Khởi Chạy | v1.0 | `./start_project.bat` | Script batch tự động nạp cấu hình, mở server và mở trang web | (Có sẵn trong source code) |
 | 6 | Script Tắt Dự Án | v1.0 | `./stop_project.bat` | Script batch dừng an toàn mọi dịch vụ đang chạy ngầm | (Có sẵn trong source code) |
-| 7 | Trình Quản Lý Dữ Liệu | v3.9.0-debug-06 | `./data-manager.js` | Đồng bộ dữ liệu, tự động thêm/xóa/sửa trang thực đơn theo tệp ảnh thực tế trong thư mục images | (Có sẵn trong source code) |
+| 7 | Trình Quản Lý Dữ Liệu | v3.9.0-debug-07 | `./data-manager.js` | Đồng bộ dữ liệu, tự động thêm/xóa/sửa trang thực đơn theo tệp ảnh thực tế trong thư mục images | (Có sẵn trong source code) |
 | 8 | Thư Viện PageFlip | v2.0.7 | CDN | Thư viện lật trang sách 3D (StPageFlip) | `https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js` |
 | 9 | Firebase Compat Core | v9.22.0 | CDN | Thư viện nền tảng kết nối Firebase | `https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js` |
 | 10 | Firebase Realtime DB | v9.22.0 | CDN | Đồng bộ dữ liệu các trang sách thời gian thực | `https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js` |
 | 11 | Firebase Storage | v9.22.0 | CDN | Quản lý tải ảnh nền và tài nguyên media của spa | `https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js` |
-| 12 | Trang Quản Trị | v3.9.0-debug-06 | `./admin.html` | Giao diện quản trị, WYSIWYG canvas, kéo thả sắp xếp trang và tuỳ chỉnh chữ nâng cao | (Có sẵn trong source code) |
-| 13 | Kịch Bản Quản Trị | v3.9.0-debug-06 | `./admin.js` | Cấu hình đám mây, quét repo và tự động đẩy mã nguồn lên GitHub | (Có sẵn trong source code) |
+| 12 | Trang Quản Trị | v3.9.0-debug-07 | `./admin.html` | Giao diện quản trị, WYSIWYG canvas, kéo thả sắp xếp trang và tuỳ chỉnh chữ nâng cao | (Có sẵn trong source code) |
+| 13 | Kịch Bản Quản Trị | v3.9.0-debug-07 | `./admin.js` | Cấu hình đám mây, quét repo và tự động đẩy mã nguồn lên GitHub | (Có sẵn trong source code) |
 
 ## 2. LOGIC CÀI ĐẶT & VẬN HÀNH
 
