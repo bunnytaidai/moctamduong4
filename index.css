@@ -583,39 +583,41 @@ html {
     z-index: 41;
 }
 
-/* Nút liên hệ chung dạng hình tròn tối giản sang trọng theo ảnh 2 */
+/* Nút liên hệ chung dạng Capsule dẹt tối giản sang trọng theo ảnh 2 */
 .contact-btn {
     text-decoration: none;
     background: rgba(18, 22, 18, 0.85) !important;
-    border: 1.5px solid rgba(212, 175, 55, 0.5) !important; /* Viền vàng kim mảnh */
-    border-radius: 50% !important;
-    width: 50px !important; /* Điều chỉnh kích thước 50px cho hài hòa */
-    height: 50px !important;
-    padding: 0 !important;
+    border: 1.5px solid rgba(197, 160, 89, 0.35) !important; /* Viền đồng cổ mảnh */
+    border-radius: 30px !important; /* Dạng Capsule bo tròn thuôn dài */
+    width: 190px !important; /* Chiều rộng cố định trên Desktop để các nút đều nhau */
+    height: 48px !important;
+    padding: 4px 12px 4px 4px !important;
     display: flex !important;
+    flex-direction: row !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
     color: #e5dfd3;
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    z-index: 99999 !important; /* Luôn nằm trên cùng */
+    z-index: 99999 !important; /* Luôn nổi trên cùng */
 }
 
 .contact-btn:hover {
     border-color: var(--gold-color) !important;
     box-shadow: 0 0 15px var(--gold-color) !important;
-    transform: translateY(-4px) scale(1.05);
+    transform: translateY(-4px) scale(1.02);
     color: #fff;
 }
 
 /* Vòng tròn icon nổi bật */
 .icon-circle {
-    width: 100% !important;
-    height: 100% !important;
+    width: 38px !important;
+    height: 38px !important;
+    flex-shrink: 0 !important;
     border-radius: 50% !important;
-    background: transparent !important;
-    color: inherit !important;
+    background: #c5a059 !important; /* Nền màu vàng đồng cổ */
+    color: #fff !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
@@ -627,41 +629,48 @@ html {
     transform: rotate(15deg);
 }
 
-/* Nhãn nút bấm */
+/* Nhãn chữ bên phải */
 .btn-info {
-    display: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    margin-left: 8px !important;
+    pointer-events: none;
 }
 
 .btn-label {
-    font-size: 0.58rem;
-    letter-spacing: 1.5px;
-    color: #a8a090;
-    font-weight: 600;
+    font-size: 0.58rem !important;
+    letter-spacing: 1px !important;
+    color: #a8a090 !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
 }
 
 .btn-val {
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
+    font-size: 0.82rem !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    letter-spacing: 0.5px !important;
+    line-height: 1.2 !important;
 }
 
-/* Khử màu đỏ rực của Hotline để đồng bộ tông vàng kim tối giản */
+/* Nút Gọi Hotline - Nền đỏ biểu tượng */
 .hotline-btn {
-    border-color: rgba(212, 175, 55, 0.5) !important;
+    border-color: rgba(166, 43, 43, 0.5) !important;
 }
 
 .hotline-btn .icon-circle {
-    background: transparent !important;
-    color: inherit !important;
-    animation: goldPulse 1.8s infinite; /* Nhấp nháy viền vàng kim nhẹ nhàng sang trọng */
+    background: #a62b2b !important; /* Đỏ đô sang trọng cho Hotline */
+    animation: goldPulse 1.8s infinite;
 }
 
 .hotline-btn:hover {
-    border-color: var(--gold-color) !important;
+    border-color: #d94141 !important;
 }
 
 .hotline-btn:hover .icon-circle {
-    background: rgba(212, 175, 55, 0.15) !important;
+    background: #d94141 !important;
 }
 
 @keyframes goldPulse {
@@ -904,8 +913,8 @@ html {
 
     /* Điều chỉnh vị trí chỉ số trang và gợi ý vuốt trên mobile */
     .page-indicator {
-        top: 10px; /* Đưa lên phía trên đầu màn hình di động */
-        bottom: auto;
+        top: calc(5px + var(--page-height) + 12px) !important; /* Dưới cuốn sách 12px, không đè sách */
+        bottom: auto !important;
         font-size: 0.75rem;
         padding: 4px 12px;
         left: calc(15px + (var(--page-width) / 2)) !important; /* Căn giữa theo trang bên Phải đang hiển thị trên Mobile */
@@ -937,7 +946,7 @@ html {
     /* Thiết lập lại chiều cao trên di động để vừa với 2 hàng nút */
     .content-frame {
         top: 5%;
-        bottom: 69px !important; /* 20px bottom + 44px button + 5px spacing */
+        bottom: 125px !important; /* Chừa 125px cho 2 hàng nút trên di động */
         height: auto !important;
         background: transparent !important; /* Xóa nền hoàn toàn */
         touch-action: none !important; /* Ngăn chặn cuộn màn hình trên mobile */
@@ -945,7 +954,51 @@ html {
 
     .bottom-footer {
         height: auto !important;
-        bottom: 20px !important;
+        bottom: 12px !important;
+        width: 100% !important;
+    }
+
+    /* Hiển thị 2 hàng 2 cột trên mobile */
+    .contact-bar {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 10px 8px !important;
+        width: 100% !important;
+        padding: 0 10px !important;
+    }
+
+    .contact-btn {
+        width: calc(50% - 4px) !important; /* Chia thành 2 cột */
+        height: 44px !important;
+        padding: 3px 8px 3px 3px !important;
+        border-radius: 25px !important;
+    }
+
+    .icon-circle {
+        width: 34px !important;
+        height: 34px !important;
+    }
+
+    .icon-circle i {
+        font-size: 0.95rem !important;
+    }
+
+    .icon-circle .zalo-text {
+        font-size: 0.65rem !important;
+    }
+
+    .btn-info {
+        margin-left: 6px !important;
+    }
+
+    .btn-label {
+        font-size: 0.5rem !important;
+        letter-spacing: 0.8px !important;
+    }
+
+    .btn-val {
+        font-size: 0.72rem !important;
     }
 
     .book-viewport {
