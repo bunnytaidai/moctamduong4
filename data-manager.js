@@ -223,11 +223,28 @@ async function loadStaticMenuData() {
         const res = await fetch(`menu_data.json?t=${Date.now()}`);
         if (res.ok) {
             const parsedData = await res.json();
+            
+            // KIỂM TRA PHIÊN BẢN CỦA CLOUD ĐỂ TRÁNH TRÌNH DUYỆT KHÁCH BỊ CACHE
+            const serverTime = parsedData.last_updated;
+            const localTime = localStorage.getItem('muxintang_last_updated');
+            if (serverTime && localTime && parseInt(serverTime) > parseInt(localTime)) {
+                localStorage.setItem('muxintang_last_updated', serverTime);
+                localStorage.removeItem('muxintang_menu_pages_cache');
+                localStorage.removeItem('muxintang_menu_pages');
+                console.log("Phát hiện phiên bản Cloud mới hơn. Đang hard-reload trang web...");
+                window.location.reload();
+                return true;
+            } else if (serverTime) {
+                localStorage.setItem('muxintang_last_updated', serverTime);
+            }
+
             let pagesList = Array.isArray(parsedData) ? parsedData : (parsedData.pages || []);
             let globalBg = Array.isArray(parsedData) ? '' : (parsedData.global_bg || '');
             localStorage.setItem('muxintang_global_bg', globalBg);
             
             let globalLayout = parsedData.global_layout || {};
+            let siteTitle = Array.isArray(parsedData) ? '' : (parsedData.site_title || '');
+            localStorage.setItem('muxintang_site_title', siteTitle);
             localStorage.setItem('muxintang_global_layout', JSON.stringify(globalLayout));
             
             pagesList.sort((a, b) => a.order - b.order);
@@ -340,6 +357,20 @@ async function loadGithubData(isSilentPoll = false) {
         const decodedContent = decodeURIComponent(escape(atob(base64Str)));
         const parsedData = JSON.parse(decodedContent);
         
+        // KIỂM TRA PHIÊN BẢN CỦA CLOUD ĐỂ TRÁNH TRÌNH DUYỆT KHÁCH BỊ CACHE
+        const serverTime = parsedData.last_updated;
+        const localTime = localStorage.getItem('muxintang_last_updated');
+        if (serverTime && localTime && parseInt(serverTime) > parseInt(localTime)) {
+            localStorage.setItem('muxintang_last_updated', serverTime);
+            localStorage.removeItem('muxintang_menu_pages_cache');
+            localStorage.removeItem('muxintang_menu_pages');
+            console.log("Phát hiện phiên bản Cloud mới hơn. Đang hard-reload trang web...");
+            window.location.reload();
+            return;
+        } else if (serverTime) {
+            localStorage.setItem('muxintang_last_updated', serverTime);
+        }
+
         let pagesList = Array.isArray(parsedData) ? parsedData : (parsedData.pages || []);
         let globalBg = Array.isArray(parsedData) ? '' : (parsedData.global_bg || '');
         localStorage.setItem('muxintang_global_bg', globalBg);
@@ -399,7 +430,8 @@ async function saveGithubData(pagesData) {
         site_title: siteTitle,
         global_bg: globalBg,
         pages: pagesData,
-        global_layout: globalLayout
+        global_layout: globalLayout,
+        last_updated: Date.now()
     };
     const jsonStr = JSON.stringify(fullData, null, 2);
     const base64Content = btoa(unescape(encodeURIComponent(jsonStr)));

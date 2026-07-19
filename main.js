@@ -490,10 +490,49 @@ document.addEventListener('DOMContentLoaded', () => {
                         pageData.texts.forEach(text => {
                             const textEl = document.createElement('div');
                             textEl.className = 'custom-text-element';
+                            
                             let style = `position: absolute; left: ${text.x}%; top: ${text.y}%; font-family: ${text.font || 'Montserrat'}, sans-serif; font-size: ${text.size || 16}px; color: ${text.color || '#333'}; white-space: pre-wrap;`;
                             if (text.bold) style += ' font-weight: bold;';
                             if (text.italic) style += ' font-style: italic;';
                             if (text.underline) style += ' text-decoration: underline;';
+                            
+                            // Căn lề chữ
+                            if (text.align) style += ` text-align: ${text.align};`;
+                            
+                            // Nền khung chữ
+                            if (text.bgTransparent) {
+                                style += ' background-color: transparent;';
+                            } else if (text.bgColor) {
+                                style += ` background-color: ${text.bgColor};`;
+                            }
+                            
+                            // Viền khung chữ
+                            if (text.borderNone) {
+                                style += ' border: none;';
+                            } else if (text.borderColor) {
+                                const bWidth = text.borderWidth !== undefined ? text.borderWidth : 1;
+                                style += ` border: ${bWidth}px solid ${text.borderColor};`;
+                            }
+                            if (text.borderRadius !== undefined) {
+                                style += ` border-radius: ${text.borderRadius}px;`;
+                            }
+                            
+                            // Padding đệm chữ
+                            if (text.padding !== undefined) {
+                                style += ` padding: ${text.padding}px;`;
+                            }
+                            
+                            // Khoảng cách dòng và chữ
+                            if (text.lineHeight) style += ` line-height: ${text.lineHeight};`;
+                            if (text.letterSpacing !== undefined) style += ` letter-spacing: ${text.letterSpacing}px;`;
+                            
+                            // Đổ bóng chữ
+                            if (text.shadow === 'soft') {
+                                style += ' text-shadow: 1px 1px 3px rgba(0,0,0,0.3);';
+                            } else if (text.shadow === 'hard') {
+                                style += ' text-shadow: 2px 2px 5px rgba(0,0,0,0.7);';
+                            }
+
                             textEl.setAttribute('style', style);
                             textEl.textContent = text.content;
                             pageContent.appendChild(textEl);
@@ -505,18 +544,61 @@ document.addEventListener('DOMContentLoaded', () => {
                         const sX = pageData.services_x !== undefined ? pageData.services_x : 10;
                         const sY = pageData.services_y !== undefined ? pageData.services_y : 25;
                         const sW = pageData.services_w !== undefined ? pageData.services_w : 80;
-                        servicesContainer.setAttribute('style', `position: absolute; left: ${sX}%; top: ${sY}%; width: ${sW}%;`);
+                        
+                        let containerStyle = `position: absolute; left: ${sX}%; top: ${sY}%; width: ${sW}%;`;
+                        
+                        // Nền bảng giá
+                        if (pageData.services_bg_transparent) {
+                            containerStyle += ' background: transparent !important;';
+                        } else if (pageData.services_bg) {
+                            containerStyle += ` background: ${pageData.services_bg} !important;`;
+                        }
+                        
+                        // Viền bảng giá
+                        if (pageData.services_border_none) {
+                            containerStyle += ' border: none !important;';
+                        } else if (pageData.services_border) {
+                            containerStyle += ` border: 1px solid ${pageData.services_border} !important;`;
+                        }
+                        
+                        if (pageData.services_border_radius !== undefined) {
+                            containerStyle += ` border-radius: ${pageData.services_border_radius}px !important;`;
+                        }
+                        
+                        servicesContainer.setAttribute('style', containerStyle);
+                        
+                        const sFont = pageData.services_font || 'Montserrat';
+                        const sSize = pageData.services_size || 13;
+                        const sColor = pageData.services_color || '#2b2b2b';
+                        const sPriceColor = pageData.services_price_color || '#a62b2b';
+                        const sAlign = pageData.services_align || 'left';
+                        const isBold = pageData.services_bold !== false;
+                        const isItalic = !!pageData.services_italic;
+                        
                         pageData.services.forEach(service => {
                             const item = document.createElement('div');
                             item.className = 'service-item';
+                            
+                            let itemStyle = `display: flex; align-items: center; justify-content: space-between; width: 100%; font-family: '${sFont}', sans-serif; font-size: ${sSize}px; text-align: ${sAlign};`;
+                            item.setAttribute('style', itemStyle);
+                            
                             const name = document.createElement('span');
                             name.className = 'service-name';
+                            let nameStyle = `color: ${sColor};`;
+                            if (isBold) nameStyle += ' font-weight: bold;';
+                            if (isItalic) nameStyle += ' font-style: italic;';
+                            name.setAttribute('style', nameStyle);
                             name.textContent = service.name;
+                            
                             const line = document.createElement('span');
                             line.className = 'service-line';
+                            line.setAttribute('style', `flex-grow: 1; border-bottom: 1.5px dotted ${pageData.services_border || 'rgba(197, 160, 89, 0.6)'}; margin: 0 8px; align-self: flex-end; margin-bottom: 4px;`);
+                            
                             const price = document.createElement('span');
                             price.className = 'service-price';
+                            price.setAttribute('style', `font-weight: 700; color: ${sPriceColor}; white-space: nowrap; padding-left: 5px;`);
                             price.textContent = service.price;
+                            
                             item.appendChild(name);
                             item.appendChild(line);
                             item.appendChild(price);

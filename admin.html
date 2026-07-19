@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng Điều Khiển Quản Trị v3.7.1 - Muxintang Wellness Spa</title>
+    <title>Bảng Điều Khiển Quản Trị v3.9.0-debug-01 - Muxintang Wellness Spa</title>
     
     <!-- Premium Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -992,7 +992,7 @@
     <!-- Header quản trị -->
     <header class="admin-header">
         <div class="logo-section">
-            <h1><i class="fa-solid fa-compass-drafting"></i> 沐心堂 Muxintang <span>BẢNG ĐIỀU KHIỂN ADMIN v3.7.1</span></h1>
+            <h1><i class="fa-solid fa-compass-drafting"></i> 沐心堂 Muxintang <span>BẢNG ĐIỀU KHIỂN ADMIN v3.9.0-debug-01</span></h1>
         </div>
         <div class="header-controls">
             <!-- Xem trang khách -->
@@ -1214,11 +1214,80 @@
                                 <input type="number" class="form-input" id="input-text-size" min="10" max="100" value="16">
                             </div>
                             <div class="form-group" style="flex: 1;">
+                                <label for="select-text-align">Căn lề chữ</label>
+                                <select class="form-select" id="select-text-align">
+                                    <option value="left">Căn trái</option>
+                                    <option value="center">Căn giữa</option>
+                                    <option value="right">Căn phải</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="btn-group-row">
+                            <div class="form-group" style="flex: 1;">
                                 <label for="input-text-color">Màu chữ</label>
                                 <div style="display: flex; gap: 5px;">
                                     <input type="color" class="form-input" id="input-text-color" style="padding: 0; width: 40px; height: 35px; cursor: pointer;" value="#c5a059">
                                     <input type="text" class="form-input" id="input-text-color-hex" style="flex: 1; font-size: 0.75rem;" value="#c5a059">
                                 </div>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Nền khung chữ</label>
+                                <div style="display: flex; gap: 5px; align-items: center; height: 35px;">
+                                    <input type="color" class="form-input" id="input-text-bg" style="padding: 0; width: 40px; height: 100%; cursor: pointer;" value="#ffffff">
+                                    <label style="font-size: 0.65rem; color: var(--text-main); display: flex; align-items: center; gap: 3px; margin: 0; cursor: pointer;">
+                                        <input type="checkbox" id="check-text-bg-transparent" checked> Xóa nền
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="btn-group-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label>Viền khung chữ</label>
+                                <div style="display: flex; gap: 5px; align-items: center; height: 35px;">
+                                    <input type="color" class="form-input" id="input-text-border" style="padding: 0; width: 40px; height: 100%; cursor: pointer;" value="#c5a059">
+                                    <label style="font-size: 0.65rem; color: var(--text-main); display: flex; align-items: center; gap: 3px; margin: 0; cursor: pointer;">
+                                        <input type="checkbox" id="check-text-border-none" checked> Xóa viền
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="input-text-border-width">Độ dày viền (px)</label>
+                                <input type="number" class="form-input" id="input-text-border-width" min="1" max="10" value="1">
+                            </div>
+                        </div>
+
+                        <div class="btn-group-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="input-text-border-radius">Bo góc viền (px)</label>
+                                <input type="number" class="form-input" id="input-text-border-radius" min="0" max="30" value="4">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="input-text-padding">Đệm Padding (px)</label>
+                                <input type="number" class="form-input" id="input-text-padding" min="0" max="50" value="4">
+                            </div>
+                        </div>
+
+                        <div class="btn-group-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="input-text-lineheight">Khoảng cách dòng</label>
+                                <input type="number" class="form-input" id="input-text-lineheight" min="1" max="3" step="0.1" value="1.4">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="input-text-letterspacing">Khoảng cách chữ</label>
+                                <input type="number" class="form-input" id="input-text-letterspacing" min="0" max="20" value="0">
+                            </div>
+                        </div>
+
+                        <div class="btn-group-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="select-text-shadow">Đổ bóng chữ</label>
+                                <select class="form-select" id="select-text-shadow">
+                                    <option value="none">Không đổ bóng</option>
+                                    <option value="soft">Bóng nhẹ</option>
+                                    <option value="hard">Bóng đậm</option>
+                                </select>
                             </div>
                         </div>
 
@@ -1250,6 +1319,84 @@
                     </div>
 
                     <div id="services-editor-container" style="display: none; flex-direction: column; gap: 10px;">
+                        <!-- Các cài đặt thuộc tính của Bảng giá -->
+                        <div class="form-group">
+                            <label for="select-services-font">Kiểu Font chữ bảng giá</label>
+                            <select class="form-select" id="select-services-font">
+                                <option value="Montserrat">Montserrat (Hiện đại, thanh mảnh)</option>
+                                <option value="Noto Serif SC">Noto Serif SC (Cổ điển, Trung Hoa)</option>
+                                <option value="Playfair Display">Playfair Display (Quý phái, chân phương)</option>
+                                <option value="Charm">Charm (Thư pháp bay bổng)</option>
+                                <option value="Charmonman">Charmonman (Thư pháp mềm mại)</option>
+                                <option value="Dancing Script">Dancing Script (Viết tay nghệ thuật)</option>
+                                <option value="Great Vibes">Great Vibes (Mềm mại phương Tây)</option>
+                            </select>
+                        </div>
+                        <div class="btn-group-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="input-services-size">Cỡ chữ (px)</label>
+                                <input type="number" class="form-input" id="input-services-size" min="10" max="40" value="13">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="select-services-align">Căn lề chữ</label>
+                                <select class="form-select" id="select-services-align">
+                                    <option value="left">Căn trái</option>
+                                    <option value="center">Căn giữa</option>
+                                    <option value="right">Căn phải</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="btn-group-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="input-services-color">Màu chữ món ăn</label>
+                                <div style="display: flex; gap: 5px;">
+                                    <input type="color" class="form-input" id="input-services-color" style="padding: 0; width: 40px; height: 35px; cursor: pointer;" value="#2b2b2b">
+                                    <input type="text" class="form-input" id="input-services-color-hex" style="flex: 1; font-size: 0.7rem;" value="#2b2b2b">
+                                </div>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="input-services-price-color">Màu chữ giá tiền</label>
+                                <div style="display: flex; gap: 5px;">
+                                    <input type="color" class="form-input" id="input-services-price-color" style="padding: 0; width: 40px; height: 35px; cursor: pointer;" value="#a62b2b">
+                                    <input type="text" class="form-input" id="input-services-price-color-hex" style="flex: 1; font-size: 0.7rem;" value="#a62b2b">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="btn-group-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label>Định dạng chữ</label>
+                                <div class="text-format-bar">
+                                    <button class="format-btn" id="btn-services-bold" title="In đậm"><i class="fa-solid fa-bold"></i></button>
+                                    <button class="format-btn" id="btn-services-italic" title="In nghiêng"><i class="fa-solid fa-italic"></i></button>
+                                </div>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Nền bảng giá</label>
+                                <div style="display: flex; gap: 5px; align-items: center; height: 35px;">
+                                    <input type="color" class="form-input" id="input-services-bg" style="padding: 0; width: 40px; height: 100%; cursor: pointer;" value="#fdfcf7">
+                                    <label style="font-size: 0.65rem; color: var(--text-main); display: flex; align-items: center; gap: 3px; margin: 0; cursor: pointer;">
+                                        <input type="checkbox" id="check-services-bg-transparent"> Xóa nền
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="btn-group-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label>Viền bảng giá</label>
+                                <div style="display: flex; gap: 5px; align-items: center; height: 35px;">
+                                    <input type="color" class="form-input" id="input-services-border" style="padding: 0; width: 40px; height: 100%; cursor: pointer;" value="#c5a059">
+                                    <label style="font-size: 0.65rem; color: var(--text-main); display: flex; align-items: center; gap: 3px; margin: 0; cursor: pointer;">
+                                        <input type="checkbox" id="check-services-border-none"> Xóa viền
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="input-services-border-radius">Bo góc viền (px)</label>
+                                <input type="number" class="form-input" id="input-services-border-radius" min="0" max="30" value="8">
+                            </div>
+                        </div>
+                        
+                        <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">Danh sách món ăn & giá tiền</label>
                         <div class="service-list-editor" id="service-list-editor-dom">
                             <!-- Danh sách các ô dịch vụ sẽ sinh ở đây -->
                         </div>

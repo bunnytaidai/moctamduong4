@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnDiscardPageChanges = document.getElementById('btn-discard-page-changes');
     const btnSavePageChanges = document.getElementById('btn-save-page-changes');
     
-    // Controls Chữ (Text)
+    // Controls Chữ (Text) nâng cấp
     const sectionTextManager = document.getElementById('section-text-manager');
     const textEditInstructions = document.getElementById('text-edit-instructions');
     const textElementEditor = document.getElementById('text-element-editor');
@@ -32,20 +32,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputTextContent = document.getElementById('input-text-content');
     const selectTextFont = document.getElementById('select-text-font');
     const inputTextSize = document.getElementById('input-text-size');
+    const selectTextAlign = document.getElementById('select-text-align');
     const inputTextColor = document.getElementById('input-text-color');
     const inputTextColorHex = document.getElementById('input-text-color-hex');
+    const inputTextBg = document.getElementById('input-text-bg');
+    const checkTextBgTransparent = document.getElementById('check-text-bg-transparent');
+    const inputTextBorder = document.getElementById('input-text-border');
+    const checkTextBorderNone = document.getElementById('check-text-border-none');
+    const inputTextBorderWidth = document.getElementById('input-text-border-width');
+    const inputTextBorderRadius = document.getElementById('input-text-border-radius');
+    const inputTextPadding = document.getElementById('input-text-padding');
+    const inputTextLineheight = document.getElementById('input-text-lineheight');
+    const inputTextLetterspacing = document.getElementById('input-text-letterspacing');
+    const selectTextShadow = document.getElementById('select-text-shadow');
     const btnFormatBold = document.getElementById('btn-format-bold');
     const btnFormatItalic = document.getElementById('btn-format-italic');
     const btnFormatUnderline = document.getElementById('btn-format-underline');
     const btnDeleteText = document.getElementById('btn-delete-text');
     
-    // Controls Dịch vụ (Services)
+    // Controls Dịch vụ (Services) nâng cấp
     const sectionServicesManager = document.getElementById('section-services-manager');
     const btnToggleServices = document.getElementById('btn-toggle-services');
     const btnAddService = document.getElementById('btn-add-service');
     const servicesEditorContainer = document.getElementById('services-editor-container');
     const serviceListEditorDom = document.getElementById('service-list-editor-dom');
     const servicesDisabledMsg = document.getElementById('services-disabled-msg');
+    const selectServicesFont = document.getElementById('select-services-font');
+    const inputServicesSize = document.getElementById('input-services-size');
+    const selectServicesAlign = document.getElementById('select-services-align');
+    const inputServicesColor = document.getElementById('input-services-color');
+    const inputServicesColorHex = document.getElementById('input-services-color-hex');
+    const inputServicesPriceColor = document.getElementById('input-services-price-color');
+    const inputServicesPriceColorHex = document.getElementById('input-services-price-color-hex');
+    const btnServicesBold = document.getElementById('btn-services-bold');
+    const btnServicesItalic = document.getElementById('btn-services-italic');
+    const inputServicesBg = document.getElementById('input-services-bg');
+    const checkServicesBgTransparent = document.getElementById('check-services-bg-transparent');
+    const inputServicesBorder = document.getElementById('input-services-border');
+    const checkServicesBorderNone = document.getElementById('check-services-border-none');
+    const inputServicesBorderRadius = document.getElementById('input-services-border-radius');
     
     // Controls Nhật ký & Log (v3.0)
     const logContainer = document.getElementById('log-container');
@@ -533,6 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const item = document.createElement('div');
             item.className = `page-item ${page.id === activePageId ? 'active' : ''}`;
             item.setAttribute('data-id', page.id);
+            item.setAttribute('draggable', 'true'); // Hỗ trợ kéo thả
             
             // Xử lý thumbnail ảnh nền
             const thumb = document.createElement('div');
@@ -564,33 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const actions = document.createElement('div');
             actions.className = 'page-actions';
             
-            // Nút di chuyển lên (Sắp xếp)
-            if (i > 0) {
-                const btnUp = document.createElement('button');
-                btnUp.className = 'action-icon-btn';
-                btnUp.title = 'Di chuyển lên';
-                btnUp.innerHTML = '<i class="fa-solid fa-chevron-up"></i>';
-                btnUp.onclick = (e) => {
-                    e.stopPropagation();
-                    movePageOrder(i, i - 1);
-                };
-                actions.appendChild(btnUp);
-            }
-            
-            // Nút di chuyển xuống (Sắp xếp)
-            if (i < allPages.length - 1) {
-                const btnDown = document.createElement('button');
-                btnDown.className = 'action-icon-btn';
-                btnDown.title = 'Di chuyển xuống';
-                btnDown.innerHTML = '<i class="fa-solid fa-chevron-down"></i>';
-                btnDown.onclick = (e) => {
-                    e.stopPropagation();
-                    movePageOrder(i, i + 1);
-                };
-                actions.appendChild(btnDown);
-            }
-
-            // Nút xóa trang
+            // Nút xóa trang (Chỉ giữ lại nút xóa, thay sắp xếp bằng kéo thả trực quan)
             const btnDel = document.createElement('button');
             btnDel.className = 'action-icon-btn btn-delete-page';
             btnDel.title = 'Xóa trang này';
@@ -607,6 +607,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             };
             actions.appendChild(btnDel);
+
+            // Drag and Drop Events
+            item.addEventListener('dragstart', (e) => {
+                item.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', i);
+            });
+
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+
+            item.addEventListener('dragenter', (e) => {
+                e.preventDefault();
+                if (!item.classList.contains('dragging')) {
+                    item.classList.add('drag-over');
+                }
+            });
+
+            item.addEventListener('dragleave', () => {
+                item.classList.remove('drag-over');
+            });
+
+            item.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                item.classList.remove('drag-over');
+                const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+                const toIdx = i;
+                
+                if (fromIdx !== toIdx) {
+                    addSystemLog(`Đang sắp xếp lại trang từ vị trí ${fromIdx + 1} sang ${toIdx + 1}...`, 'info');
+                    await movePageOrder(fromIdx, toIdx);
+                }
+            });
+
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+                document.querySelectorAll('.page-item').forEach(el => el.classList.remove('drag-over'));
+            });
 
             // Click vào trang để chỉnh sửa
             item.onclick = () => selectPage(page.id);
@@ -791,6 +829,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Nếu là trang tùy biến (custom) thì vẽ chữ và bảng dịch vụ
         if (activePageData.type === 'custom') {
+            const canvasWidth = canvasPreview.offsetWidth || 310;
+            const scaleRatio = canvasWidth / 380;
+
             // A. Vẽ các phần tử chữ
             if (activePageData.texts) {
                 activePageData.texts.forEach(text => {
@@ -798,15 +839,54 @@ document.addEventListener('DOMContentLoaded', () => {
                     textEl.className = `canvas-text-el ${text.id === selectedTextId ? 'selected' : ''}`;
                     textEl.setAttribute('data-id', text.id);
                     
-                    const canvasWidth = canvasPreview.offsetWidth || 310;
-                    const scaleRatio = canvasWidth / 380;
-                    let style = `left: ${text.x}%; top: ${text.y}%; font-family: ${text.font || 'Montserrat'}, sans-serif; font-size: ${Math.floor(text.size * 0.81 * scaleRatio)}px; color: ${text.color || '#333'};`;
+                    let style = `left: ${text.x}%; top: ${text.y}%; font-family: ${text.font || 'Montserrat'}, sans-serif; font-size: ${Math.floor(text.size * 0.81 * scaleRatio)}px; color: ${text.color || '#333'}; white-space: pre-wrap;`;
                     if (text.bold) style += ' font-weight: bold;';
                     if (text.italic) style += ' font-style: italic;';
                     if (text.underline) style += ' text-decoration: underline;';
+                    
+                    // Nâng cấp: Căn lề
+                    if (text.align) style += ` text-align: ${text.align};`;
+                    
+                    // Nâng cấp: Nền khung
+                    if (text.bgTransparent) {
+                        style += ' background-color: transparent;';
+                    } else if (text.bgColor) {
+                        style += ` background-color: ${text.bgColor};`;
+                    }
+                    
+                    // Nâng cấp: Viền khung
+                    if (text.borderNone) {
+                        style += ' border: none;';
+                    } else if (text.borderColor) {
+                        const bWidth = text.borderWidth !== undefined ? text.borderWidth : 1;
+                        style += ` border: ${bWidth}px solid ${text.borderColor};`;
+                    }
+                    if (text.borderRadius !== undefined) {
+                        style += ` border-radius: ${text.borderRadius}px;`;
+                    }
+                    
+                    // Nâng cấp: Padding
+                    if (text.padding !== undefined) {
+                        style += ` padding: ${text.padding}px;`;
+                    }
+                    
+                    // Nâng cấp: Khoảng cách dòng và chữ
+                    if (text.lineHeight) style += ` line-height: ${text.lineHeight};`;
+                    if (text.letterSpacing !== undefined) style += ` letter-spacing: ${text.letterSpacing}px;`;
+                    
+                    // Nâng cấp: Bóng chữ
+                    if (text.shadow === 'soft') {
+                        style += ' text-shadow: 1px 1px 3px rgba(0,0,0,0.3);';
+                    } else if (text.shadow === 'hard') {
+                        style += ' text-shadow: 2px 2px 5px rgba(0,0,0,0.7);';
+                    }
+
                     textEl.setAttribute('style', style);
                     
-                    textEl.textContent = text.content;
+                    // Thêm phần tử chứa text nội dung
+                    const textSpan = document.createElement('span');
+                    textSpan.textContent = text.content;
+                    textEl.appendChild(textSpan);
                     
                     // Thêm tay nắm co giãn kích thước (Resize Handle)
                     const resizeHandle = document.createElement('div');
@@ -847,23 +927,58 @@ document.addEventListener('DOMContentLoaded', () => {
                 const sY = activePageData.services_y !== undefined ? activePageData.services_y : 25;
                 const sW = activePageData.services_w !== undefined ? activePageData.services_w : 80;
                 
-                const canvasWidth = canvasPreview.offsetWidth || 310;
-                const scaleRatio = canvasWidth / 380;
-                sContainer.setAttribute('style', `left: ${sX}%; top: ${sY}%; width: ${sW}%; font-size: ${Math.floor(13 * scaleRatio)}px;`);
+                const sFont = activePageData.services_font || 'Montserrat';
+                const sSize = activePageData.services_size || 13;
+                const sColor = activePageData.services_color || '#2b2b2b';
+                const sPriceColor = activePageData.services_price_color || '#a62b2b';
+                const sAlign = activePageData.services_align || 'left';
+                const isBold = activePageData.services_bold !== false;
+                const isItalic = !!activePageData.services_italic;
+                
+                // Style cho container bảng dịch vụ
+                let containerStyle = `left: ${sX}%; top: ${sY}%; width: ${sW}%; font-size: ${Math.floor(sSize * scaleRatio)}px;`;
+                
+                if (activePageData.services_bg_transparent) {
+                    containerStyle += ' background: transparent !important;';
+                } else if (activePageData.services_bg) {
+                    containerStyle += ` background: ${activePageData.services_bg} !important;`;
+                }
+                
+                if (activePageData.services_border_none) {
+                    containerStyle += ' border: none !important;';
+                } else if (activePageData.services_border) {
+                    containerStyle += ` border: 1px solid ${activePageData.services_border} !important;`;
+                }
+                
+                if (activePageData.services_border_radius !== undefined) {
+                    containerStyle += ` border-radius: ${activePageData.services_border_radius}px !important;`;
+                }
+                
+                sContainer.setAttribute('style', containerStyle);
                 
                 activePageData.services.forEach(service => {
                     const item = document.createElement('div');
                     item.className = 'service-item';
                     
+                    // Style cho từng dòng dịch vụ
+                    let itemStyle = `display: flex; align-items: center; justify-content: space-between; width: 100%; font-family: '${sFont}', sans-serif; text-align: ${sAlign};`;
+                    item.setAttribute('style', itemStyle);
+                    
                     const name = document.createElement('span');
                     name.className = 'service-name';
+                    let nameStyle = `color: ${sColor};`;
+                    if (isBold) nameStyle += ' font-weight: bold;';
+                    if (isItalic) nameStyle += ' font-style: italic;';
+                    name.setAttribute('style', nameStyle);
                     name.textContent = service.name;
                     
                     const line = document.createElement('span');
                     line.className = 'service-line';
+                    line.setAttribute('style', `border-bottom: 1.5px dotted ${activePageData.services_border || 'rgba(197, 160, 89, 0.6)'};`);
                     
                     const price = document.createElement('span');
                     price.className = 'service-price';
+                    price.setAttribute('style', `color: ${sPriceColor}; font-weight: 700; white-space: nowrap; padding-left: 5px;`);
                     price.textContent = service.price;
                     
                     item.appendChild(name);
@@ -1032,8 +1147,26 @@ document.addEventListener('DOMContentLoaded', () => {
         inputTextContent.value = textObj.content || '';
         selectTextFont.value = textObj.font || 'Montserrat';
         inputTextSize.value = textObj.size || 16;
-        inputTextColor.value = textObj.color || '#333333';
-        inputTextColorHex.value = textObj.color || '#333333';
+        selectTextAlign.value = textObj.align || 'left';
+        inputTextColor.value = textObj.color || '#c5a059';
+        inputTextColorHex.value = textObj.color || '#c5a059';
+        
+        inputTextBg.value = textObj.bgColor || '#ffffff';
+        checkTextBgTransparent.checked = textObj.bgTransparent !== false; // mặc định trong suốt (true)
+        inputTextBg.disabled = checkTextBgTransparent.checked;
+        
+        inputTextBorder.value = textObj.borderColor || '#c5a059';
+        checkTextBorderNone.checked = textObj.borderNone !== false; // mặc định không viền (true)
+        inputTextBorder.disabled = checkTextBorderNone.checked;
+        inputTextBorderWidth.value = textObj.borderWidth !== undefined ? textObj.borderWidth : 1;
+        inputTextBorderWidth.disabled = checkTextBorderNone.checked;
+        inputTextBorderRadius.value = textObj.borderRadius !== undefined ? textObj.borderRadius : 4;
+        inputTextBorderRadius.disabled = checkTextBorderNone.checked;
+        
+        inputTextPadding.value = textObj.padding !== undefined ? textObj.padding : 4;
+        inputTextLineheight.value = textObj.lineHeight || 1.4;
+        inputTextLetterspacing.value = textObj.letterSpacing || 0;
+        selectTextShadow.value = textObj.shadow || 'none';
         
         // Trạng thái các nút định dạng
         btnFormatBold.classList.toggle('active', !!textObj.bold);
@@ -1050,8 +1183,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Update nhanh trên canvas
             const el = document.querySelector(`.canvas-text-el[data-id="${selectedTextId}"]`);
             if (el) {
-                // Giữ lại handle resize
-                el.firstChild.textContent = e.target.value;
+                el.querySelector('span').textContent = e.target.value;
             }
             checkChanges();
         }
@@ -1077,6 +1209,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    selectTextAlign.onchange = (e) => {
+        if (!selectedTextId) return;
+        const textObj = activePageData.texts.find(t => t.id === selectedTextId);
+        if (textObj) {
+            textObj.align = e.target.value;
+            renderCanvasPreview();
+            checkChanges();
+        }
+    };
+
     // Color picker
     inputTextColor.oninput = (e) => {
         if (!selectedTextId) return;
@@ -1095,6 +1237,110 @@ document.addEventListener('DOMContentLoaded', () => {
         if (textObj && e.target.value.match(/^#[0-9A-F]{6}$/i)) {
             textObj.color = e.target.value;
             inputTextColor.value = e.target.value;
+            renderCanvasPreview();
+            checkChanges();
+        }
+    };
+
+    inputTextBg.oninput = (e) => {
+        if (!selectedTextId) return;
+        const textObj = activePageData.texts.find(t => t.id === selectedTextId);
+        if (textObj) {
+            textObj.bgColor = e.target.value;
+            renderCanvasPreview();
+            checkChanges();
+        }
+    };
+
+    checkTextBgTransparent.onchange = (e) => {
+        if (!selectedTextId) return;
+        const textObj = activePageData.texts.find(t => t.id === selectedTextId);
+        if (textObj) {
+            textObj.bgTransparent = e.target.checked;
+            inputTextBg.disabled = e.target.checked;
+            renderCanvasPreview();
+            checkChanges();
+        }
+    };
+
+    inputTextBorder.oninput = (e) => {
+        if (!selectedTextId) return;
+        const textObj = activePageData.texts.find(t => t.id === selectedTextId);
+        if (textObj) {
+            textObj.borderColor = e.target.value;
+            renderCanvasPreview();
+            checkChanges();
+        }
+    };
+
+    checkTextBorderNone.onchange = (e) => {
+        if (!selectedTextId) return;
+        const textObj = activePageData.texts.find(t => t.id === selectedTextId);
+        if (textObj) {
+            textObj.borderNone = e.target.checked;
+            inputTextBorder.disabled = e.target.checked;
+            inputTextBorderWidth.disabled = e.target.checked;
+            inputTextBorderRadius.disabled = e.target.checked;
+            renderCanvasPreview();
+            checkChanges();
+        }
+    };
+
+    inputTextBorderWidth.oninput = (e) => {
+        if (!selectedTextId) return;
+        const textObj = activePageData.texts.find(t => t.id === selectedTextId);
+        if (textObj) {
+            textObj.borderWidth = parseInt(e.target.value) || 1;
+            renderCanvasPreview();
+            checkChanges();
+        }
+    };
+
+    inputTextBorderRadius.oninput = (e) => {
+        if (!selectedTextId) return;
+        const textObj = activePageData.texts.find(t => t.id === selectedTextId);
+        if (textObj) {
+            textObj.borderRadius = parseInt(e.target.value) || 0;
+            renderCanvasPreview();
+            checkChanges();
+        }
+    };
+
+    inputTextPadding.oninput = (e) => {
+        if (!selectedTextId) return;
+        const textObj = activePageData.texts.find(t => t.id === selectedTextId);
+        if (textObj) {
+            textObj.padding = parseInt(e.target.value) || 0;
+            renderCanvasPreview();
+            checkChanges();
+        }
+    };
+
+    inputTextLineheight.oninput = (e) => {
+        if (!selectedTextId) return;
+        const textObj = activePageData.texts.find(t => t.id === selectedTextId);
+        if (textObj) {
+            textObj.lineHeight = parseFloat(e.target.value) || 1.4;
+            renderCanvasPreview();
+            checkChanges();
+        }
+    };
+
+    inputTextLetterspacing.oninput = (e) => {
+        if (!selectedTextId) return;
+        const textObj = activePageData.texts.find(t => t.id === selectedTextId);
+        if (textObj) {
+            textObj.letterSpacing = parseInt(e.target.value) || 0;
+            renderCanvasPreview();
+            checkChanges();
+        }
+    };
+
+    selectTextShadow.onchange = (e) => {
+        if (!selectedTextId) return;
+        const textObj = activePageData.texts.find(t => t.id === selectedTextId);
+        if (textObj) {
+            textObj.shadow = e.target.value;
             renderCanvasPreview();
             checkChanges();
         }
@@ -1179,6 +1425,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnAddService.style.display = 'block';
             servicesEditorContainer.style.display = 'flex';
             servicesDisabledMsg.style.display = 'none';
+            updateServicesEditorUI();
             renderServiceEditorList();
         } else {
             btnToggleServices.textContent = "Bật bảng giá";
@@ -1188,6 +1435,130 @@ document.addEventListener('DOMContentLoaded', () => {
             servicesDisabledMsg.style.display = 'block';
         }
     }
+
+    function updateServicesEditorUI() {
+        if (!activePageData) return;
+        
+        selectServicesFont.value = activePageData.services_font || 'Montserrat';
+        inputServicesSize.value = activePageData.services_size || 13;
+        selectServicesAlign.value = activePageData.services_align || 'left';
+        
+        inputServicesColor.value = activePageData.services_color || '#2b2b2b';
+        inputServicesColorHex.value = activePageData.services_color || '#2b2b2b';
+        
+        inputServicesPriceColor.value = activePageData.services_price_color || '#a62b2b';
+        inputServicesPriceColorHex.value = activePageData.services_price_color || '#a62b2b';
+        
+        btnServicesBold.classList.toggle('active', activePageData.services_bold !== false);
+        btnServicesItalic.classList.toggle('active', !!activePageData.services_italic);
+        
+        inputServicesBg.value = activePageData.services_bg || '#fdfcf7';
+        checkServicesBgTransparent.checked = !!activePageData.services_bg_transparent;
+        inputServicesBg.disabled = !!activePageData.services_bg_transparent;
+        
+        inputServicesBorder.value = activePageData.services_border || '#c5a059';
+        checkServicesBorderNone.checked = !!activePageData.services_border_none;
+        inputServicesBorder.disabled = !!activePageData.services_border_none;
+        
+        inputServicesBorderRadius.value = activePageData.services_border_radius !== undefined ? activePageData.services_border_radius : 8;
+    }
+
+    // Sự kiện chỉnh sửa bảng giá thời gian thực
+    selectServicesFont.onchange = (e) => {
+        activePageData.services_font = e.target.value;
+        renderCanvasPreview();
+        checkChanges();
+    };
+
+    inputServicesSize.oninput = (e) => {
+        activePageData.services_size = parseInt(e.target.value) || 13;
+        renderCanvasPreview();
+        checkChanges();
+    };
+
+    selectServicesAlign.onchange = (e) => {
+        activePageData.services_align = e.target.value;
+        renderCanvasPreview();
+        checkChanges();
+    };
+
+    inputServicesColor.oninput = (e) => {
+        activePageData.services_color = e.target.value;
+        inputServicesColorHex.value = e.target.value;
+        renderCanvasPreview();
+        checkChanges();
+    };
+
+    inputServicesColorHex.oninput = (e) => {
+        if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+            activePageData.services_color = e.target.value;
+            inputServicesColor.value = e.target.value;
+            renderCanvasPreview();
+            checkChanges();
+        }
+    };
+
+    inputServicesPriceColor.oninput = (e) => {
+        activePageData.services_price_color = e.target.value;
+        inputServicesPriceColorHex.value = e.target.value;
+        renderCanvasPreview();
+        checkChanges();
+    };
+
+    inputServicesPriceColorHex.oninput = (e) => {
+        if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+            activePageData.services_price_color = e.target.value;
+            inputServicesPriceColor.value = e.target.value;
+            renderCanvasPreview();
+            checkChanges();
+        }
+    };
+
+    btnServicesBold.onclick = () => {
+        activePageData.services_bold = activePageData.services_bold === false ? true : !activePageData.services_bold;
+        btnServicesBold.classList.toggle('active', activePageData.services_bold !== false);
+        renderCanvasPreview();
+        checkChanges();
+    };
+
+    btnServicesItalic.onclick = () => {
+        activePageData.services_italic = !activePageData.services_italic;
+        btnServicesItalic.classList.toggle('active', activePageData.services_italic);
+        renderCanvasPreview();
+        checkChanges();
+    };
+
+    inputServicesBg.oninput = (e) => {
+        activePageData.services_bg = e.target.value;
+        renderCanvasPreview();
+        checkChanges();
+    };
+
+    checkServicesBgTransparent.onchange = (e) => {
+        activePageData.services_bg_transparent = e.target.checked;
+        inputServicesBg.disabled = e.target.checked;
+        renderCanvasPreview();
+        checkChanges();
+    };
+
+    inputServicesBorder.oninput = (e) => {
+        activePageData.services_border = e.target.value;
+        renderCanvasPreview();
+        checkChanges();
+    };
+
+    checkServicesBorderNone.onchange = (e) => {
+        activePageData.services_border_none = e.target.checked;
+        inputServicesBorder.disabled = e.target.checked;
+        renderCanvasPreview();
+        checkChanges();
+    };
+
+    inputServicesBorderRadius.oninput = (e) => {
+        activePageData.services_border_radius = parseInt(e.target.value) || 0;
+        renderCanvasPreview();
+        checkChanges();
+    };
 
     btnToggleServices.onclick = () => {
         if (!activePageData.services) activePageData.services = [];
@@ -1208,6 +1579,19 @@ document.addEventListener('DOMContentLoaded', () => {
             activePageData.services_x = 10;
             activePageData.services_y = 25;
             activePageData.services_w = 80;
+            activePageData.services_font = 'Montserrat';
+            activePageData.services_size = 13;
+            activePageData.services_color = '#2b2b2b';
+            activePageData.services_price_color = '#a62b2b';
+            activePageData.services_align = 'left';
+            activePageData.services_bold = true;
+            activePageData.services_italic = false;
+            activePageData.services_bg = '#fdfcf7';
+            activePageData.services_bg_transparent = false;
+            activePageData.services_border = '#c5a059';
+            activePageData.services_border_none = false;
+            activePageData.services_border_radius = 8;
+            
             initServicesEditor();
             renderCanvasPreview();
             checkChanges();
@@ -1604,7 +1988,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Lưu GitHub
-    btnSaveGithub.onclick = () => {
+    btnSaveGithub.onclick = async () => {
         const token = inputGhToken.value.trim();
         const username = inputGhUsername.value.trim();
         const repo = selectGhRepo.value;
@@ -1622,11 +2006,26 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const config = { username, repo, branch, token };
         DataManager.saveGithubConfig(config);
-        closeModal(cloudModal);
         
-        addSystemLog(`Đã lưu cấu hình GitHub Cloud (Repo: ${username}/${repo}, Nhánh: ${branch})`, 'success');
-        showToast('Cài đặt GitHub Cloud thành công!', 'success');
-        setTimeout(() => location.reload(), 1000);
+        btnSaveGithub.disabled = true;
+        btnSaveGithub.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang đồng bộ...';
+        
+        addSystemLog(`Đã lưu cấu hình GitHub Cloud. Bắt đầu đẩy toàn bộ mã nguồn lên repo ${username}/${repo} để deploy Pages...`, 'info');
+        
+        try {
+            await syncEntireSourceToGithub();
+            closeModal(cloudModal);
+            showToast('Cài đặt & Đồng bộ GitHub thành công!', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } catch (err) {
+            console.error(err);
+            addSystemLog(`Đồng bộ thất bại: ${err.message}. Tuy nhiên cấu hình vẫn được lưu cục bộ.`, 'warn');
+            closeModal(cloudModal);
+            setTimeout(() => location.reload(), 1500);
+        } finally {
+            btnSaveGithub.disabled = false;
+            btnSaveGithub.textContent = 'Lưu cấu hình';
+        }
     };
 
     btnClearGithub.onclick = () => {
@@ -2253,5 +2652,153 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeModal(adminZoomModal);
             }
         };
+    }
+    // Đồng bộ toàn bộ mã nguồn website tĩnh lên GitHub Repository (v3.8)
+    async function syncEntireSourceToGithub() {
+        const ghConfig = DataManager.getGithubConfig();
+        if (!ghConfig || !ghConfig.token) {
+            throw new Error('Chưa cấu hình tài khoản hoặc thiếu GitHub Access Token!');
+        }
+        
+        addSystemLog('Khởi động đồng bộ mã nguồn website lên GitHub Repository...', 'info');
+        showToast('Đang đồng bộ source code lên GitHub...', 'info');
+        
+        const filesToSync = [
+            'index.html',
+            'index.css',
+            'main.js',
+            'data-manager.js',
+            'admin.html',
+            'admin.js',
+            'icon.js',
+            'server.js',
+            'start_project.bat',
+            'stop_project.bat',
+            '.nojekyll',
+            '.github/workflows/static.yml'
+        ];
+        
+        const imagesToSync = [
+            'images/dau.jpg',
+            'images/2.jpg',
+            'images/3.jpg',
+            'images/4.jpg',
+            'images/5.jpeg',
+            'images/6.jpg',
+            'images/7.jpg',
+            'images/8.jpg',
+            'images/cuoi.jpg',
+            'images/spa_background.png',
+            'icon/1-phone.png',
+            'icon/2-wechat.png',
+            'icon/3-zalo.png',
+            'icon/4-maps.png'
+        ];
+        
+        try {
+            // A. Kích hoạt GitHub Pages bằng Actions
+            const pagesUrl = `https://api.github.com/repos/${ghConfig.username}/${ghConfig.repo}/pages`;
+            try {
+                await fetch(pagesUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${ghConfig.token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({ build_type: 'workflow' })
+                });
+                addSystemLog('Đã bật tính năng GitHub Pages (build_type: workflow).', 'success');
+            } catch (e) {
+                // Đã bật từ trước hoặc có lỗi, tiếp tục tiến trình
+            }
+            
+            // B. Tải lên các file mã nguồn cốt lõi
+            for (const filePath of filesToSync) {
+                addSystemLog(`Đang đẩy file mã nguồn: ${filePath}...`, 'info');
+                const fileRes = await fetch(`${filePath}?t=${Date.now()}`);
+                if (fileRes.ok) {
+                    const content = await fileRes.text();
+                    await uploadFileToGithub(filePath, content, false);
+                } else {
+                    addSystemLog(`Bỏ qua file không đọc được: ${filePath}`, 'warn');
+                }
+            }
+            
+            // C. Tải lên các file ảnh mặc định nếu chưa tồn tại
+            for (const imgPath of imagesToSync) {
+                const checkUrl = `https://api.github.com/repos/${ghConfig.username}/${ghConfig.repo}/contents/${imgPath}?ref=${ghConfig.branch || 'main'}`;
+                const checkRes = await fetch(checkUrl, {
+                    headers: { 'Authorization': `token ${ghConfig.token}` }
+                });
+                if (checkRes.status !== 200) {
+                    addSystemLog(`Tải lên tài nguyên ảnh mặc định thiếu trên repo: ${imgPath}...`, 'info');
+                    const imgRes = await fetch(imgPath);
+                    if (imgRes.ok) {
+                        const blob = await imgRes.blob();
+                        await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onloadend = async () => {
+                                const rawBase64 = reader.result.split(',')[1];
+                                try {
+                                    await uploadFileToGithub(imgPath, rawBase64, true);
+                                    resolve();
+                                } catch (err) { reject(err); }
+                            };
+                            reader.onerror = reject;
+                            reader.readAsDataURL(blob);
+                        });
+                    }
+                }
+            }
+            
+            addSystemLog(`Đã đồng bộ thành công toàn bộ mã nguồn lên repo ${ghConfig.username}/${ghConfig.repo}.`, 'success');
+            showToast('Đồng bộ mã nguồn GitHub thành công!');
+        } catch (error) {
+            console.error("Lỗi đồng bộ mã nguồn:", error);
+            addSystemLog(`Lỗi đồng bộ mã nguồn lên GitHub: ${error.message}`, 'error');
+            throw error;
+        }
+    }
+    
+    // Hàm phụ trợ upload tệp đơn lẻ lên GitHub qua API
+    async function uploadFileToGithub(filePath, content, isBase64 = false) {
+        const ghConfig = DataManager.getGithubConfig();
+        const { username, repo, token, branch = 'main' } = ghConfig;
+        const url = `https://api.github.com/repos/${username}/${repo}/contents/${filePath}`;
+        
+        let sha = null;
+        try {
+            const checkRes = await fetch(`${url}?ref=${branch}`, {
+                headers: { 'Authorization': `token ${token}` }
+            });
+            if (checkRes.status === 200) {
+                const fileInfo = await checkRes.json();
+                sha = fileInfo.sha;
+            }
+        } catch (e) {}
+
+        let base64Content = isBase64 ? content : btoa(unescape(encodeURIComponent(content)));
+
+        const body = {
+            message: `Dong bo code ${filePath} [v3.8]`,
+            content: base64Content,
+            branch: branch
+        };
+        if (sha) body.sha = sha;
+
+        const res = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(`Ghi file ${filePath} thất bại: ${err.message}`);
+        }
     }
 });

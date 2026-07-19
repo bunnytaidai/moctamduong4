@@ -1082,3 +1082,19 @@ html {
     transform: scale(1.04) translateZ(60px) !important; /* Phóng to nhẹ và đẩy nổi lên không gian 3D gần mắt người dùng */
     box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8) !important; /* Bóng đổ động cực đại lan ra nền */
 }
+
+/* C. Thiết kế Kéo Thả trang sách (Drag & Drop) */
+.page-item[draggable="true"] {
+    cursor: grab;
+}
+.page-item.dragging {
+    opacity: 0.45 !important;
+    border: 2px dashed var(--gold-color) !important;
+    background: rgba(212, 175, 55, 0.05) !important;
+    cursor: grabbing;
+}
+.page-item.drag-over {
+    border-top: 3px solid var(--gold-color) !important;
+    background: rgba(212, 175, 55, 0.08) !important;
+    transition: all 0.2s ease;
+}
