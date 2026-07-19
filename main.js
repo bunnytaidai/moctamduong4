@@ -792,4 +792,11 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
     });
 
+    // Ngăn chặn cuộn trang (scroll/bounce) mặc định khi chạm kéo trên di động để giữ nguyên vị trí và kích thước
+    document.addEventListener('touchmove', (event) => {
+        if (event.touches.length === 1) {
+            event.preventDefault();
+        }
+    }, { passive: false });
+
 });

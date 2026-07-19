@@ -48,6 +48,7 @@ html {
     overflow: hidden;
     display: flex !important;
     flex-direction: row !important;
+    touch-action: none !important; /* Ngăn chặn cuộn màn hình */
 }
 
 /* Khung 1: Bên trái chiếm 93% chiều rộng để nhường không gian cho thực đơn */
@@ -56,6 +57,7 @@ html {
     height: 100% !important;
     position: relative !important;
     overflow: visible !important; /* Đổi thành visible để không che khuất bóng đổ ngoài của sách */
+    touch-action: none !important; /* Ngăn chặn cuộn màn hình */
 }
 
 /* Khung 2: Bên phải chiếm 7% chiều rộng (nhỏ gọn tối đa) */
@@ -217,6 +219,7 @@ html {
     border-radius: 0 12px 12px 0;
     transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease !important;
     transform-style: preserve-3d; /* Giữ cấu trúc phối cảnh 3D của các trang con khi lật (v3.4) */
+    touch-action: none !important; /* Khóa cuộn màn hình */
 }
 
 /* Chỉ căn giữa bằng relative flexbox khi ở giao diện Desktop màn hình rộng (v3.4) */
@@ -236,6 +239,7 @@ html {
     overflow: hidden;
     background-color: #fdfcf7;
     position: absolute !important; /* Cố định vị trí tuyệt đối cho trang con */
+    touch-action: none !important; /* Khóa cuộn màn hình */
 }
 
 /* Nội dung ảnh của trang */
@@ -246,6 +250,7 @@ html {
     /* Giữ đúng tỷ lệ ảnh không bị kéo bóp méo */
     background-position: center;
     background-repeat: no-repeat;
+    touch-action: none !important; /* Khóa cuộn màn hình */
 }
 
 /* ==========================================================================
@@ -927,6 +932,7 @@ html {
         bottom: 69px !important; /* 20px bottom + 44px button + 5px spacing */
         height: auto !important;
         background: transparent !important; /* Xóa nền hoàn toàn */
+        touch-action: none !important; /* Ngăn chặn cuộn màn hình trên mobile */
     }
 
     .bottom-footer {
