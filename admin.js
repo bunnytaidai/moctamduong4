@@ -386,7 +386,11 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // A. Lấy Username
             const userRes = await fetch('https://api.github.com/user', {
-                headers: { 'Authorization': `token ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/vnd.github+json',
+                    'X-GitHub-Api-Version': '2022-11-28'
+                }
             });
             if (userRes.status !== 200) {
                 throw new Error(`Token không hợp lệ (HTTP ${userRes.status})`);
@@ -398,7 +402,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // B. Tải danh sách Repos
             addSystemLog('Đang tải danh sách Repository có sẵn...', 'info');
             const reposRes = await fetch('https://api.github.com/user/repos?per_page=100&type=owner', {
-                headers: { 'Authorization': `token ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/vnd.github+json',
+                    'X-GitHub-Api-Version': '2022-11-28'
+                }
             });
             if (reposRes.status !== 200) {
                 throw new Error(`Không lấy được danh sách Repos (HTTP ${reposRes.status})`);
@@ -496,7 +504,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch('https://api.github.com/user/repos', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `token ${token}`,
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/vnd.github+json',
+                    'X-GitHub-Api-Version': '2022-11-28',
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -2702,9 +2712,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 await fetch(pagesUrl, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `token ${ghConfig.token}`,
+                        'Authorization': `Bearer ${ghConfig.token}`,
                         'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
+                        'Accept': 'application/vnd.github+json',
+                        'X-GitHub-Api-Version': '2022-11-28'
                     },
                     body: JSON.stringify({ build_type: 'workflow' })
                 });
@@ -2729,7 +2740,11 @@ document.addEventListener('DOMContentLoaded', () => {
             for (const imgPath of imagesToSync) {
                 const checkUrl = `https://api.github.com/repos/${ghConfig.username}/${ghConfig.repo}/contents/${imgPath}?ref=${ghConfig.branch || 'main'}`;
                 const checkRes = await fetch(checkUrl, {
-                    headers: { 'Authorization': `token ${ghConfig.token}` }
+                    headers: { 
+                        'Authorization': `Bearer ${ghConfig.token}`,
+                        'Accept': 'application/vnd.github+json',
+                        'X-GitHub-Api-Version': '2022-11-28'
+                    }
                 });
                 if (checkRes.status !== 200) {
                     addSystemLog(`Tải lên tài nguyên ảnh mặc định thiếu trên repo: ${imgPath}...`, 'info');
@@ -2770,7 +2785,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let sha = null;
         try {
             const checkRes = await fetch(`${url}?ref=${branch}`, {
-                headers: { 'Authorization': `token ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/vnd.github+json',
+                    'X-GitHub-Api-Version': '2022-11-28'
+                }
             });
             if (checkRes.status === 200) {
                 const fileInfo = await checkRes.json();
@@ -2790,7 +2809,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const res = await fetch(url, {
             method: 'PUT',
             headers: {
-                'Authorization': `token ${token}`,
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(body)

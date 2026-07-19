@@ -18,6 +18,26 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
+    // API quét danh sách file trong thư mục images
+    if (req.url.split('?')[0] === '/api/list-images') {
+        const imagesDir = path.join(__dirname, 'images');
+        fs.readdir(imagesDir, (err, files) => {
+            if (err) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: err.code }));
+            } else {
+                const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp'];
+                const imageFiles = files.filter(file => {
+                    const ext = path.extname(file).toLowerCase();
+                    return imageExtensions.includes(ext);
+                });
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' });
+                res.end(JSON.stringify(imageFiles));
+            }
+        });
+        return;
+    }
+
     let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url.split('?')[0]);
     const extname = path.extname(filePath);
     let contentType = MIME_TYPES[extname] || 'application/octet-stream';

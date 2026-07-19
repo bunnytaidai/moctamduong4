@@ -239,6 +239,15 @@ async function loadStaticMenuData() {
             }
 
             let pagesList = Array.isArray(parsedData) ? parsedData : (parsedData.pages || []);
+            
+            // Tự động quét và đồng bộ trang theo tệp ảnh trong thư mục images (v3.9)
+            try {
+                const imgFiles = await fetchImageFilesList();
+                pagesList = syncPagesWithImageFiles(pagesList, imgFiles);
+            } catch (e) {
+                console.error("Lỗi đồng bộ trang theo thư mục images:", e);
+            }
+
             let globalBg = Array.isArray(parsedData) ? '' : (parsedData.global_bg || '');
             localStorage.setItem('muxintang_global_bg', globalBg);
             
@@ -312,10 +321,139 @@ async function loadLocalData() {
     }
 }
 
-// -------------------------------------------------------------
-// 4. LOGIC KẾT NỐI VỚI GITHUB API (ĐÁM MÂY TỰ CHỦ MIỄN PHÍ)
-// -------------------------------------------------------------
-let lastGithubSha = null;
+// A. Hàm bổ trợ cắt đuôi file tương đương path.extname
+function getFilenameExt(filename) {
+    const idx = filename.lastIndexOf('.');
+    return idx === -1 ? '' : filename.substring(idx);
+}
+
+// B. Hàm quét danh sách ảnh trong thư mục images (hỗ trợ cả GitHub API online và Local API offline)
+async function fetchImageFilesList() {
+    // 1. Nếu đang cấu hình GitHub, ưu tiên gọi GitHub API quét contents của thư mục images
+    if (activeStorageMode === 'github' && githubConfig) {
+        const { username, repo, token, branch = 'main' } = githubConfig;
+        const url = `https://api.github.com/repos/${username}/${repo}/contents/images?ref=${branch}`;
+        try {
+            const headers = new Headers();
+            headers.append('Accept', 'application/vnd.github+json');
+            headers.append('X-GitHub-Api-Version', '2022-11-28');
+            if (token) {
+                headers.append('Authorization', `Bearer ${token}`);
+            }
+            const res = await fetch(url, { headers });
+            if (res.ok) {
+                const files = await res.json();
+                const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp'];
+                return files
+                    .filter(f => f.type === 'file' && imageExtensions.includes(getFilenameExt(f.name).toLowerCase()))
+                    .map(f => f.name);
+            }
+        } catch (e) {
+            console.error("Lỗi quét thư mục images trên GitHub:", e);
+        }
+    }
+    
+    // 2. Chạy local hoặc fallback: gọi API local quét thư mục images của dự án
+    try {
+        const res = await fetch('/api/list-images');
+        if (res.ok) {
+            return await res.json();
+        }
+    } catch (e) {
+        console.warn("Không thể quét images từ API local (chạy tĩnh):", e);
+    }
+    
+    // 3. Trả về danh sách mặc định nếu hoàn toàn không kết nối được
+    return ['dau.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg', '7.jpg', '8.jpg', 'cuoi.jpg'];
+}
+
+// C. Hàm đồng bộ danh sách trang dựa trên các tệp ảnh thực tế trong thư mục images
+function syncPagesWithImageFiles(pagesList, imageFiles) {
+    // Sắp xếp danh sách tệp ảnh theo đúng thứ tự logic:
+    // - Bìa trước (dau.jpg, cover.jpg) đứng đầu.
+    // - Bìa sau (cuoi.jpg, back.jpg) đứng cuối.
+    // - Các tệp là số xếp tăng dần. Các tệp khác xếp theo bảng chữ cái.
+    imageFiles.sort((a, b) => {
+        const isCoverA = a.toLowerCase().includes('dau') || a.toLowerCase().includes('cover') || a.toLowerCase().includes('front');
+        const isCoverB = b.toLowerCase().includes('dau') || b.toLowerCase().includes('cover') || b.toLowerCase().includes('front');
+        if (isCoverA && !isCoverB) return -1;
+        if (!isCoverA && isCoverB) return 1;
+
+        const isBackA = a.toLowerCase().includes('cuoi') || a.toLowerCase().includes('back') || a.toLowerCase().includes('end');
+        const isBackB = b.toLowerCase().includes('cuoi') || b.toLowerCase().includes('back') || b.toLowerCase().includes('end');
+        if (isBackA && !isBackB) return 1;
+        if (!isBackA && isBackB) return -1;
+
+        const numA = parseInt(a.match(/\d+/));
+        const numB = parseInt(b.match(/\d+/));
+        if (!isNaN(numA) && !isNaN(numB)) {
+            return numA - numB;
+        }
+        if (!isNaN(numA)) return -1;
+        if (!isNaN(numB)) return 1;
+
+        return a.localeCompare(b);
+    });
+
+    const newPagesList = [];
+    const validImagePaths = imageFiles.map(f => 'images/' + f);
+    const mappedImages = new Set();
+
+    // 1. Giữ lại các trang ảnh tĩnh có tệp tin còn tồn tại và giữ lại trang custom tự thiết kế
+    pagesList.forEach(page => {
+        if (page.type === 'custom') {
+            newPagesList.push(page);
+        } else if (page.type === 'image' && page.image) {
+            if (validImagePaths.includes(page.image)) {
+                newPagesList.push(page);
+                mappedImages.add(page.image);
+            }
+        }
+    });
+
+    // 2. Tạo trang mới cho các tệp ảnh mới được thêm vào thư mục images
+    imageFiles.forEach(filename => {
+        const imgPath = 'images/' + filename;
+        if (!mappedImages.has(imgPath)) {
+            const isCover = filename.toLowerCase().includes('dau') || filename.toLowerCase().includes('cover') || filename.toLowerCase().includes('front');
+            const isBack = filename.toLowerCase().includes('cuoi') || filename.toLowerCase().includes('back') || filename.toLowerCase().includes('end');
+            
+            newPagesList.push({
+                id: 'page_' + filename.split('.')[0] + '_' + Math.random().toString(36).substr(2, 5),
+                order: 9999, // Đặt tạm thời cuối
+                type: 'image',
+                image: imgPath,
+                name: isCover ? 'Trang Bìa Trước' : (isBack ? 'Trang Bìa Sau' : 'Trang Menu ' + filename.split('.')[0])
+            });
+        }
+    });
+
+    // 3. Sắp xếp lại thứ tự order của toàn bộ danh sách trang
+    newPagesList.sort((a, b) => {
+        const isCoverA = a.type === 'image' && (a.image.toLowerCase().includes('dau') || a.image.toLowerCase().includes('cover'));
+        const isCoverB = b.type === 'image' && (b.image.toLowerCase().includes('dau') || b.image.toLowerCase().includes('cover'));
+        if (isCoverA && !isCoverB) return -1;
+        if (!isCoverA && isCoverB) return 1;
+
+        const isBackA = a.type === 'image' && (a.image.toLowerCase().includes('cuoi') || a.image.toLowerCase().includes('back'));
+        const isBackB = b.type === 'image' && (b.image.toLowerCase().includes('cuoi') || b.image.toLowerCase().includes('back'));
+        if (isBackA && !isBackB) return 1;
+        if (!isBackA && isBackB) return -1;
+
+        if (a.type === 'image' && b.type === 'image') {
+            return validImagePaths.indexOf(a.image) - validImagePaths.indexOf(b.image);
+        }
+
+        return a.order - b.order;
+    });
+
+    // Cập nhật lại số thứ tự tuần tự
+    newPagesList.forEach((page, idx) => {
+        page.order = idx + 1;
+    });
+
+    return newPagesList;
+}
 
 // Hàm tải dữ liệu từ file menu_data.json trong Repo qua GitHub API
 async function loadGithubData(isSilentPoll = false) {
@@ -331,7 +469,9 @@ async function loadGithubData(isSilentPoll = false) {
         
         // Nếu ở trang Admin, dùng token để tránh bị giới hạn API Rate Limit của Github
         if (githubConfig.token) {
-            headers.append('Authorization', `token ${githubConfig.token}`);
+            headers.append('Authorization', `Bearer ${githubConfig.token}`);
+            headers.append('Accept', 'application/vnd.github+json');
+            headers.append('X-GitHub-Api-Version', '2022-11-28');
         }
 
         const res = await fetch(url, { headers });
@@ -372,6 +512,15 @@ async function loadGithubData(isSilentPoll = false) {
         }
 
         let pagesList = Array.isArray(parsedData) ? parsedData : (parsedData.pages || []);
+        
+        // Tự động quét và đồng bộ trang theo tệp ảnh trong thư mục images (v3.9)
+        try {
+            const imgFiles = await fetchImageFilesList();
+            pagesList = syncPagesWithImageFiles(pagesList, imgFiles);
+        } catch (e) {
+            console.error("Lỗi đồng bộ trang theo thư mục images:", e);
+        }
+
         let globalBg = Array.isArray(parsedData) ? '' : (parsedData.global_bg || '');
         localStorage.setItem('muxintang_global_bg', globalBg);
         
@@ -411,7 +560,11 @@ async function saveGithubData(pagesData) {
     let sha = null;
     try {
         const checkRes = await fetch(`${url}?ref=${branch}`, {
-            headers: { 'Authorization': `token ${token}` }
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
         });
         if (checkRes.status === 200) {
             const fileInfo = await checkRes.json();
@@ -447,7 +600,9 @@ async function saveGithubData(pagesData) {
     const res = await fetch(url, {
         method: 'PUT',
         headers: {
-            'Authorization': `token ${token}`,
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
@@ -665,7 +820,11 @@ const DataManager = {
                         // Kiểm tra xem file đã tồn tại trên Github chưa để lấy SHA (nếu ghi đè)
                         let sha = null;
                         const checkRes = await fetch(`${url}?ref=${branch}`, {
-                            headers: { 'Authorization': `token ${token}` }
+                            headers: { 
+                                'Authorization': `Bearer ${token}`,
+                                'Accept': 'application/vnd.github+json',
+                                'X-GitHub-Api-Version': '2022-11-28'
+                            }
                         });
                         if (checkRes.status === 200) {
                             const fileInfo = await checkRes.json();
@@ -682,7 +841,9 @@ const DataManager = {
                         const res = await fetch(url, {
                             method: 'PUT',
                             headers: {
-                                'Authorization': `token ${token}`,
+                                'Authorization': `Bearer ${token}`,
+                                'Accept': 'application/vnd.github+json',
+                                'X-GitHub-Api-Version': '2022-11-28',
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify(body)
@@ -766,7 +927,11 @@ const DataManager = {
                 try {
                     // Bước A: Lấy SHA của tệp
                     const checkRes = await fetch(`${url}?ref=${branch}`, {
-                        headers: { 'Authorization': `token ${token}` }
+                        headers: { 
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/vnd.github+json',
+                            'X-GitHub-Api-Version': '2022-11-28'
+                        }
                     });
                     if (checkRes.status === 200) {
                         const fileInfo = await checkRes.json();
@@ -776,7 +941,9 @@ const DataManager = {
                         const deleteRes = await fetch(url, {
                             method: 'DELETE',
                             headers: {
-                                'Authorization': `token ${token}`,
+                                'Authorization': `Bearer ${token}`,
+                                'Accept': 'application/vnd.github+json',
+                                'X-GitHub-Api-Version': '2022-11-28',
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({
