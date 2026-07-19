@@ -196,10 +196,10 @@ document.addEventListener('DOMContentLoaded', () => {
             showCover: false,      // Sử dụng trang đôi liên tục.
             usePortrait: false,    // Ép hiển thị trang đôi kể cả trên mobile ngang.
             
-            flippingTime: 300,     // Hoạt ảnh lật trang siêu tốc (300ms) cực kỳ nhạy và nhanh
-            swipeDistance: 15,     // Giảm khoảng cách vuốt tối thiểu để lật trang nhanh hơn trên mobile
-            maxShadowOpacity: 0.85, // Tăng mạnh độ đậm bóng đổ StPageFlip vẽ để tối ưu thị giác 3D (v3.4)
-            showPageCorners: false, // TẮT hiệu ứng nhô mép góc trang khi rê chuột qua (v3.4)
+            flippingTime: 600,     // Chuyển động lật trang mềm mại, tự nhiên như sách thật (600ms)
+            swipeDistance: 30,     // Khoảng cách vuốt tay tối ưu tự nhiên và mượt mà
+            maxShadowOpacity: 0.85, // Giữ bóng đổ 3D đậm đà cực sâu
+            showPageCorners: true, // Bật góc cong 3D nhô lên khi rê chuột báo hiệu lật được
             disableKeyPress: true
         });
 

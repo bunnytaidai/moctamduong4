@@ -1068,8 +1068,8 @@ html {
 }
 
 .flipbook.flipping-active {
-    transform: scale(1.04) translateZ(60px) !important; /* Phóng to nhẹ và đẩy nổi lên không gian 3D gần mắt người dùng */
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8) !important; /* Bóng đổ động cực đại lan ra nền */
+    /* Giữ nguyên kích thước gốc không tự ý phóng to co giãn khi chạm vuốt lật trang (v3.9.0-debug-03) */
+    box-shadow: 0 45px 105px rgba(0, 0, 0, 0.85) !important; /* Chỉ tạo bóng đổ động cực lớn lan tỏa tạo chiều sâu 3D */
 }
 
 /* C. Thiết kế Kéo Thả trang sách (Drag & Drop) */
