@@ -311,6 +311,7 @@ html {
 
 /* Hiệu ứng 3D gáy sách mềm mại đè lên các trang sách ở mốc 50px */
 .book-crease-overlay {
+    display: none !important; /* Bỏ hiệu ứng nổi hạt giấy/bóng gáy theo yêu cầu của Thỏ */
     position: absolute;
     height: var(--page-height) !important; /* Chiều cao khớp 100% với cuốn sách */
     top: auto !important;
