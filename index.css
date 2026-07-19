@@ -610,6 +610,13 @@ html {
     color: #fff;
 }
 
+.contact-btn:active {
+    transform: translateY(-2px) scale(0.92) !important; /* Co nảy 8% khi chạm */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6), 0 0 10px rgba(212, 175, 55, 0.5) !important;
+    border-color: var(--gold-color) !important;
+    transition: transform 0.1s ease !important; /* Phản hồi cực nhanh khi chạm */
+}
+
 /* Vòng tròn icon nổi bật */
 .icon-circle {
     width: 38px !important;
@@ -913,7 +920,7 @@ html {
 
     /* Điều chỉnh vị trí chỉ số trang và gợi ý vuốt trên mobile */
     .page-indicator {
-        top: calc(5px + var(--page-height) + 12px) !important; /* Dưới cuốn sách 12px, không đè sách */
+        top: 20px !important; /* Đặt ở đỉnh đầu vùng trống 55px để không đè vào trang sách */
         bottom: auto !important;
         font-size: 0.75rem;
         padding: 4px 12px;
@@ -969,36 +976,36 @@ html {
     }
 
     .contact-btn {
-        width: calc(50% - 4px) !important; /* Chia thành 2 cột */
-        height: 44px !important;
-        padding: 3px 8px 3px 3px !important;
+        width: calc(50% - 5px) !important; /* Chia thành 2 cột */
+        height: 48px !important; /* Tăng chiều cao lên 48px cho to rõ */
+        padding: 4px 10px 4px 4px !important;
         border-radius: 25px !important;
     }
 
     .icon-circle {
-        width: 34px !important;
-        height: 34px !important;
+        width: 38px !important; /* Tăng kích thước vòng tròn logo lên 38px */
+        height: 38px !important;
     }
 
     .icon-circle i {
-        font-size: 0.95rem !important;
+        font-size: 1.05rem !important; /* Tăng kích thước icon FontAwesome */
     }
 
     .icon-circle .zalo-text {
-        font-size: 0.65rem !important;
+        font-size: 0.72rem !important; /* Tăng kích thước chữ Zalo */
     }
 
     .btn-info {
-        margin-left: 6px !important;
+        margin-left: 8px !important;
     }
 
     .btn-label {
-        font-size: 0.5rem !important;
+        font-size: 0.55rem !important;
         letter-spacing: 0.8px !important;
     }
 
     .btn-val {
-        font-size: 0.72rem !important;
+        font-size: 0.78rem !important; /* Cỡ chữ to rõ rực rỡ hơn */
     }
 
     .book-viewport {
@@ -1008,7 +1015,7 @@ html {
     /* ĐỊNH VỊ CHO DI ĐỘNG: Gáy sách cách lề trái 15px để chừa bóng gáy mượt và phóng to trang phải nội dung chính (v3.4) */
     .flipbook {
         position: absolute !important;
-        top: 5px !important; /* Đẩy cuốn sách cách viền trên cùng book-viewport đúng 5px theo yêu cầu của Thỏ */
+        top: 55px !important; /* Đẩy cuốn sách cách viền trên 55px để nhường chỗ cho page-indicator */
         left: calc(15px - var(--page-width)) !important;
         right: auto !important;
         width: calc(2 * var(--page-width)) !important;
@@ -1019,7 +1026,7 @@ html {
         left: 15px !important; /* Gáy sách nằm ở 15px từ lề trái */
         right: auto !important;
         transform: translateX(-50%) !important;
-        top: 5px !important; /* Khớp lề trên với sách */
+        top: 55px !important; /* Khớp lề trên với sách */
         bottom: auto !important;
         height: var(--page-height) !important;
     }
@@ -1028,7 +1035,7 @@ html {
         left: -5px !important; /* Đẩy sát lề trái màn hình để làm điểm tỳ trang giấy lật */
         right: auto !important;
         width: 20px !important;
-        top: 5px !important; /* Khớp lề trên với sách */
+        top: 55px !important; /* Khớp lề trên với sách */
         bottom: auto !important;
         height: var(--page-height) !important;
     }

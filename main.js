@@ -36,9 +36,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateBookSize() {
         if (!contentFrame) return;
         
-        // Chiều cao book lấy khoảng 98% chiều cao của Frame 4 để tối ưu hóa không gian hiển thị tối đa
+        const isMobile = window.innerWidth <= 600;
         const frameHeight = contentFrame.clientHeight;
-        pageHeight = Math.floor(frameHeight * 0.98);
+        
+        // Chiều cao book lấy khoảng 98% chiều cao của Frame 4 để tối ưu hóa không gian hiển thị tối đa
+        // Riêng di động trừ đi 55px cho page-indicator nằm ở đỉnh không đè lên sách
+        if (isMobile) {
+            pageHeight = Math.floor((frameHeight - 55) * 0.95);
+        } else {
+            pageHeight = Math.floor(frameHeight * 0.98);
+        }
         
         // Nới rộng giới hạn chiều cao tối đa lên 850px để sách hiển thị to rõ rực rỡ hơn trên Desktop lớn
         if (pageHeight > 850) pageHeight = 850;
@@ -49,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ĐẢM BẢO KHÔNG TRÀN MÀN HÌNH DI ĐỘNG:
         // Căn lề hai bên cực mảnh, riêng trên di động chừa 25px (gáy 15px lề trái, 10px lề phải) để tối ưu không gian hiển thị tối đa trang lẻ bên phải (v3.4)
-        const isMobile = window.innerWidth <= 600;
         const frameWidth = contentFrame.clientWidth;
         const maxAllowedWidth = isMobile ? (frameWidth - 25) : (frameWidth - 10);
         if (pageWidth > maxAllowedWidth) {
