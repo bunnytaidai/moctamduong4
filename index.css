@@ -63,9 +63,9 @@ html {
     width: 15% !important;
     height: 100% !important;
     position: relative !important;
-    background: rgba(18, 22, 18, 0.7) !important;
-    border-left: 1.5px solid rgba(197, 160, 89, 0.3) !important;
-    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.6) !important;
+    background: transparent !important;
+    border-left: 1px solid rgba(197, 160, 89, 0.15) !important;
+    box-shadow: none !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -203,7 +203,7 @@ html {
     justify-content: center; /* Căn giữa cuốn sách theo chiều ngang (v3.4) */
     align-items: flex-end !important; /* Đẩy sát đáy của viewport (cách nút 5px) */
     pointer-events: auto; /* Kích hoạt lại tương tác click/vuốt trên vùng sách */
-    perspective: 2500px; /* Tạo chiều sâu phối cảnh không gian 3D cực mạnh (v3.4) */
+    perspective: 1400px; /* Tăng chiều sâu phối cảnh không gian 3D lật trang (v3.4) */
 }
 
 /* Container sách lật - mặc định dùng absolute để định vị linh hoạt */
@@ -214,7 +214,7 @@ html {
     overflow: visible;
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65); /* Tăng bóng đổ viền ngoài cho sách (v3.4) */
     border-radius: 0 12px 12px 0;
-    transition: box-shadow 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease !important;
     transform-style: preserve-3d; /* Giữ cấu trúc phối cảnh 3D của các trang con khi lật (v3.4) */
 }
 
@@ -241,8 +241,8 @@ html {
 .page-content {
     width: 100%;
     height: 100%;
-    background-size: 100% 100%;
-    /* Căng khít ảnh đầy đủ */
+    background-size: cover !important;
+    /* Giữ đúng tỷ lệ ảnh không bị kéo bóp méo */
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -1051,3 +1051,34 @@ html {
 
 /* Import thêm các font chữ thư pháp, cổ trang Việt hóa từ Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Charmonman:wght@400;700&family=Dancing+Script:wght@400;700&family=Great+Vibes&display=swap');
+
+/* ==========================================================================
+   HIỆU ỨNG NÂNG CẤP MẠNH MẼ (v3.8) - TRÀN KHUNG 3D & ZOOM BÌA
+   ========================================================================== */
+
+/* A. Hiệu ứng phóng to trang bìa khi tương tác chạm vuốt/nhấn giữ */
+.page-cover-zoom {
+    transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.35s ease !important;
+    transform-origin: center right !important; /* Phóng to hướng về phía bên phải (hướng vào trung tâm màn hình) */
+    cursor: grab;
+}
+
+.page-cover-zoom:active {
+    cursor: grabbing;
+}
+
+.page-cover-zoom.zoomed {
+    transform: scale(1.15) !important; /* Phóng to 1.15 lần để hiển thị cực nét */
+    z-index: 1000 !important; /* Đè lên toàn bộ các trang khác khi zoom */
+    box-shadow: 0 45px 95px rgba(0, 0, 0, 0.85) !important; /* Tỏa bóng đổ cực dày và mượt */
+}
+
+/* B. Hiệu ứng tràn khung 3D mạnh mẽ cho khung-1 khi sách đang lật */
+#khung-1.flipping-active {
+    z-index: 100 !important; /* Đẩy khung trái lên trên cùng để các trang lật bay tràn qua khung phải */
+}
+
+.flipbook.flipping-active {
+    transform: scale(1.04) translateZ(60px) !important; /* Phóng to nhẹ và đẩy nổi lên không gian 3D gần mắt người dùng */
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8) !important; /* Bóng đổ động cực đại lan ra nền */
+}

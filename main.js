@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnPrev = document.getElementById('btn-prev-page');
     const btnNext = document.getElementById('btn-next-page');
 
-    // Tỷ lệ khung hình của trang đơn (flyers / book cover: ~ 3:4 tức là 0.73)
-    const ASPECT_RATIO = 0.73; 
+    // Tỷ lệ khung hình của trang đơn (flyers / book cover: ~ 3:4 tức là 0.75)
+    const ASPECT_RATIO = 0.75; 
     let pageWidth = 380;
     let pageHeight = 540;
     let pageFlip = null;
@@ -199,6 +199,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Nạp nội dung từ các div .page đã được render động trong DOM mới
         pageFlip.loadFromHTML(currentBookEl.querySelectorAll('.page'));
 
+        // Thiết lập hiệu ứng phóng to trang bìa và chặn vuốt lật trang
+        const pages = currentBookEl.querySelectorAll('.page');
+        if (pages && pages.length > 1) {
+            const coverPageEl = pages[1]; // Trang bìa đầu tiên (index 1)
+            setupCoverPageZoom(coverPageEl);
+        }
+
         // Cập nhật trạng thái ban đầu và khôi phục trang trước khi resize
         if (savedIdx > 0 && savedIdx < pageFlip.getPageCount()) {
             pageFlip.flip(savedIdx);
@@ -211,9 +218,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         pageFlip.on('changeState', (e) => {
+            const isFlippingState = (e.data === 'page_flip' || e.data === 'user_fold');
+            
+            // Áp dụng class hiệu ứng tràn khung 3D cho khung-1 và flipbook
+            const khung1 = document.getElementById('khung-1');
+            if (isFlippingState) {
+                if (khung1) khung1.classList.add('flipping-active');
+                if (currentBookEl) currentBookEl.classList.add('flipping-active');
+            } else {
+                setTimeout(() => {
+                    if (khung1) khung1.classList.remove('flipping-active');
+                    if (currentBookEl) currentBookEl.classList.remove('flipping-active');
+                }, 300);
+            }
+
             // Khi đang lật hoặc kéo, gáy sách tạm thời ẩn đi và hạ z-index xuống dưới để trang đang lật đè lên trên gáy sách (v3.4)
             if (creaseOverlay) {
-                if (e.data === 'page_flip' || e.data === 'user_fold') {
+                if (isFlippingState) {
                     creaseOverlay.style.opacity = '0';
                     creaseOverlay.style.zIndex = '1';
                 } else {
@@ -224,6 +245,80 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, 100); // Trì hoãn nhẹ 100ms để hoạt ảnh lật trang hoàn tất phẳng phiu
                 }
             }
+        });
+    }
+
+    // Hàm thiết lập hiệu ứng zoom cho trang bìa và chặn vuốt lật trang
+    function setupCoverPageZoom(coverPageEl) {
+        if (!coverPageEl) return;
+
+        coverPageEl.classList.add('page-cover-zoom');
+
+        let isTouching = false;
+        let startX = 0;
+        let startY = 0;
+
+        const handleStart = (clientX, clientY) => {
+            isTouching = true;
+            startX = clientX;
+            startY = clientY;
+            coverPageEl.classList.add('zoomed');
+            coverPageEl.style.transform = `scale(1.15) rotateY(-5deg)`;
+        };
+
+        const handleMove = (clientX, clientY) => {
+            if (!isTouching) return;
+            const deltaX = (clientX - startX) * 0.15;
+            const deltaY = (clientY - startY) * 0.15;
+            const maxOffset = 25;
+            const offsetX = Math.min(Math.max(deltaX, -maxOffset), maxOffset);
+            const offsetY = Math.min(Math.max(deltaY, -maxOffset), maxOffset);
+            // Áp dụng scale zoom, translate 3D parallax và rotate Y nghiêng nhẹ
+            coverPageEl.style.transform = `scale(1.15) translate3d(${offsetX}px, ${offsetY}px, 60px) rotateY(-5deg)`;
+        };
+
+        const handleEnd = () => {
+            if (!isTouching) return;
+            isTouching = false;
+            coverPageEl.classList.remove('zoomed');
+            coverPageEl.style.transform = '';
+        };
+
+        // Chặn tuyệt đối sự kiện lan truyền lên cha (PageFlip) và xử lý zoom
+        const touchEvents = ['touchstart', 'touchmove', 'touchend', 'touchcancel'];
+        touchEvents.forEach(evt => {
+            coverPageEl.addEventListener(evt, (e) => {
+                e.stopPropagation(); // Chặn cử chỉ lật trang của PageFlip
+                
+                if (evt === 'touchstart' && e.touches.length > 0) {
+                    handleStart(e.touches[0].clientX, e.touches[0].clientY);
+                } else if (evt === 'touchmove' && e.touches.length > 0) {
+                    handleMove(e.touches[0].clientX, e.touches[0].clientY);
+                } else if (evt === 'touchend' || evt === 'touchcancel') {
+                    handleEnd();
+                }
+            }, { passive: false });
+        });
+
+        // Mouse Events cho Desktop
+        coverPageEl.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            handleStart(e.clientX, e.clientY);
+        });
+
+        coverPageEl.addEventListener('mousemove', (e) => {
+            e.stopPropagation();
+            handleMove(e.clientX, e.clientY);
+        });
+
+        coverPageEl.addEventListener('mouseup', (e) => {
+            e.stopPropagation();
+            handleEnd();
+        });
+
+        coverPageEl.addEventListener('mouseleave', (e) => {
+            e.stopPropagation();
+            handleEnd();
         });
     }
 
