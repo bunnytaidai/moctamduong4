@@ -3,23 +3,11 @@
   "global_bg": "",
   "pages": [
     {
-      "id": "page_dau_djbu9",
-      "name": "Trang Bìa Trước",
-      "type": "custom",
+      "id": "page_dau_zf4hs",
       "order": 1,
+      "type": "image",
       "image": "images/dau.jpg",
-      "bg_image": "images/dau.jpg",
-      "texts": [],
-      "services": [
-        {
-          "id": "srv_1784527265910",
-          "name": "Dịch vụ mẫu",
-          "price": "150.000đ"
-        }
-      ],
-      "services_x": 7.37,
-      "services_y": 41.3,
-      "services_w": 80
+      "name": "Trang Bìa Trước"
     },
     {
       "id": "page_2_uud2i",
@@ -79,5 +67,5 @@
     }
   ],
   "global_layout": {},
-  "last_updated": 1784527276411
+  "last_updated": 1784527512144
 }
