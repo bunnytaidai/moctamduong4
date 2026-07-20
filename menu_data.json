@@ -1,0 +1,71 @@
+{
+  "site_title": "MỘC TÂM ĐƯỜNG MASSAGE",
+  "global_bg": "",
+  "pages": [
+    {
+      "id": "page_dau_djbu9",
+      "order": 1,
+      "type": "image",
+      "image": "images/dau.jpg",
+      "name": "Trang Bìa Trước"
+    },
+    {
+      "id": "page_2_uud2i",
+      "order": 2,
+      "type": "image",
+      "image": "images/2.jpg",
+      "name": "Trang Menu 2"
+    },
+    {
+      "id": "page_3_ablr7",
+      "order": 3,
+      "type": "image",
+      "image": "images/3.jpg",
+      "name": "Trang Menu 3"
+    },
+    {
+      "id": "page_4_42ir1",
+      "order": 4,
+      "type": "image",
+      "image": "images/4.jpg",
+      "name": "Trang Menu 4"
+    },
+    {
+      "id": "page_5_h7976",
+      "order": 5,
+      "type": "image",
+      "image": "images/5.jpg",
+      "name": "Trang Menu 5"
+    },
+    {
+      "id": "page_6_2e3if",
+      "order": 6,
+      "type": "image",
+      "image": "images/6.jpg",
+      "name": "Trang Menu 6"
+    },
+    {
+      "id": "page_7_j4h2w",
+      "order": 7,
+      "type": "image",
+      "image": "images/7.jpg",
+      "name": "Trang Menu 7"
+    },
+    {
+      "id": "page_8_fs1jk",
+      "order": 8,
+      "type": "image",
+      "image": "images/8.jpg",
+      "name": "Trang Menu 8"
+    },
+    {
+      "id": "page_cuoi_90o08",
+      "order": 9,
+      "type": "image",
+      "image": "images/cuoi.jpg",
+      "name": "Trang Bìa Sau"
+    }
+  ],
+  "global_layout": {},
+  "last_updated": 1784526816021
+}
